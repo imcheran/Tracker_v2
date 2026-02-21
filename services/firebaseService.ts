@@ -150,10 +150,13 @@ export const loginWithGoogle = async (): Promise<{ user: any; accessToken: strin
   } catch (error: any) {
     console.error("Google login error", error);
     if (error.code === 'auth/popup-closed-by-user') {
-      throw new Error("Login cancelled.");
+      throw new Error("Login cancelled by user.");
     }
     if (error.code === 'auth/unauthorized-domain') {
-      throw new Error("Domain not authorized in Firebase Console.");
+      throw new Error(`Domain not authorized. Please add '${window.location.hostname}' to Firebase Console > Authentication > Settings > Authorized Domains.`);
+    }
+    if (error.code === 'auth/popup-blocked') {
+      throw new Error("Popup blocked. Please allow popups for this site.");
     }
     throw error;
   }

@@ -401,7 +401,10 @@ const App: React.FC = () => {
       setUser(user);
       setAccessToken(accessToken);
       if (accessToken) { localStorage.setItem('google_access_token', accessToken); syncWithGoogleCalendar(accessToken); }
-    } catch (error) { console.error("Login failed", error); alert("Login failed. Please try again."); }
+    } catch (error: any) { 
+      console.error("Login failed", error); 
+      alert(`Login failed: ${error.message || "Please try again."}`); 
+    }
   };
   const handleLogout = async () => { await logoutUser(); setUser(null); setAccessToken(null); };
 
