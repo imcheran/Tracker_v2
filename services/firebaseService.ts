@@ -114,18 +114,23 @@ export const loginWithGoogle = async (): Promise<{ user: any; accessToken: strin
 
   try {
     if (Capacitor.isNativePlatform()) {
-      const googleUser = await GoogleAuth.signIn();
-      const credential = GoogleAuthProvider.credential(googleUser.authentication.idToken);
-      const result = await signInWithCredential(auth, credential);
-      return {
-        user: {
-          uid: result.user.uid,
-          displayName: result.user.displayName,
-          email: result.user.email,
-          photoURL: result.user.photoURL
-        },
-        accessToken: googleUser.authentication.accessToken || ''
-      };
+      try {
+        const googleUser = await GoogleAuth.signIn();
+        const credential = GoogleAuthProvider.credential(googleUser.authentication.idToken);
+        const result = await signInWithCredential(auth, credential);
+        return {
+          user: {
+            uid: result.user.uid,
+            displayName: result.user.displayName,
+            email: result.user.email,
+            photoURL: result.user.photoURL
+          },
+          accessToken: googleUser.authentication.accessToken || ''
+        };
+      } catch (nativeError: any) {
+        console.error("Native Google Sign-In Error:", nativeError);
+        throw new Error(`Native Sign-In Failed: ${nativeError.message || JSON.stringify(nativeError)}. \n\nPOSSIBLE FIX: Ensure your app's SHA-1 fingerprint is added to Firebase Console > Project Settings > Your Android App.`);
+      }
     } else {
       const provider = new GoogleAuthProvider();
       provider.addScope('https://www.googleapis.com/auth/calendar.events');
@@ -158,7 +163,7 @@ export const loginWithGoogle = async (): Promise<{ user: any; accessToken: strin
     if (error.code === 'auth/popup-blocked') {
       throw new Error("Popup blocked. Please allow popups for this site.");
     }
-    throw error;
+    throw new Error(error.message || "An unknown error occurred during login.");
   }
 };
 
