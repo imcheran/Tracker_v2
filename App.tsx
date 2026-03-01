@@ -19,10 +19,8 @@ import { loadFromStorage, saveToStorage, STORAGE_KEYS } from './services/storage
 import { loginWithGoogle, logoutUser, subscribeToAuthChanges, saveUserDataToFirestore, subscribeToDataChanges, loadUserDataFromFirestore } from './services/firebaseService';
 import { fetchCalendarEvents, updateCalendarEvent, deleteCalendarEvent, createCalendarEvent } from './services/googleCalendarService';
 import { playAlarmSound } from './services/notificationService';
-import { updateWidgetData } from './services/widgetService';
 import { Loader2 } from 'lucide-react';
 import { addMonths } from 'date-fns';
-import { LiveUpdate } from '@capawesome/capacitor-live-update';
 import { Capacitor } from '@capacitor/core';
 import { App as CapacitorApp } from '@capacitor/app';
 
@@ -180,12 +178,6 @@ const App: React.FC = () => {
 
       window.addEventListener('popstate', handlePopState);
       return () => window.removeEventListener('popstate', handlePopState);
-  }, []);
-
-  useEffect(() => {
-      if (Capacitor.isNativePlatform()) {
-          LiveUpdate.sync({ channel: 'production' }).catch(console.warn);
-      }
   }, []);
 
   useEffect(() => {
@@ -353,7 +345,6 @@ const App: React.FC = () => {
           saveToStorage(STORAGE_KEYS.SUBSCRIPTIONS, subscriptions);
           saveToStorage(STORAGE_KEYS.INVESTMENTS, investments);
           saveToStorage(STORAGE_KEYS.SETTINGS, settings);
-          updateWidgetData(habits);
       }, 0);
 
       // Debounce Save to Firestore

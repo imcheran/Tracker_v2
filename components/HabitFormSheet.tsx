@@ -66,7 +66,6 @@ const HabitFormSheet: React.FC<HabitFormSheetProps> = ({ isOpen, onClose, onSave
   
   const [reminders, setReminders] = useState<string[]>([]);
   const [isAutoLog, setIsAutoLog] = useState(false);
-  const [showWidget, setShowWidget] = useState(false);
   
   // Goal State
   const [goalType, setGoalType] = useState<'all' | 'amount'>('all');
@@ -111,7 +110,6 @@ const HabitFormSheet: React.FC<HabitFormSheetProps> = ({ isOpen, onClose, onSave
       setTargetValue('1');
       setUnit('Count');
       setIsAutoLog(false);
-      setShowWidget(false);
       setSelectedCategory('Suggested');
   };
 
@@ -156,7 +154,6 @@ const HabitFormSheet: React.FC<HabitFormSheetProps> = ({ isOpen, onClose, onSave
       }
       
       setIsAutoLog(data.isAutoLog || false);
-      setShowWidget(data.showWidget || false);
   };
 
   const handleSelectPreset = (preset: any) => {
@@ -195,7 +192,6 @@ const HabitFormSheet: React.FC<HabitFormSheetProps> = ({ isOpen, onClose, onSave
       targetValue: goalType === 'amount' ? parseFloat(targetValue) : undefined,
       unit: goalType === 'amount' ? unit : undefined,
       isAutoLog,
-      showWidget,
       history: initialData?.history || {},
       createdDate: initialData?.createdDate || new Date(),
     };

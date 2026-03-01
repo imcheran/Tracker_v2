@@ -107,7 +107,6 @@ export interface Habit {
   unit?: string;
   isArchived?: boolean;
   isAutoLog?: boolean;
-  showWidget?: boolean; // New: Show as widget in Today view
   createdDate?: Date;
   updatedAt?: Date;
   history: Record<string, { completed: boolean; timestamp: number; mood?: string; note?: string; skipReason?: string; duration?: number }>;
