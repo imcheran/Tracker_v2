@@ -10,6 +10,7 @@ const FocusView = lazy(() => import('./components/FocusView'));
 const CalendarView = lazy(() => import('./components/CalendarView'));
 const TagsView = lazy(() => import('./components/TagsView'));
 const FinanceView = lazy(() => import('./components/FinanceView'));
+const NotesView = lazy(() => import('./components/NotesView'));
 const SettingsView = lazy(() => import('./components/SettingsView'));
 const ProfileMenu = lazy(() => import('./components/ProfileMenu'));
 
@@ -573,6 +574,11 @@ const App: React.FC = () => {
                         onUpdateInvestment={(i) => setInvestments(prev => prev.map(old => old.id === i.id ? i : old))}
                         onDeleteInvestment={(id) => setInvestments(prev => prev.filter(i => i.id !== id))}
                         user={user}
+                    />
+                )}
+                {currentView === ViewType.Notes && (
+                    <NotesView 
+                        onMenuClick={() => setIsSidebarOpen(true)}
                     />
                 )}
             </Suspense>
