@@ -376,6 +376,11 @@ const NoteEditor: React.FC<EditorProps> = ({ note, folders, onSave, onClose, onD
               className="p-1.5 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors">
               {isSpeaking ? <MicOff size={16} className="text-red-500" /> : <Mic size={16} className="text-slate-400" />}
             </button>
+            {/* Lock */}
+            <button onClick={() => toggleProp('isLocked')} title="Lock"
+              className="p-1.5 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors">
+              {draft.isLocked ? <Lock size={16} className="text-blue-500" /> : <Unlock size={16} className="text-slate-400" />}
+            </button>
             {/* Archive */}
             <button onClick={() => { toggleProp('isArchived'); onClose(); }} title="Archive"
               className="p-1.5 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors">
@@ -474,12 +479,13 @@ interface CardProps {
   onClick: () => void;
   onPin: () => void;
   onFavorite: () => void;
+  onLock: () => void;
   onDelete: () => void;
   onArchive: () => void;
   onDuplicate: () => void;
 }
 
-const NoteCard: React.FC<CardProps> = ({ note, viewMode, onClick, onPin, onFavorite, onDelete, onArchive, onDuplicate }) => {
+const NoteCard: React.FC<CardProps> = ({ note, viewMode, onClick, onPin, onFavorite, onLock, onDelete, onArchive, onDuplicate }) => {
   const [showMenu, setShowMenu] = useState(false);
   const colorObj = NOTE_COLORS.find(c => c.value === note.color) || NOTE_COLORS[0];
 
@@ -520,6 +526,7 @@ const NoteCard: React.FC<CardProps> = ({ note, viewMode, onClick, onPin, onFavor
               <ContextMenu
                 onPin={() => { onPin(); setShowMenu(false); }}
                 onFavorite={() => { onFavorite(); setShowMenu(false); }}
+                onLock={() => { onLock(); setShowMenu(false); }}
                 onArchive={() => { onArchive(); setShowMenu(false); }}
                 onDuplicate={() => { onDuplicate(); setShowMenu(false); }}
                 onDelete={() => { onDelete(); setShowMenu(false); }}
@@ -564,6 +571,7 @@ const NoteCard: React.FC<CardProps> = ({ note, viewMode, onClick, onPin, onFavor
             <ContextMenu
               onPin={() => { onPin(); setShowMenu(false); }}
               onFavorite={() => { onFavorite(); setShowMenu(false); }}
+              onLock={() => { onLock(); setShowMenu(false); }}
               onArchive={() => { onArchive(); setShowMenu(false); }}
               onDuplicate={() => { onDuplicate(); setShowMenu(false); }}
               onDelete={() => { onDelete(); setShowMenu(false); }}
@@ -618,13 +626,14 @@ interface CtxMenuProps {
   note: Note;
   onPin: () => void;
   onFavorite: () => void;
+  onLock: () => void;
   onArchive: () => void;
   onDuplicate: () => void;
   onDelete: () => void;
   onClose: () => void;
 }
 
-const ContextMenu: React.FC<CtxMenuProps> = ({ note, onPin, onFavorite, onArchive, onDuplicate, onDelete, onClose }) => {
+const ContextMenu: React.FC<CtxMenuProps> = ({ note, onPin, onFavorite, onLock, onArchive, onDuplicate, onDelete, onClose }) => {
   useEffect(() => {
     const handler = () => onClose();
     setTimeout(() => window.addEventListener('click', handler), 0);
@@ -647,6 +656,7 @@ const ContextMenu: React.FC<CtxMenuProps> = ({ note, onPin, onFavorite, onArchiv
     >
       {item(note.isPinned ? <PinOff size={14} /> : <Pin size={14} />, note.isPinned ? 'Unpin' : 'Pin', onPin)}
       {item(note.isFavorite ? <StarOff size={14} /> : <Star size={14} />, note.isFavorite ? 'Unfavorite' : 'Favorite', onFavorite)}
+      {item(note.isLocked ? <Unlock size={14} /> : <Lock size={14} />, note.isLocked ? 'Unlock' : 'Lock', onLock)}
       {item(<Copy size={14} />, 'Duplicate', onDuplicate)}
       {item(note.isArchived ? <ArchiveRestore size={14} /> : <Archive size={14} />, note.isArchived ? 'Unarchive' : 'Archive', onArchive)}
       <div className="border-t border-slate-100 dark:border-slate-700" />
@@ -1037,6 +1047,7 @@ const NotesView: React.FC<NotesViewProps> = ({ onMenuClick }) => {
                       onClick={() => setSelectedNote(note)}
                       onPin={() => toggleProp(note.id, 'isPinned')}
                       onFavorite={() => toggleProp(note.id, 'isFavorite')}
+                      onLock={() => toggleProp(note.id, 'isLocked')}
                       onDelete={() => deleteNote(note.id)}
                       onArchive={() => toggleProp(note.id, 'isArchived')}
                       onDuplicate={() => duplicateNote(note)}
@@ -1063,6 +1074,7 @@ const NotesView: React.FC<NotesViewProps> = ({ onMenuClick }) => {
                       onClick={() => setSelectedNote(note)}
                       onPin={() => toggleProp(note.id, 'isPinned')}
                       onFavorite={() => toggleProp(note.id, 'isFavorite')}
+                      onLock={() => toggleProp(note.id, 'isLocked')}
                       onDelete={() => deleteNote(note.id)}
                       onArchive={() => toggleProp(note.id, 'isArchived')}
                       onDuplicate={() => duplicateNote(note)}

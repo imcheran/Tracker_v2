@@ -1,276 +1,250 @@
-
-import React, { useState } from 'react';
-import { 
-  ChevronLeft, ChevronRight, Share2, Menu, X, ExternalLink
-} from 'lucide-react';
-import { Habit, HabitLog } from '../types';
-import { 
-  format, eachDayOfInterval, 
-  isSameDay, addMonths, addWeeks, getDay
-} from 'date-fns';
-
-// Helper functions for date-fns members reported as missing
-const startOfWeek = (date: Date, options?: { weekStartsOn?: number }) => {
-    const day = getDay(date);
-    const startDay = options?.weekStartsOn || 0;
-    const diff = (day < startDay ? 7 : 0) + day - startDay;
-    const result = new Date(date);
-    result.setHours(0, 0, 0, 0);
-    result.setDate(result.getDate() - diff);
-    return result;
-};
-const endOfWeek = (date: Date, options?: { weekStartsOn?: number }) => {
-    const start = startOfWeek(date, options);
-    const result = new Date(start);
-    result.setDate(result.getDate() + 6);
-    result.setHours(23, 59, 59, 999);
-    return result;
-};
-const startOfMonth = (date: Date) => new Date(date.getFullYear(), date.getMonth(), 1);
-const endOfMonth = (date: Date) => new Date(date.getFullYear(), date.getMonth() + 1, 0);
-const subMonths = (date: Date, n: number) => addMonths(date, -n);
-const subWeeks = (date: Date, n: number) => addWeeks(date, -n);
+import React, { useState, useMemo } from 'react';
+import { ArrowLeft, Flame, CheckCircle2, TrendingUp, Calendar } from 'lucide-react';
+import {
+  BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer,
+  RadarChart, Radar, PolarGrid, PolarAngleAxis, Cell, PieChart, Pie, Legend
+} from 'recharts';
+import { Habit } from '../types';
+import { format, subDays, eachDayOfInterval } from 'date-fns';
 
 interface HabitStatsViewProps {
-    habits: Habit[];
-    onClose?: () => void;
+  habits: Habit[];
+  onClose: () => void;
 }
 
-type Tab = 'Week' | 'Month' | 'Year' | 'Record';
+const COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899'];
 
 const HabitStatsView: React.FC<HabitStatsViewProps> = ({ habits, onClose }) => {
-  const [activeTab, setActiveTab] = useState<Tab>('Month');
-  const [currentDate, setCurrentDate] = useState(new Date());
+  const [selectedHabit, setSelectedHabit] = useState<string | 'all'>('all');
+  const [range, setRange] = useState<7 | 30 | 90>(30);
 
-  // --- Helpers ---
   const activeHabits = habits.filter(h => !h.isArchived);
 
-  // --- Renderers ---
+  const days = useMemo(() => {
+    const end = new Date();
+    const start = subDays(end, range - 1);
+    return eachDayOfInterval({ start, end });
+  }, [range]);
 
-  const renderYearView = () => {
-      const yearStart = new Date(currentDate.getFullYear(), 0, 1);
-      const yearEnd = new Date(currentDate.getFullYear(), 11, 31);
-      const daysInYear = eachDayOfInterval({ start: yearStart, end: yearEnd });
+  // Daily completion data for bar chart
+  const dailyData = useMemo(() => {
+    return days.map(day => {
+      const dateKey = format(day, 'yyyy-MM-dd');
+      const habitsToCheck = selectedHabit === 'all' ? activeHabits : activeHabits.filter(h => h.id === selectedHabit);
+      const completed = habitsToCheck.filter(h => h.history?.[dateKey]?.completed).length;
+      return {
+        date: format(day, range === 7 ? 'EEE' : 'MMM d'),
+        completed,
+        total: habitsToCheck.length,
+        rate: habitsToCheck.length > 0 ? Math.round((completed / habitsToCheck.length) * 100) : 0,
+      };
+    });
+  }, [days, selectedHabit, activeHabits, range]);
 
-      return (
-          <div className="p-4 animate-in fade-in">
-               <div className="flex items-center justify-between mb-6 px-2">
-                  <button onClick={() => setCurrentDate(new Date(currentDate.getFullYear() - 1, 0, 1))} className="p-1 hover:bg-slate-100 rounded-full text-slate-500"><ChevronLeft size={20}/></button>
-                  <span className="text-slate-800 font-bold text-lg">{currentDate.getFullYear()}</span>
-                  <button onClick={() => setCurrentDate(new Date(currentDate.getFullYear() + 1, 0, 1))} className="p-1 hover:bg-slate-100 rounded-full text-slate-500"><ChevronRight size={20}/></button>
-              </div>
+  // Per-habit completion rates for radar/pie
+  const habitRates = useMemo(() => {
+    return activeHabits.map(habit => {
+      const completed = days.filter(day => {
+        const key = format(day, 'yyyy-MM-dd');
+        return habit.history?.[key]?.completed;
+      }).length;
+      return {
+        name: habit.name.length > 12 ? habit.name.slice(0, 12) + '…' : habit.name,
+        fullName: habit.name,
+        rate: days.length > 0 ? Math.round((completed / days.length) * 100) : 0,
+        completed,
+        icon: habit.icon,
+        color: habit.color,
+        streak: calculateStreak(habit),
+      };
+    }).sort((a, b) => b.rate - a.rate);
+  }, [activeHabits, days]);
 
-              <div className="space-y-6">
-                  {activeHabits.map(habit => (
-                      <div key={habit.id} className="bg-white rounded-2xl p-4 border border-slate-200 shadow-sm">
-                          <div className="flex items-center gap-2 mb-3">
-                              <span>{habit.icon}</span>
-                              <span className="text-slate-800 font-medium text-sm">{habit.name}</span>
-                          </div>
-                          
-                          {/* Year Heatmap Grid */}
-                          <div className="flex flex-wrap gap-0.5">
-                              {daysInYear.map((day, i) => {
-                                  const dateStr = format(day, 'yyyy-MM-dd');
-                                  const completed = habit.history[dateStr]?.completed;
-                                  return (
-                                      <div 
-                                        key={i} 
-                                        className={`w-2 h-2 rounded-[1px] ${completed ? '' : 'bg-slate-100'}`}
-                                        style={{ backgroundColor: completed ? habit.color : undefined }}
-                                        title={dateStr}
-                                      />
-                                  );
-                              })}
-                          </div>
-                      </div>
-                  ))}
-              </div>
-          </div>
-      );
-  };
+  // Section breakdown pie
+  const sectionData = useMemo(() => {
+    const map: Record<string, number> = {};
+    activeHabits.forEach(h => {
+      const s = h.section || 'Others';
+      map[s] = (map[s] || 0) + 1;
+    });
+    return Object.entries(map).map(([name, value]) => ({ name, value }));
+  }, [activeHabits]);
 
-  const renderWeekView = () => {
-      const weekStart = startOfWeek(currentDate, { weekStartsOn: 0 }); // Sunday
-      const weekEnd = endOfWeek(currentDate, { weekStartsOn: 0 });
-      const weekDays = eachDayOfInterval({ start: weekStart, end: weekEnd });
+  function calculateStreak(habit: Habit): number {
+    let streak = 0;
+    const today = new Date();
+    for (let i = 0; i < 365; i++) {
+      const key = format(subDays(today, i), 'yyyy-MM-dd');
+      if (habit.history?.[key]?.completed) streak++;
+      else break;
+    }
+    return streak;
+  }
 
-      return (
-          <div className="p-4 animate-in fade-in">
-              <div className="flex items-center justify-between mb-6 px-2">
-                  <button onClick={() => setCurrentDate(subWeeks(currentDate, 1))} className="p-1 hover:bg-slate-100 rounded-full text-slate-500"><ChevronLeft size={20}/></button>
-                  <span className="text-slate-800 font-bold">This Week</span>
-                  <button onClick={() => setCurrentDate(addWeeks(currentDate, 1))} className="p-1 hover:bg-slate-100 rounded-full text-slate-500"><ChevronRight size={20}/></button>
-              </div>
+  const overallRate = useMemo(() => {
+    const total = dailyData.reduce((s, d) => s + d.total, 0);
+    const completed = dailyData.reduce((s, d) => s + d.completed, 0);
+    return total > 0 ? Math.round((completed / total) * 100) : 0;
+  }, [dailyData]);
 
-              <div className="bg-white rounded-2xl p-4 border border-slate-200 shadow-sm overflow-hidden">
-                  <div className="overflow-x-auto pb-2">
-                      <table className="w-full border-collapse min-w-[300px]">
-                          <thead>
-                              <tr>
-                                  <th className="text-left pb-4 text-slate-500 font-medium text-xs sticky left-0 bg-white z-10 w-24">Habit</th>
-                                  {weekDays.map(day => (
-                                      <th key={day.toString()} className="pb-4 text-center min-w-[32px]">
-                                          <div className="text-slate-400 text-[10px] uppercase font-bold mb-1">{format(day, 'EEE').slice(0, 2)}</div>
-                                      </th>
-                                  ))}
-                              </tr>
-                          </thead>
-                          <tbody className="space-y-4">
-                              {activeHabits.map(habit => (
-                                  <tr key={habit.id} className="group border-b border-slate-50 last:border-0">
-                                      <td className="py-3 pr-4 sticky left-0 bg-white z-10">
-                                          <div className="flex items-center gap-2">
-                                              <span className="text-lg">{habit.icon}</span>
-                                              <span className="text-slate-700 text-sm font-medium whitespace-nowrap overflow-hidden text-ellipsis max-w-[80px]">{habit.name}</span>
-                                          </div>
-                                      </td>
-                                      {weekDays.map(day => {
-                                          const dateStr = format(day, 'yyyy-MM-dd');
-                                          const completed = habit.history[dateStr]?.completed;
-                                          return (
-                                              <td key={day.toString()} className="py-3 text-center">
-                                                  <div 
-                                                    className={`w-6 h-6 rounded mx-auto transition-all ${completed ? '' : 'bg-slate-100'}`}
-                                                    style={{ backgroundColor: completed ? habit.color : undefined }}
-                                                  />
-                                              </td>
-                                          )
-                                      })}
-                                  </tr>
-                              ))}
-                          </tbody>
-                      </table>
-                  </div>
-              </div>
-          </div>
-      );
-  };
-
-  const renderMonthView = () => {
-      const monthStart = startOfMonth(currentDate);
-      const monthEnd = endOfMonth(currentDate);
-      const daysInMonth = eachDayOfInterval({ start: monthStart, end: monthEnd });
-      // Calculate padding for grid alignment (Sun start)
-      const startDay = getDay(monthStart);
-      const paddedDays = Array(startDay).fill(null).concat(daysInMonth);
-
-      return (
-          <div className="p-4 animate-in fade-in">
-               <div className="flex items-center justify-between mb-6 px-2">
-                  <button onClick={() => setCurrentDate(subMonths(currentDate, 1))} className="p-1 hover:bg-slate-100 rounded-full text-slate-500"><ChevronLeft size={20}/></button>
-                  <span className="text-slate-800 font-bold text-lg">{format(currentDate, 'MMM')}</span>
-                  <button onClick={() => setCurrentDate(addMonths(currentDate, 1))} className="p-1 hover:bg-slate-100 rounded-full text-slate-500"><ChevronRight size={20}/></button>
-              </div>
-
-              {/* Premium Banner Mock */}
-              <div className="flex items-center gap-2 text-yellow-600 bg-yellow-50 p-2 rounded-lg text-xs font-bold mb-6 mx-2 border border-yellow-100">
-                  <ExternalLink size={12} />
-                  <span>Detailed Analysis</span>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  {activeHabits.map(habit => (
-                      <div key={habit.id} className="bg-white rounded-2xl p-4 flex flex-col gap-3 border border-slate-200 shadow-sm">
-                          <div className="flex items-center gap-2 mb-1">
-                              <span>{habit.icon}</span>
-                              <span className="text-slate-800 font-medium text-sm truncate flex-1">{habit.name}</span>
-                          </div>
-                          
-                          {/* Mini Heatmap */}
-                          <div className="grid grid-cols-7 gap-1">
-                              {paddedDays.map((day, i) => {
-                                  if (!day) return <div key={i} className="w-full pt-[100%]" />; // spacer
-                                  
-                                  const dateStr = format(day, 'yyyy-MM-dd');
-                                  const completed = habit.history[dateStr]?.completed;
-                                  
-                                  return (
-                                      <div 
-                                        key={i} 
-                                        className={`w-full pt-[100%] rounded-sm relative ${completed ? '' : 'bg-slate-100'}`}
-                                        style={{ backgroundColor: completed ? habit.color : undefined }}
-                                      >
-                                          {/* Aspect Ratio Trick */}
-                                      </div>
-                                  );
-                              })}
-                          </div>
-                      </div>
-                  ))}
-              </div>
-          </div>
-      );
-  };
-
-  const renderRecordView = () => {
-      // Flatten all logs
-      const allLogs = activeHabits.flatMap(h => {
-          return (Object.entries(h.history) as [string, HabitLog][]).map(([date, log]) => ({
-              habit: h,
-              date,
-              ...log
-          }));
-      }).sort((a, b) => b.date.localeCompare(a.date));
-
-      return (
-          <div className="p-4 animate-in fade-in">
-              <div className="space-y-4">
-                  {allLogs.length === 0 && <div className="text-slate-400 text-center py-10">No records found.</div>}
-                  {allLogs.map((log, i) => (
-                      <div key={i} className="flex gap-4">
-                          <div className="w-12 text-center pt-1 shrink-0">
-                              <div className="text-sm font-bold text-slate-400">{format(new Date(log.date), 'MMM')}</div>
-                              <div className="text-xl font-bold text-slate-800">{format(new Date(log.date), 'dd')}</div>
-                          </div>
-                          <div className="flex-1 bg-white p-3 rounded-xl flex items-center gap-3 border border-slate-200 shadow-sm min-w-0">
-                              <div className="text-2xl shrink-0">{log.habit.icon}</div>
-                              <div className="min-w-0">
-                                  <div className="font-bold text-slate-800 truncate">{log.habit.name}</div>
-                                  <div className="text-xs text-slate-500">{log.completed ? 'Completed' : 'Skipped'}</div>
-                              </div>
-                              {log.mood && <div className="ml-auto text-xl">{log.mood}</div>}
-                          </div>
-                      </div>
-                  ))}
-              </div>
-          </div>
-      );
-  };
+  const topStreak = useMemo(() => Math.max(0, ...habitRates.map(h => h.streak)), [habitRates]);
 
   return (
-    <div className="flex-1 h-full flex flex-col bg-slate-50 text-slate-900 relative overflow-hidden font-sans">
-        {/* Header */}
-        <div className="h-14 flex items-center justify-between px-4 shrink-0 bg-white z-10 border-b border-slate-200 shadow-sm">
-             {onClose ? (
-                <button onClick={onClose} className="p-2 -ml-2 text-slate-500 hover:text-slate-800"><X size={24}/></button>
-             ) : (
-                <div className="w-10"></div>
-             )}
-             
-             {/* Tabs */}
-             <div className="flex bg-slate-100 rounded-lg p-1 overflow-x-auto no-scrollbar max-w-[200px] sm:max-w-none">
-                  {(['Week', 'Month', 'Year', 'Record'] as Tab[]).map(tab => (
-                      <button
-                        key={tab}
-                        onClick={() => setActiveTab(tab)}
-                        className={`px-4 py-1 text-xs font-bold rounded-md transition-colors whitespace-nowrap ${activeTab === tab ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
-                      >
-                          {tab}
-                      </button>
+    <div className="flex flex-col h-full bg-white dark:bg-slate-950 overflow-hidden">
+      {/* Header */}
+      <div className="flex items-center gap-3 px-4 pt-5 pb-3 border-b border-slate-100 dark:border-slate-800">
+        <button onClick={onClose} className="p-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+          <ArrowLeft size={20} className="text-slate-600 dark:text-slate-400" />
+        </button>
+        <h1 className="text-xl font-bold text-slate-800 dark:text-slate-100">Habit Analytics</h1>
+      </div>
+
+      <div className="flex-1 overflow-y-auto p-4 space-y-5">
+        {/* Range selector */}
+        <div className="flex gap-2">
+          {([7, 30, 90] as const).map(r => (
+            <button
+              key={r}
+              onClick={() => setRange(r)}
+              className={`px-4 py-1.5 rounded-full text-sm font-medium transition-colors ${
+                range === r
+                  ? 'bg-blue-500 text-white'
+                  : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400'
+              }`}
+            >
+              {r}d
+            </button>
+          ))}
+        </div>
+
+        {/* Summary Cards */}
+        <div className="grid grid-cols-3 gap-3">
+          <div className="bg-blue-50 dark:bg-blue-950/30 rounded-2xl p-3 text-center">
+            <CheckCircle2 size={20} className="text-blue-500 mx-auto mb-1" />
+            <div className="text-2xl font-bold text-blue-600">{overallRate}%</div>
+            <div className="text-xs text-slate-500 dark:text-slate-400">Overall Rate</div>
+          </div>
+          <div className="bg-orange-50 dark:bg-orange-950/30 rounded-2xl p-3 text-center">
+            <Flame size={20} className="text-orange-500 mx-auto mb-1" />
+            <div className="text-2xl font-bold text-orange-500">{topStreak}</div>
+            <div className="text-xs text-slate-500 dark:text-slate-400">Top Streak</div>
+          </div>
+          <div className="bg-green-50 dark:bg-green-950/30 rounded-2xl p-3 text-center">
+            <TrendingUp size={20} className="text-green-500 mx-auto mb-1" />
+            <div className="text-2xl font-bold text-green-600">{activeHabits.length}</div>
+            <div className="text-xs text-slate-500 dark:text-slate-400">Active Habits</div>
+          </div>
+        </div>
+
+        {/* Habit filter */}
+        <div className="flex gap-2 overflow-x-auto pb-1 hide-scrollbar">
+          <button
+            onClick={() => setSelectedHabit('all')}
+            className={`px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-colors ${
+              selectedHabit === 'all'
+                ? 'bg-slate-800 dark:bg-slate-200 text-white dark:text-slate-900'
+                : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400'
+            }`}
+          >
+            All Habits
+          </button>
+          {activeHabits.map(h => (
+            <button
+              key={h.id}
+              onClick={() => setSelectedHabit(h.id)}
+              className={`px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-colors ${
+                selectedHabit === h.id
+                  ? 'text-white'
+                  : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400'
+              }`}
+              style={selectedHabit === h.id ? { backgroundColor: h.color } : {}}
+            >
+              {h.icon} {h.name}
+            </button>
+          ))}
+        </div>
+
+        {/* Daily Completion Bar Chart */}
+        <div className="bg-slate-50 dark:bg-slate-900 rounded-2xl p-4">
+          <h2 className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-3">
+            Daily Completion Rate
+          </h2>
+          <ResponsiveContainer width="100%" height={180}>
+            <BarChart data={dailyData} barSize={range === 7 ? 24 : range === 30 ? 10 : 5}>
+              <XAxis
+                dataKey="date"
+                tick={{ fontSize: 10, fill: '#94a3b8' }}
+                tickLine={false}
+                axisLine={false}
+                interval={range === 90 ? 6 : range === 30 ? 4 : 0}
+              />
+              <YAxis hide domain={[0, 100]} />
+              <Tooltip
+                formatter={(val: number) => [`${val}%`, 'Rate']}
+                contentStyle={{
+                  background: 'var(--tw-bg-opacity, #1e293b)',
+                  border: 'none',
+                  borderRadius: '12px',
+                  fontSize: '12px',
+                }}
+              />
+              <Bar dataKey="rate" fill="#3b82f6" radius={[4, 4, 0, 0]} />
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+
+        {/* Per-Habit Rates */}
+        {habitRates.length > 0 && (
+          <div className="bg-slate-50 dark:bg-slate-900 rounded-2xl p-4">
+            <h2 className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-3">
+              Habit Completion Rates
+            </h2>
+            <div className="space-y-3">
+              {habitRates.map((h, i) => (
+                <div key={i}>
+                  <div className="flex justify-between items-center mb-1">
+                    <span className="text-xs text-slate-600 dark:text-slate-400 flex items-center gap-1">
+                      <span>{h.icon}</span> {h.fullName}
+                    </span>
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs text-orange-500 flex items-center gap-0.5">
+                        <Flame size={10} /> {h.streak}
+                      </span>
+                      <span className="text-xs font-semibold text-slate-700 dark:text-slate-300">{h.rate}%</span>
+                    </div>
+                  </div>
+                  <div className="h-2 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
+                    <div
+                      className="h-full rounded-full transition-all duration-500"
+                      style={{ width: `${h.rate}%`, backgroundColor: h.color || '#3b82f6' }}
+                    />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Section Breakdown Pie */}
+        {sectionData.length > 1 && (
+          <div className="bg-slate-50 dark:bg-slate-900 rounded-2xl p-4">
+            <h2 className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-3">
+              <Calendar size={14} className="inline mr-1" />
+              Habits by Routine
+            </h2>
+            <ResponsiveContainer width="100%" height={180}>
+              <PieChart>
+                <Pie data={sectionData} cx="50%" cy="50%" outerRadius={65} dataKey="value" label={({ name, percent }) => `${name} ${Math.round(percent * 100)}%`} labelLine={false} fontSize={11}>
+                  {sectionData.map((_, idx) => (
+                    <Cell key={idx} fill={COLORS[idx % COLORS.length]} />
                   ))}
-             </div>
-
-             <button className="p-2 text-slate-500 hover:text-slate-800"><Share2 size={20} /></button>
-        </div>
-
-        {/* Content */}
-        <div className="flex-1 overflow-y-auto custom-scrollbar">
-            {activeTab === 'Week' && renderWeekView()}
-            {activeTab === 'Month' && renderMonthView()}
-            {activeTab === 'Year' && renderYearView()}
-            {activeTab === 'Record' && renderRecordView()}
-        </div>
+                </Pie>
+                <Tooltip />
+              </PieChart>
+            </ResponsiveContainer>
+          </div>
+        )}
+      </div>
     </div>
   );
 };
