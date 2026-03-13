@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { ArrowLeft, Flame, CheckCircle2, TrendingUp, Calendar } from 'lucide-react';
+import { ArrowLeft, Flame, CheckCircle2, TrendingUp, Calendar, Share2 } from 'lucide-react';
 import {
   BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer,
   RadarChart, Radar, PolarGrid, PolarAngleAxis, Cell, PieChart, Pie, Legend
@@ -89,14 +89,33 @@ const HabitStatsView: React.FC<HabitStatsViewProps> = ({ habits, onClose }) => {
 
   const topStreak = useMemo(() => Math.max(0, ...habitRates.map(h => h.streak)), [habitRates]);
 
+  const handleShare = async () => {
+    const text = `My habit stats — ${activeHabits.length} active habits tracked! Check them out.`;
+    if (navigator.share) {
+      try {
+        await navigator.share({ title: 'My Habit Stats', text });
+      } catch (err) {
+        console.error('Share failed', err);
+      }
+    } else {
+      await navigator.clipboard.writeText(text);
+      alert('Stats copied to clipboard!');
+    }
+  };
+
   return (
     <div className="flex flex-col h-full bg-white dark:bg-slate-950 overflow-hidden">
       {/* Header */}
-      <div className="flex items-center gap-3 px-4 pt-5 pb-3 border-b border-slate-100 dark:border-slate-800">
-        <button onClick={onClose} className="p-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
-          <ArrowLeft size={20} className="text-slate-600 dark:text-slate-400" />
+      <div className="flex items-center justify-between px-4 pt-5 pb-3 border-b border-slate-100 dark:border-slate-800">
+        <div className="flex items-center gap-3">
+          <button onClick={onClose} className="p-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+            <ArrowLeft size={20} className="text-slate-600 dark:text-slate-400" />
+          </button>
+          <h1 className="text-xl font-bold text-slate-800 dark:text-slate-100">Habit Analytics</h1>
+        </div>
+        <button onClick={handleShare} className="p-2 text-slate-500 hover:text-slate-800 hover:bg-slate-100 rounded-full transition-colors">
+          <Share2 size={20} />
         </button>
-        <h1 className="text-xl font-bold text-slate-800 dark:text-slate-100">Habit Analytics</h1>
       </div>
 
       <div className="flex-1 overflow-y-auto p-4 space-y-5">

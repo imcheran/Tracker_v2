@@ -53,6 +53,11 @@ const TaskDetailView: React.FC<TaskDetailViewProps> = ({
   const [showThemePicker, setShowThemePicker] = useState(false);
   const [showDrawing, setShowDrawing] = useState(false);
   const [showShareModal, setShowShareModal] = useState(false);
+  const [showReminderPicker, setShowReminderPicker] = useState(false);
+  const [isRecording, setIsRecording] = useState(false);
+  
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const audioChunksRef = useRef<Blob[]>([]);
   
   const [fullScreenImage, setFullScreenImage] = useState<string | null>(null);
   
@@ -99,6 +104,50 @@ const TaskDetailView: React.FC<TaskDetailViewProps> = ({
       updatedAt: new Date(),
       ...updatedFields
     });
+  };
+
+  // Bell / Reminder handler
+  const handleSetReminder = (minutesBefore: number) => {
+    const reminderDate = task.dueDate
+      ? new Date(new Date(task.dueDate).getTime() - minutesBefore * 60 * 1000)
+      : new Date(Date.now() + minutesBefore * 60 * 1000);
+    handleSave({ reminderAt: reminderDate });
+    setShowReminderPicker(false);
+  };
+
+  // Mic / Voice recording handler
+  const handleToggleVoiceRecord = async () => {
+    if (isRecording) {
+      // Stop recording
+      mediaRecorderRef.current?.stop();
+      setIsRecording(false);
+      return;
+    }
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const recorder = new MediaRecorder(stream);
+      audioChunksRef.current = [];
+
+      recorder.ondataavailable = (e) => {
+        if (e.data.size > 0) audioChunksRef.current.push(e.data);
+      };
+
+      recorder.onstop = () => {
+        const blob    = new Blob(audioChunksRef.current, { type: 'audio/webm' });
+        const url     = URL.createObjectURL(blob);
+        const id      = Date.now().toString();
+        const newAtt  = { id, url, title: `Voice ${new Date().toLocaleTimeString()}`, type: 'audio' as const };
+        handleSave({ attachments: [...(task.attachments || []), newAtt] });
+        stream.getTracks().forEach((t) => t.stop());
+      };
+
+      recorder.start();
+      mediaRecorderRef.current = recorder;
+      setIsRecording(true);
+    } catch (err) {
+      console.error('Mic access denied', err);
+      alert('Microphone access is required to record voice notes.');
+    }
   };
 
   const handleEditorBlur = () => {
@@ -429,7 +478,7 @@ const TaskDetailView: React.FC<TaskDetailViewProps> = ({
               <button onClick={() => setShowDrawing(true)} className={`p-3 rounded-full hover:bg-black/5 transition-colors ${iconColorClass}`}>
                    <PenTool size={20} />
               </button>
-              <button className={`p-3 rounded-full hover:bg-black/5 transition-colors ${iconColorClass}`}>
+              <button onClick={handleToggleVoiceRecord} className={`p-3 rounded-full hover:bg-black/5 transition-colors ${isRecording ? 'bg-red-100 text-red-500 animate-pulse' : iconColorClass}`}>
                    <Mic size={20} />
               </button>
           </div>
@@ -439,6 +488,20 @@ const TaskDetailView: React.FC<TaskDetailViewProps> = ({
           </div>
 
           <div className="flex items-center gap-1">
+              <div className="relative">
+                  <button onClick={() => setShowReminderPicker(!showReminderPicker)} className={`p-3 rounded-full hover:bg-black/5 transition-colors ${showReminderPicker ? 'bg-black/10 text-blue-500' : iconColorClass}`}>
+                      <Bell size={20} />
+                  </button>
+                  {showReminderPicker && (
+                      <div className="absolute bottom-full right-0 mb-2 w-48 bg-white dark:bg-slate-900 rounded-2xl shadow-xl border border-slate-100 dark:border-slate-800 p-2 z-50 animate-in fade-in slide-in-from-bottom-2">
+                          <div className="text-xs font-bold text-slate-400 uppercase tracking-wider px-3 py-2">Set Reminder</div>
+                          <button onClick={() => handleSetReminder(5)} className="w-full text-left px-3 py-2 text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-xl transition-colors">5 min before</button>
+                          <button onClick={() => handleSetReminder(15)} className="w-full text-left px-3 py-2 text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-xl transition-colors">15 min before</button>
+                          <button onClick={() => handleSetReminder(60)} className="w-full text-left px-3 py-2 text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-xl transition-colors">1 hour before</button>
+                          <button onClick={() => handleSetReminder(1440)} className="w-full text-left px-3 py-2 text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-xl transition-colors">1 day before</button>
+                      </div>
+                  )}
+              </div>
               <button onClick={() => setShowOptions(!showOptions)} className={`p-3 rounded-full hover:bg-black/5 transition-colors ${iconColorClass}`}>
                   <MoreVertical size={20} />
               </button>
