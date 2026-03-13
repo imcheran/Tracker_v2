@@ -1,7 +1,7 @@
 
 import React from 'react';
-import { Layers, Calendar, Clock, Menu } from 'lucide-react';
 import { ViewType } from '../types';
+import { CheckSquare, Calendar, Zap, BarChart2, Repeat, Menu } from 'lucide-react';
 
 interface MobileNavigationProps {
   currentView: ViewType | string;
@@ -9,50 +9,57 @@ interface MobileNavigationProps {
   onMenuClick: () => void;
 }
 
-export const MobileNavigation: React.FC<MobileNavigationProps> = React.memo(({ currentView, onChangeView, onMenuClick }) => {
-  const navItems = [
-    { id: ViewType.Inbox, icon: Layers, label: 'Tasks', color: 'text-blue-600 dark:text-blue-400' },
-    { id: ViewType.Calendar, icon: Calendar, label: 'Calendar', color: 'text-rose-500' },
-    { id: ViewType.Focus, icon: Clock, label: 'Focus', color: 'text-indigo-500' },
-  ];
+const navItems = [
+  { view: ViewType.Today,    icon: CheckSquare, label: 'Today'    },
+  { view: ViewType.Calendar, icon: Calendar,    label: 'Calendar' },
+  { view: ViewType.Habits,   icon: Repeat,      label: 'Habits'   },
+  { view: ViewType.Focus,    icon: Zap,         label: 'Focus'    },
+  { view: ViewType.Finance,  icon: BarChart2,   label: 'Finance'  },
+];
 
+export const MobileNavigation: React.FC<MobileNavigationProps> = ({
+  currentView, onChangeView, onMenuClick,
+}) => {
   return (
-    <div 
-        className="md:hidden fixed bottom-0 left-0 right-0 bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 z-30 shadow-[0_-1px_3px_rgba(0,0,0,0.05)]"
-        style={{ paddingBottom: 'max(env(safe-area-inset-bottom), 12px)' }}
-    >
-      <div className="flex justify-between items-center h-14 px-4">
-        {navItems.map((item) => {
-          const isActive = currentView === item.id || (item.id === ViewType.Inbox && (currentView === ViewType.All || currentView === ViewType.Today || currentView === ViewType.Next7Days));
+    <div className="md:hidden flex justify-center pb-safe px-4 pb-3 pt-1 absolute bottom-0 left-0 right-0 z-40 pointer-events-none">
+      <nav className="mobile-nav-float pointer-events-auto flex items-center gap-1 rounded-2xl px-2 py-2 w-full max-w-sm">
+        {/* Hamburger */}
+        <button
+          onClick={onMenuClick}
+          className="flex flex-col items-center justify-center w-12 h-12 rounded-xl text-slate-400 dark:text-slate-500 hover:bg-slate-100 dark:hover:bg-white/5 transition-colors"
+          aria-label="Open menu"
+        >
+          <Menu size={20} />
+        </button>
+
+        <div className="w-px h-6 bg-slate-200 dark:bg-white/10 mx-1 flex-shrink-0" />
+
+        {/* Nav items */}
+        {navItems.map(({ view, icon: Icon, label }) => {
+          const isActive = currentView === view;
           return (
             <button
-              key={item.id}
-              onClick={() => onChangeView(item.id)}
-              className="flex flex-col items-center justify-center min-w-[3.5rem] h-full gap-1 group relative"
+              key={view}
+              onClick={() => onChangeView(view)}
+              className={`flex flex-col items-center justify-center flex-1 h-12 rounded-xl gap-0.5 transition-all duration-200 relative
+                ${isActive
+                  ? 'text-indigo-600 dark:text-indigo-400'
+                  : 'text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300'
+                }`}
+              aria-label={label}
             >
-              <div className={`
-                  p-1.5 rounded-xl transition-all duration-300
-                  ${isActive ? `${item.color} -translate-y-1` : 'text-slate-400 dark:text-slate-500 group-hover:text-slate-600'}
-              `}>
-                  <item.icon size={22} strokeWidth={isActive ? 2.5 : 2} />
-              </div>
-              <span className={`text-[10px] font-bold transition-all ${isActive ? `${item.color} scale-100` : 'text-slate-400 dark:text-slate-500 scale-90'}`}>
-                  {item.label}
+              {isActive && (
+                <span className="absolute inset-0 bg-indigo-50 dark:bg-indigo-500/10 rounded-xl" />
+              )}
+              <Icon size={20} strokeWidth={isActive ? 2.5 : 1.75} className="relative z-10" />
+              <span className={`text-[10px] font-medium relative z-10 leading-none
+                ${isActive ? 'opacity-100' : 'opacity-70'}`}>
+                {label}
               </span>
             </button>
           );
         })}
-        
-        <button
-          onClick={onMenuClick}
-          className="flex flex-col items-center justify-center min-w-[3.5rem] h-full gap-1 group"
-        >
-          <div className="p-1.5 rounded-xl text-slate-400 dark:text-slate-500 group-hover:text-slate-600 transition-all">
-              <Menu size={22} />
-          </div>
-          <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 scale-90">Menu</span>
-        </button>
-      </div>
+      </nav>
     </div>
   );
-});
+};

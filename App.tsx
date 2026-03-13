@@ -48,9 +48,14 @@ const mergeArrays = <T extends { id: string; updatedAt?: Date | string }>(local:
 };
 
 const LoadingFallback: React.FC = () => (
-    <div className="flex-1 flex items-center justify-center bg-slate-50 dark:bg-slate-900 h-full rounded-[32px]">
-        <Loader2 size={32} className="animate-spin text-blue-500" />
-    </div>
+  <div className="flex-1 flex flex-col items-center justify-center h-full gap-3
+    bg-white dark:bg-[#0f0f1a] rounded-[28px]">
+    <div className="w-10 h-10 rounded-full border-2 border-indigo-500/20 border-t-indigo-500
+      animate-spin" />
+    <p className="text-sm text-slate-400 dark:text-slate-500 font-medium animate-pulse">
+      Loading…
+    </p>
+  </div>
 );
 
 const App: React.FC = () => {
@@ -416,7 +421,7 @@ const App: React.FC = () => {
   };
 
   return (
-    <div className="flex h-screen w-full bg-[#f0f2f5] dark:bg-black text-slate-900 dark:text-slate-100 transition-colors p-0 md:p-4 gap-4 overflow-hidden">
+    <div className="flex h-screen w-full bg-[#eef0f6] dark:bg-[#09090b] text-slate-900 dark:text-slate-100 transition-colors duration-300 p-0 md:p-3 gap-3 overflow-hidden">
         {/* Sidebar as a Floating Card on Desktop */}
         <Sidebar 
             currentView={currentView}
@@ -435,7 +440,7 @@ const App: React.FC = () => {
         />
         
         {/* Main Content Area - Bento Card Style */}
-        <main className="flex-1 flex flex-col h-full relative overflow-hidden bg-white dark:bg-slate-950 md:rounded-[32px] shadow-sm md:shadow-xl transition-all">
+        <main className="flex-1 flex flex-col h-full relative overflow-hidden bg-white dark:bg-[#0f0f1a] md:rounded-[28px] shadow-none md:shadow-2xl ring-0 md:ring-1 ring-black/5 dark:ring-white/5 transition-all duration-300">
             <Suspense fallback={<LoadingFallback />}>
                 {(currentView === ViewType.Inbox || currentView === ViewType.Today || currentView === ViewType.Next7Days || currentView === ViewType.Completed || currentView === ViewType.Trash || currentView === ViewType.All || currentView === ViewType.Search || currentView === ViewType.Archive || currentView === ViewType.Notes || lists.find(l => l.id === currentView)) && (
                     <TaskView 
