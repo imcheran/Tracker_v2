@@ -236,7 +236,7 @@ const HabitFormSheet: React.FC<HabitFormSheetProps> = ({ isOpen, onClose, onSave
                         <span className="text-lg font-bold ml-2">Gallery</span>
                     </div>
                     <div className="flex items-center gap-2 text-slate-400">
-                        <button onClick={() => { resetData(); setStep('basics'); }} className="p-2 bg-blue-600/20 text-blue-500 hover:bg-blue-600/30 rounded-full"><Plus size={20}/></button>
+                        <button onClick={() => { resetData(); setStep('basics'); }} className="p-2 bg-gradient-to-br from-orange-500 to-amber-400/20 text-orange-500 hover:bg-gradient-to-br from-orange-500 to-amber-400/30 rounded-full"><Plus size={20}/></button>
                     </div>
                 </div>
             </div>
@@ -414,10 +414,10 @@ const HabitFormSheet: React.FC<HabitFormSheetProps> = ({ isOpen, onClose, onSave
                         <button
                             key={f}
                             onClick={() => handleFreqTypeChange(f)}
-                            className={`pb-2 text-xs font-bold uppercase transition-colors relative ${frequencyType === f ? 'text-blue-500' : 'text-slate-500 hover:text-slate-300'}`}
+                            className={`pb-2 text-xs font-bold uppercase transition-colors relative ${frequencyType === f ? 'text-orange-500' : 'text-slate-500 hover:text-slate-300'}`}
                         >
                             {f}
-                            {frequencyType === f && <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-500 rounded-full"/>}
+                            {frequencyType === f && <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-orange-500 rounded-full"/>}
                         </button>
                     ))}
                 </div>
@@ -429,7 +429,7 @@ const HabitFormSheet: React.FC<HabitFormSheetProps> = ({ isOpen, onClose, onSave
                                 <button
                                     key={i}
                                     onClick={() => toggleDay(i)}
-                                    className={`w-9 h-9 rounded-full text-xs font-bold transition-all ${frequencyDays.includes(i) ? 'bg-blue-600 text-white shadow-lg' : 'bg-slate-800 text-slate-500'}`}
+                                    className={`w-9 h-9 rounded-full text-xs font-bold transition-all ${frequencyDays.includes(i) ? 'bg-gradient-to-br from-orange-500 to-amber-400 text-white shadow-lg' : 'bg-slate-800 text-slate-500'}`}
                                 >
                                     {day}
                                 </button>
@@ -540,7 +540,7 @@ const HabitFormSheet: React.FC<HabitFormSheetProps> = ({ isOpen, onClose, onSave
                          <button 
                             key={s} 
                             onClick={() => setSection(s)}
-                            className={`px-4 py-2 text-xs font-bold rounded-full transition-colors whitespace-nowrap ${section === s ? 'bg-blue-600 text-white' : 'bg-slate-800 text-slate-400'}`}
+                            className={`px-4 py-2 text-xs font-bold rounded-full transition-colors whitespace-nowrap ${section === s ? 'bg-gradient-to-br from-orange-500 to-amber-400 text-white' : 'bg-slate-800 text-slate-400'}`}
                         >
                              {s}
                          </button>
@@ -562,7 +562,7 @@ const HabitFormSheet: React.FC<HabitFormSheetProps> = ({ isOpen, onClose, onSave
                         ))}
                     </div>
                 )}
-                <button onClick={addReminder} className="flex items-center gap-2 text-blue-500 text-sm font-bold mt-2 hover:text-blue-400">
+                <button onClick={addReminder} className="flex items-center gap-2 text-orange-500 text-sm font-bold mt-2 hover:text-orange-400">
                     <Plus size={16}/> Add
                 </button>
             </div>
@@ -570,7 +570,7 @@ const HabitFormSheet: React.FC<HabitFormSheetProps> = ({ isOpen, onClose, onSave
             {/* Toggles */}
             <div className="bg-[#1c1c1e] rounded-2xl p-4 flex justify-between items-center cursor-pointer" onClick={() => setIsAutoLog(!isAutoLog)}>
                 <span className="font-medium text-slate-200 text-sm">Auto pop-up of habit log</span>
-                <div className={`w-10 h-5 rounded-full relative transition-colors ${isAutoLog ? 'bg-blue-500' : 'bg-slate-600'}`}>
+                <div className={`w-10 h-5 rounded-full relative transition-colors ${isAutoLog ? 'bg-orange-500' : 'bg-slate-600'}`}>
                     <div className={`absolute top-1 w-3 h-3 bg-white rounded-full shadow-sm transition-transform ${isAutoLog ? 'left-6' : 'left-1'}`}></div>
                 </div>
             </div>
@@ -580,7 +580,7 @@ const HabitFormSheet: React.FC<HabitFormSheetProps> = ({ isOpen, onClose, onSave
                     <span className="font-medium text-slate-200 text-sm">Quote</span>
                     {quote && <span className="text-xs text-slate-500 mt-1">{quote}</span>}
                 </div>
-                <RefreshCw size={16} className="text-blue-500"/>
+                <RefreshCw size={16} className="text-orange-500"/>
             </div>
 
         </div>
@@ -594,16 +594,16 @@ const HabitFormSheet: React.FC<HabitFormSheetProps> = ({ isOpen, onClose, onSave
                         
                         <div className="space-y-4">
                             <label className="flex items-center gap-3 cursor-pointer group">
-                                <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${goalType === 'all' ? 'border-blue-500' : 'border-slate-500'}`}>
-                                    {goalType === 'all' && <div className="w-2.5 h-2.5 bg-blue-500 rounded-full"/>}
+                                <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${goalType === 'all' ? 'border-orange-500' : 'border-slate-500'}`}>
+                                    {goalType === 'all' && <div className="w-2.5 h-2.5 bg-orange-500 rounded-full"/>}
                                 </div>
                                 <span className={`font-medium ${goalType === 'all' ? 'text-white' : 'text-slate-400'}`}>Achieve it all</span>
                                 <input type="radio" checked={goalType === 'all'} onChange={() => setGoalType('all')} className="hidden"/>
                             </label>
 
                             <label className="flex items-center gap-3 cursor-pointer group">
-                                <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${goalType === 'amount' ? 'border-blue-500' : 'border-slate-500'}`}>
-                                    {goalType === 'amount' && <div className="w-2.5 h-2.5 bg-blue-500 rounded-full"/>}
+                                <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${goalType === 'amount' ? 'border-orange-500' : 'border-slate-500'}`}>
+                                    {goalType === 'amount' && <div className="w-2.5 h-2.5 bg-orange-500 rounded-full"/>}
                                 </div>
                                 <span className={`font-medium ${goalType === 'amount' ? 'text-white' : 'text-slate-400'}`}>Reach a certain amount</span>
                                 <input type="radio" checked={goalType === 'amount'} onChange={() => setGoalType('amount')} className="hidden"/>
@@ -649,8 +649,8 @@ const HabitFormSheet: React.FC<HabitFormSheetProps> = ({ isOpen, onClose, onSave
                         )}
                     </div>
                     <div className="flex justify-end p-4 gap-6">
-                        <button onClick={() => setShowGoalModal(false)} className="text-blue-500 font-bold hover:text-white transition-colors">Cancel</button>
-                        <button onClick={() => setShowGoalModal(false)} className="text-blue-500 font-bold hover:text-white transition-colors">OK</button>
+                        <button onClick={() => setShowGoalModal(false)} className="text-orange-500 font-bold hover:text-white transition-colors">Cancel</button>
+                        <button onClick={() => setShowGoalModal(false)} className="text-orange-500 font-bold hover:text-white transition-colors">OK</button>
                     </div>
                 </div>
             </div>
@@ -673,8 +673,8 @@ const HabitFormSheet: React.FC<HabitFormSheetProps> = ({ isOpen, onClose, onSave
                                 }}
                                 className="w-full flex items-center gap-3 p-3 rounded-xl hover:bg-slate-800 transition-colors"
                             >
-                                <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${goalDaysOption === opt ? 'border-blue-500' : 'border-slate-600'}`}>
-                                    {goalDaysOption === opt && <div className="w-2.5 h-2.5 bg-blue-500 rounded-full"/>}
+                                <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${goalDaysOption === opt ? 'border-orange-500' : 'border-slate-600'}`}>
+                                    {goalDaysOption === opt && <div className="w-2.5 h-2.5 bg-orange-500 rounded-full"/>}
                                 </div>
                                 <span className="text-slate-200 text-sm flex-1 text-left">{opt}</span>
                                 {opt === 'Custom' && goalDaysOption === 'Custom' && (
@@ -693,8 +693,8 @@ const HabitFormSheet: React.FC<HabitFormSheetProps> = ({ isOpen, onClose, onSave
                         ))}
                     </div>
                     <div className="flex justify-end p-4 gap-6">
-                        <button onClick={() => setShowGoalDaysModal(false)} className="text-blue-500 font-bold text-sm">Cancel</button>
-                        <button onClick={() => setShowGoalDaysModal(false)} className="text-blue-500 font-bold text-sm">OK</button>
+                        <button onClick={() => setShowGoalDaysModal(false)} className="text-orange-500 font-bold text-sm">Cancel</button>
+                        <button onClick={() => setShowGoalDaysModal(false)} className="text-orange-500 font-bold text-sm">OK</button>
                     </div>
                 </div>
             </div>
@@ -712,8 +712,8 @@ const HabitFormSheet: React.FC<HabitFormSheetProps> = ({ isOpen, onClose, onSave
                         className="w-full bg-[#2c2c2e] text-white p-3 rounded-xl outline-none mb-4 color-scheme-dark"
                     />
                     <div className="flex justify-end gap-6">
-                        <button onClick={() => setShowStartDateModal(false)} className="text-blue-500 font-bold text-sm">Cancel</button>
-                        <button onClick={() => setShowStartDateModal(false)} className="text-blue-500 font-bold text-sm">Confirm</button>
+                        <button onClick={() => setShowStartDateModal(false)} className="text-orange-500 font-bold text-sm">Cancel</button>
+                        <button onClick={() => setShowStartDateModal(false)} className="text-orange-500 font-bold text-sm">Confirm</button>
                     </div>
                 </div>
             </div>

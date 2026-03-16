@@ -126,7 +126,7 @@ const HabitShareModal: React.FC<HabitShareModalProps> = ({ isOpen, onClose, habi
             </button>
             <button 
                 onClick={handleShare}
-                className="bg-blue-600 text-white px-8 py-3 rounded-full font-bold text-sm shadow-lg flex items-center gap-2 hover:bg-blue-700"
+                className="bg-gradient-to-br from-orange-500 to-amber-400 text-white px-8 py-3 rounded-full font-bold text-sm shadow-lg flex items-center gap-2 hover:from-orange-600 hover:to-amber-500"
             >
                 <Share2 size={18} />
                 Share

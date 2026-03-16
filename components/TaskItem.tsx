@@ -15,7 +15,7 @@ const TaskItem: React.FC<TaskItemProps> = ({ task, onToggle, onSelect, selected 
   const priorityColor = {
     [Priority.High]: 'text-red-500',
     [Priority.Medium]: 'text-yellow-500',
-    [Priority.Low]: 'text-blue-500',
+    [Priority.Low]: 'text-orange-500',
     [Priority.None]: 'text-slate-300'
   };
 
@@ -30,7 +30,7 @@ const TaskItem: React.FC<TaskItemProps> = ({ task, onToggle, onSelect, selected 
       onClick={() => onSelect(task.id)}
       className={`
         group flex items-start gap-3 p-3 rounded-lg border-b border-slate-100 cursor-pointer transition-all hover:shadow-md
-        ${selected ? 'bg-blue-50 border-blue-100' : 'bg-white hover:bg-slate-50'}
+        ${selected ? 'bg-orange-50 border-blue-100' : 'bg-white hover:bg-slate-50'}
         ${task.isCompleted ? 'opacity-60' : ''}
       `}
     >
@@ -40,8 +40,8 @@ const TaskItem: React.FC<TaskItemProps> = ({ task, onToggle, onSelect, selected 
           className={`
             w-5 h-5 rounded border-2 flex items-center justify-center transition-colors
             ${task.isCompleted 
-                ? 'bg-blue-500 border-blue-500' 
-                : `border-slate-300 hover:border-blue-500 ${priorityColor[task.priority].replace('text-', 'border-')}`
+                ? 'bg-orange-500 border-orange-500' 
+                : `border-slate-300 hover:border-orange-500 ${priorityColor[task.priority].replace('text-', 'border-')}`
             }
           `}
         >

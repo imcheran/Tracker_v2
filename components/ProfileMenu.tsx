@@ -49,7 +49,7 @@ const ProfileMenu: React.FC<ProfileMenuProps> = ({ user, onClose, onLogout, onLo
                         <div className="w-full space-y-2">
                             <button 
                                 onClick={onSync}
-                                className="w-full py-3 border border-blue-200 dark:border-blue-900/50 bg-blue-50 dark:bg-blue-900/10 rounded-xl text-sm font-bold text-blue-600 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900/30 transition-colors flex items-center justify-center gap-2"
+                                className="w-full py-3 border border-blue-200 dark:border-blue-900/50 bg-orange-50 dark:bg-blue-900/10 rounded-xl text-sm font-bold text-orange-500 dark:text-orange-400 hover:bg-orange-100 dark:hover:bg-blue-900/30 transition-colors flex items-center justify-center gap-2"
                             >
                                 <RefreshCw size={18} />
                                 Sync Now
@@ -65,7 +65,7 @@ const ProfileMenu: React.FC<ProfileMenuProps> = ({ user, onClose, onLogout, onLo
                     ) : (
                         <button 
                             onClick={onLogin}
-                            className="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-sm font-bold shadow-lg shadow-blue-500/30 transition-all active:scale-95 flex items-center justify-center gap-2"
+                            className="w-full py-3 bg-gradient-to-br from-orange-500 to-amber-400 hover:from-orange-600 hover:to-amber-500 text-white rounded-xl text-sm font-bold shadow-lg shadow-orange-500/30 transition-all active:scale-95 flex items-center justify-center gap-2"
                         >
                             <LogIn size={18} />
                             Sign in with Google

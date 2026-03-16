@@ -24,7 +24,7 @@ interface SidebarProps {
 }
 
 const VIEW_COLORS: Record<string, string> = {
-    [ViewType.Inbox]: 'bg-blue-500',
+    [ViewType.Inbox]: 'bg-orange-500',
     [ViewType.Today]: 'bg-orange-500',
     [ViewType.Next7Days]: 'bg-violet-500',
     [ViewType.All]: 'bg-slate-500',
@@ -36,7 +36,7 @@ const VIEW_COLORS: Record<string, string> = {
 };
 
 const TEXT_COLORS: Record<string, string> = {
-    [ViewType.Inbox]: 'text-blue-500',
+    [ViewType.Inbox]: 'text-orange-500',
     [ViewType.Today]: 'text-orange-500',
     [ViewType.Next7Days]: 'text-violet-500',
     [ViewType.All]: 'text-slate-500',
@@ -56,7 +56,7 @@ const Sidebar: React.FC<SidebarProps> = React.memo(({
 
   // Pill style navigation items
   const navItemClass = (view: ViewType | string) => {
-      const activeColor = VIEW_COLORS[view] || 'bg-blue-600';
+      const activeColor = VIEW_COLORS[view] || 'bg-gradient-to-br from-orange-500 to-amber-400';
       const isActive = currentView === view;
       
       return `
@@ -100,7 +100,7 @@ const Sidebar: React.FC<SidebarProps> = React.memo(({
         <div className={`
             fixed md:static inset-y-0 left-0 z-50
             h-full md:h-auto md:rounded-[32px]
-            bg-white dark:bg-slate-950 flex flex-col 
+            bg-white/90 dark:bg-slate-950/95 backdrop-blur-xl flex flex-col 
             transition-transform duration-300 ease-[cubic-bezier(0.2,0.8,0.2,1)]
             w-[85vw] max-w-[280px]
             ${isOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0 md:ml-0'}
@@ -111,7 +111,7 @@ const Sidebar: React.FC<SidebarProps> = React.memo(({
             {/* Header / Branding */}
             <div className="py-6 flex items-center justify-between px-2">
                 <div className="flex items-center gap-4">
-                    <div className="w-11 h-11 bg-blue-600 rounded-2xl flex items-center justify-center text-white shadow-xl shadow-blue-600/20">
+                    <div className="w-11 h-11 bg-gradient-to-br from-orange-500 to-amber-400 rounded-2xl flex items-center justify-center text-white shadow-xl shadow-orange-500/25">
                         <CheckSquare size={24} strokeWidth={2.5} />
                     </div>
                     <span className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">Tracker</span>
@@ -133,7 +133,7 @@ const Sidebar: React.FC<SidebarProps> = React.memo(({
 
             {/* Global Search */}
             <div className="mb-6 mx-1">
-                <div className="bg-slate-100/50 dark:bg-slate-900/50 flex items-center px-4 py-3 rounded-2xl gap-3 focus-within:ring-2 focus-within:ring-blue-500/20 transition-all focus-within:bg-white dark:focus-within:bg-slate-800 shadow-sm border border-transparent focus-within:border-blue-100 dark:focus-within:border-slate-700">
+                <div className="bg-slate-100/50 dark:bg-slate-900/50 flex items-center px-4 py-3 rounded-2xl gap-3 focus-within:ring-2 focus-within:ring-orange-400/30 transition-all focus-within:bg-white dark:focus-within:bg-slate-800 shadow-sm border border-transparent focus-within:border-orange-100 dark:focus-within:border-slate-700">
                     <Search size={18} className="text-slate-400" />
                     <input 
                         id="sidebar-search"
@@ -203,8 +203,8 @@ const Sidebar: React.FC<SidebarProps> = React.memo(({
                 {/* Custom Lists */}
                 <div>
                     <div className="flex items-center justify-between px-4 mb-2 group cursor-pointer" onClick={() => setIsManagingLists(true)}>
-                        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest group-hover:text-blue-600 transition-colors">Lists</span>
-                        <Plus size={14} className="text-slate-400 group-hover:text-blue-600" />
+                        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest group-hover:text-orange-500 transition-colors">Lists</span>
+                        <Plus size={14} className="text-slate-400 group-hover:text-orange-500" />
                     </div>
                     
                     <div className="space-y-1">
@@ -253,9 +253,9 @@ const Sidebar: React.FC<SidebarProps> = React.memo(({
                             value={newListTitle}
                             onChange={(e) => setNewListTitle(e.target.value)}
                             placeholder="New List Name"
-                            className="flex-1 text-sm bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all dark:text-white"
+                            className="flex-1 text-sm bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20 transition-all dark:text-white"
                         />
-                        <button onClick={handleCreateList} disabled={!newListTitle.trim()} className="bg-blue-600 text-white p-3 rounded-xl hover:bg-blue-700 disabled:opacity-50 transition-colors active:scale-95 shadow-lg shadow-blue-500/30">
+                        <button onClick={handleCreateList} disabled={!newListTitle.trim()} className="bg-gradient-to-br from-orange-500 to-amber-400 text-white p-3 rounded-xl hover:from-orange-600 hover:to-amber-500 disabled:opacity-50 transition-colors active:scale-95 shadow-lg shadow-orange-500/30">
                             <Plus size={20} />
                         </button>
                     </div>

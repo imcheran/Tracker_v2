@@ -22,7 +22,7 @@ const KanbanView: React.FC<KanbanViewProps> = ({ tasks, lists, onToggleTask, onS
     switch (p) {
       case Priority.High: return 'text-red-500';
       case Priority.Medium: return 'text-yellow-500';
-      case Priority.Low: return 'text-blue-500';
+      case Priority.Low: return 'text-orange-500';
       default: return 'text-slate-300';
     }
   };

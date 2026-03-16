@@ -377,7 +377,7 @@ const FocusView: React.FC<FocusViewProps> = ({
           <div>
             <h1 className="text-xl font-bold text-slate-800 dark:text-slate-100">Focus</h1>
             {activeTask && (
-              <p className="text-xs text-blue-500 truncate max-w-[200px]">📌 {activeTask.title}</p>
+              <p className="text-xs text-orange-500 truncate max-w-[200px]">📌 {activeTask.title}</p>
             )}
           </div>
         </div>
@@ -461,7 +461,7 @@ const FocusView: React.FC<FocusViewProps> = ({
               className="w-4 h-4 accent-blue-500"
             />
             <span className="text-xs text-slate-600 dark:text-slate-300">Desktop notifications</span>
-            {notificationsEnabled ? <Bell size={13} className="text-blue-500" /> : <BellOff size={13} className="text-slate-400" />}
+            {notificationsEnabled ? <Bell size={13} className="text-orange-500" /> : <BellOff size={13} className="text-slate-400" />}
           </label>
         </div>
       )}
@@ -477,7 +477,7 @@ const FocusView: React.FC<FocusViewProps> = ({
               <div className="flex items-center justify-between mb-2">
                 <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide">Category</span>
                 <button onClick={() => { resetCatForm(); setShowNewCategory(true); }}
-                  className="flex items-center gap-1 text-xs text-blue-500 hover:text-blue-600 font-medium">
+                  className="flex items-center gap-1 text-xs text-orange-500 hover:text-orange-500 font-medium">
                   <Plus size={13} /> New
                 </button>
               </div>
@@ -519,7 +519,7 @@ const FocusView: React.FC<FocusViewProps> = ({
                     {ICON_OPTIONS.map(ic => (
                       <button key={ic} onClick={() => setNewCatIcon(ic)}
                         className={`text-xl p-1.5 rounded-lg transition-all ${
-                          newCatIcon === ic ? 'bg-blue-100 dark:bg-blue-900/40 ring-2 ring-blue-400 scale-110' : 'hover:bg-slate-100 dark:hover:bg-slate-700'
+                          newCatIcon === ic ? 'bg-orange-100 dark:bg-orange-900/40 ring-2 ring-blue-400 scale-110' : 'hover:bg-slate-100 dark:hover:bg-slate-700'
                         }`}>{ic}</button>
                     ))}
                   </div>
@@ -542,7 +542,7 @@ const FocusView: React.FC<FocusViewProps> = ({
                         <button key={m} onClick={() => setNewCatMode(m)}
                           className={`flex-1 py-1.5 text-xs rounded-xl font-medium transition-all ${
                             newCatMode === m
-                              ? 'bg-blue-500 text-white'
+                              ? 'bg-orange-500 text-white'
                               : 'bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300'
                           }`}>
                           {m === 'pomo' ? '🍅 Pomodoro' : '⏱ Stopwatch'}
@@ -563,7 +563,7 @@ const FocusView: React.FC<FocusViewProps> = ({
                 </div>
                 <div className="flex gap-2">
                   <button onClick={handleSaveCategory}
-                    className="flex-1 bg-blue-500 hover:bg-blue-600 text-white py-2 rounded-xl text-sm font-semibold transition-all">
+                    className="flex-1 bg-orange-500 hover:bg-gradient-to-br from-orange-500 to-amber-400 text-white py-2 rounded-xl text-sm font-semibold transition-all">
                     {editCategoryId ? 'Save Changes' : 'Add Category'}
                   </button>
                   <button onClick={resetCatForm}
@@ -729,7 +729,7 @@ const FocusView: React.FC<FocusViewProps> = ({
                   <button key={s.id} onClick={() => setAmbientSound(s.id)}
                     className={`flex-shrink-0 flex items-center gap-1.5 px-3 py-2 rounded-xl border-2 text-xs font-medium transition-all ${
                       ambientSound === s.id
-                        ? 'bg-blue-500 border-blue-500 text-white'
+                        ? 'bg-orange-500 border-orange-500 text-white'
                         : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:border-blue-300'
                     }`}>
                     {s.icon} {s.label}
@@ -804,7 +804,7 @@ const FocusView: React.FC<FocusViewProps> = ({
                       <span className="text-xs text-slate-400">{mins > 0 ? `${mins}m` : ''}</span>
                       <div className="w-full rounded-t-lg transition-all"
                         style={{ height: h, background: isToday ? '#3b82f6' : '#93c5fd', opacity: isToday ? 1 : 0.7 }} />
-                      <span className={`text-xs font-medium ${isToday ? 'text-blue-500' : 'text-slate-400'}`}>
+                      <span className={`text-xs font-medium ${isToday ? 'text-orange-500' : 'text-slate-400'}`}>
                         {['S','M','T','W','T','F','S'][d.getDay()]}
                       </span>
                     </div>

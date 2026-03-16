@@ -139,7 +139,7 @@ const CalendarView: React.FC<CalendarViewProps> = ({
     switch (p) {
       case Priority.High: return 'text-red-500';
       case Priority.Medium: return 'text-yellow-500';
-      case Priority.Low: return 'text-blue-500';
+      case Priority.Low: return 'text-orange-500';
       default: return 'text-slate-300 dark:text-slate-600';
     }
   };
@@ -150,7 +150,7 @@ const CalendarView: React.FC<CalendarViewProps> = ({
       switch (task.priority) {
           case Priority.High: return { bg: 'bg-red-50 dark:bg-red-900/20', border: 'border-l-4 border-red-500', text: 'text-red-900 dark:text-red-100' };
           case Priority.Medium: return { bg: 'bg-yellow-50 dark:bg-yellow-900/20', border: 'border-l-4 border-yellow-500', text: 'text-yellow-900 dark:text-yellow-100' };
-          default: return { bg: 'bg-blue-50 dark:bg-blue-900/20', border: 'border-l-4 border-blue-500', text: 'text-blue-900 dark:text-blue-100' };
+          default: return { bg: 'bg-orange-50 dark:bg-orange-900/20', border: 'border-l-4 border-orange-500', text: 'text-blue-900 dark:text-blue-100' };
       }
   };
 
@@ -272,7 +272,7 @@ const CalendarView: React.FC<CalendarViewProps> = ({
                               </div>
                               <div className="space-y-1 overflow-hidden flex-1 px-0.5">
                                   {dayTasks.slice(0, 3).map(t => (
-                                      <div key={t.id} className={`text-[8px] px-1.5 py-0.5 rounded-md truncate leading-tight ${t.isEvent ? 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300 border-l-2 border-indigo-500' : 'text-slate-700 dark:text-slate-300 bg-blue-50/50 dark:bg-blue-900/30 border-l-2 border-blue-400 dark:border-blue-500'} ${t.isCompleted ? 'opacity-50 line-through' : ''}`}>{t.title}</div>
+                                      <div key={t.id} className={`text-[8px] px-1.5 py-0.5 rounded-md truncate leading-tight ${t.isEvent ? 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300 border-l-2 border-indigo-500' : 'text-slate-700 dark:text-slate-300 bg-orange-50/50 dark:bg-orange-900/30 border-l-2 border-orange-400 dark:border-orange-500'} ${t.isCompleted ? 'opacity-50 line-through' : ''}`}>{t.title}</div>
                                   ))}
                                   {dayHabits.slice(0, 1).map(h => (
                                       <div key={h.id} className="text-[8px] px-1.5 py-0.5 rounded-md truncate flex items-center gap-1 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-400 leading-tight border-l-2 border-emerald-500"><span className="opacity-80 text-[8px]">{h.icon}</span>{h.name}</div>
@@ -360,7 +360,7 @@ const CalendarView: React.FC<CalendarViewProps> = ({
                                   return (
                                       <div key={day.toString()} className="bg-white dark:bg-slate-900 p-1 min-h-[30px] flex flex-col gap-1">
                                           {allDayTasks.map(task => (
-                                              <div key={task.id} onClick={() => onSelectTask(task.id)} className={`text-[9px] px-1.5 py-0.5 rounded truncate font-medium cursor-pointer ${task.isEvent ? 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300' : 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300'} ${task.isCompleted ? 'opacity-50 line-through' : ''}`}>{task.title}</div>
+                                              <div key={task.id} onClick={() => onSelectTask(task.id)} className={`text-[9px] px-1.5 py-0.5 rounded truncate font-medium cursor-pointer ${task.isEvent ? 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300' : 'bg-orange-100 text-blue-700 dark:bg-orange-900/30 dark:text-orange-300'} ${task.isCompleted ? 'opacity-50 line-through' : ''}`}>{task.title}</div>
                                           ))}
                                       </div>
                                   );

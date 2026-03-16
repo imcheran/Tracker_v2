@@ -722,7 +722,7 @@ const FinanceView: React.FC<FinanceViewProps> = ({
                       <button 
                         onClick={handleSmsSync} 
                         disabled={isReadingSms}
-                        className="p-3 bg-blue-50 text-blue-600 rounded-[20px] hover:bg-blue-100 transition-colors"
+                        className="p-3 bg-orange-50 text-orange-500 rounded-[20px] hover:bg-orange-100 transition-colors"
                       >
                           {isReadingSms ? <Loader2 size={20} className="animate-spin"/> : <MessageSquare size={20} />}
                       </button>
@@ -749,7 +749,7 @@ const FinanceView: React.FC<FinanceViewProps> = ({
                                           <div className="font-bold text-slate-800 dark:text-white text-sm truncate">{t.merchant}</div>
                                           <div className="text-[11px] text-slate-400 font-bold mt-0.5">{t.category}</div>
                                           {t.personalShare !== undefined && t.personalShare !== t.amount && (
-                                              <div className="text-[10px] text-blue-500 font-bold mt-0.5 flex items-center gap-1">
+                                              <div className="text-[10px] text-orange-500 font-bold mt-0.5 flex items-center gap-1">
                                                   <Split size={10} /> My share: {formatCurrency(t.personalShare)}
                                               </div>
                                           )}
@@ -864,7 +864,7 @@ const FinanceView: React.FC<FinanceViewProps> = ({
           <div>
               <div className="flex justify-between items-center mb-4 px-2">
                   <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest">Subscriptions</h3>
-                  <button onClick={() => setShowSubModal(true)} className="p-2 bg-slate-100 dark:bg-slate-800 rounded-full text-slate-500 hover:text-blue-500 transition-colors">
+                  <button onClick={() => setShowSubModal(true)} className="p-2 bg-slate-100 dark:bg-slate-800 rounded-full text-slate-500 hover:text-orange-500 transition-colors">
                       <Plus size={16} />
                   </button>
               </div>
@@ -873,7 +873,7 @@ const FinanceView: React.FC<FinanceViewProps> = ({
                   {subscriptions.map(sub => (
                       <div key={sub.id} className="bg-white dark:bg-slate-900 p-4 rounded-[24px] border border-slate-100 dark:border-slate-800 flex items-center justify-between shadow-sm relative group">
                           <div className="flex items-center gap-3">
-                              <div className="w-10 h-10 bg-blue-50 dark:bg-blue-900/20 text-blue-500 rounded-2xl flex items-center justify-center">
+                              <div className="w-10 h-10 bg-orange-50 dark:bg-orange-900/20 text-orange-500 rounded-2xl flex items-center justify-center">
                                   <RefreshCw size={18} />
                               </div>
                               <div>
@@ -1018,7 +1018,7 @@ const FinanceView: React.FC<FinanceViewProps> = ({
                                             placeholder="0.00" 
                                             className="w-full bg-slate-50 dark:bg-slate-800 pl-10 pr-20 py-4 rounded-[24px] outline-none text-2xl font-black text-slate-900 dark:text-white placeholder-slate-300 focus:ring-2 focus:ring-[#6B4DFF]/20 transition-all"
                                         />
-                                        <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[10px] font-bold text-blue-500 uppercase pointer-events-none bg-slate-50 dark:bg-slate-800 pl-1">My Share</span>
+                                        <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[10px] font-bold text-orange-500 uppercase pointer-events-none bg-slate-50 dark:bg-slate-800 pl-1">My Share</span>
                                     </div>
                                 )}
                             </div>
@@ -1027,7 +1027,7 @@ const FinanceView: React.FC<FinanceViewProps> = ({
                                 <div className="flex justify-end px-1">
                                     <button 
                                         onClick={() => setIsSplit(!isSplit)}
-                                        className={`text-xs font-bold px-3 py-1.5 rounded-full flex items-center gap-1.5 transition-colors ${isSplit ? 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400' : 'text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'}`}
+                                        className={`text-xs font-bold px-3 py-1.5 rounded-full flex items-center gap-1.5 transition-colors ${isSplit ? 'bg-orange-100 text-orange-500 dark:bg-orange-900/30 dark:text-orange-400' : 'text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'}`}
                                     >
                                         <Split size={14} /> 
                                         {isSplit ? "Split Active" : "Split Bill"}

@@ -39,7 +39,7 @@ const ShareModal: React.FC<ShareModalProps> = ({ isOpen, onClose, collaborators,
           </div>
           <button 
             onClick={onClose}
-            className="px-4 py-2 text-sm font-bold text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-full transition-colors"
+            className="px-4 py-2 text-sm font-bold text-orange-500 hover:bg-orange-50 dark:hover:bg-blue-900/30 rounded-full transition-colors"
           >
             Save
           </button>
@@ -60,7 +60,7 @@ const ShareModal: React.FC<ShareModalProps> = ({ isOpen, onClose, collaborators,
 
           {collaborators.map((email) => (
             <div key={email} className="flex items-center gap-4 px-4 py-3 group">
-              <div className="w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-blue-600 dark:text-blue-400">
+              <div className="w-10 h-10 rounded-full bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center text-orange-500 dark:text-orange-400">
                 <Mail size={18} />
               </div>
               <div className="flex-1 min-w-0">
@@ -91,7 +91,7 @@ const ShareModal: React.FC<ShareModalProps> = ({ isOpen, onClose, collaborators,
             {emailInput && (
               <button 
                 onClick={handleAdd}
-                className="p-2 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-full"
+                className="p-2 text-orange-500 dark:text-orange-400 hover:bg-orange-50 dark:hover:bg-blue-900/30 rounded-full"
               >
                 <Check size={20} />
               </button>
