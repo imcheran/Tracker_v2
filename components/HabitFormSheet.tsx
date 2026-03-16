@@ -236,7 +236,7 @@ const HabitFormSheet: React.FC<HabitFormSheetProps> = ({ isOpen, onClose, onSave
                         <span className="text-lg font-bold ml-2">Gallery</span>
                     </div>
                     <div className="flex items-center gap-2 text-slate-400">
-                        <button onClick={() => { resetData(); setStep('basics'); }} className="p-2 bg-gradient-to-br from-orange-500 to-amber-400/20 text-orange-500 hover:bg-gradient-to-br from-orange-500 to-amber-400/30 rounded-full"><Plus size={20}/></button>
+                        <button onClick={() => { resetData(); setStep('basics'); }} className="p-2 bg-gradient-to-br from-indigo-500 to-purple-500/20 text-indigo-500 hover:bg-gradient-to-br from-orange-500 to-amber-400/30 rounded-full"><Plus size={20}/></button>
                     </div>
                 </div>
             </div>
@@ -248,7 +248,7 @@ const HabitFormSheet: React.FC<HabitFormSheetProps> = ({ isOpen, onClose, onSave
                         onClick={() => setSelectedCategory(cat)}
                         className={`text-sm font-bold whitespace-nowrap cursor-pointer pb-2 border-b-2 transition-colors ${
                             selectedCategory === cat 
-                            ? 'text-white border-orange-500' 
+                            ? 'text-white border-indigo-500' 
                             : 'text-slate-500 border-transparent hover:text-slate-400'
                         }`}
                     >
@@ -326,7 +326,7 @@ const HabitFormSheet: React.FC<HabitFormSheetProps> = ({ isOpen, onClose, onSave
                                 <button
                                     key={i}
                                     onClick={() => setIcon(i)}
-                                    className={`w-10 h-10 rounded-full flex items-center justify-center text-xl transition-all ${icon === i ? 'bg-slate-700 scale-110 ring-2 ring-orange-500' : 'bg-slate-900 hover:bg-slate-700'}`}
+                                    className={`w-10 h-10 rounded-full flex items-center justify-center text-xl transition-all ${icon === i ? 'bg-slate-700 scale-110 ring-2 ring-indigo-500' : 'bg-slate-900 hover:bg-slate-700'}`}
                                 >
                                     {i}
                                 </button>
@@ -365,7 +365,7 @@ const HabitFormSheet: React.FC<HabitFormSheetProps> = ({ isOpen, onClose, onSave
                 <button 
                     onClick={() => setStep('settings')}
                     disabled={!name}
-                    className="w-full py-3 bg-orange-500 disabled:bg-slate-700 disabled:text-slate-500 text-white font-bold rounded-full shadow-lg hover:bg-orange-600 transition-colors"
+                    className="w-full py-3 bg-indigo-500 disabled:bg-slate-700 disabled:text-slate-500 text-white font-bold rounded-full shadow-lg hover:bg-orange-600 transition-colors"
                 >
                     Next
                 </button>
@@ -417,7 +417,7 @@ const HabitFormSheet: React.FC<HabitFormSheetProps> = ({ isOpen, onClose, onSave
                             className={`pb-2 text-xs font-bold uppercase transition-colors relative ${frequencyType === f ? 'text-orange-500' : 'text-slate-500 hover:text-slate-300'}`}
                         >
                             {f}
-                            {frequencyType === f && <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-orange-500 rounded-full"/>}
+                            {frequencyType === f && <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-indigo-500 rounded-full"/>}
                         </button>
                     ))}
                 </div>

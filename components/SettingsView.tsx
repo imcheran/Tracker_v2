@@ -27,7 +27,7 @@ const SettingsView: React.FC<SettingsViewProps> = ({
 
   // Fixed SectionHeader to correctly handle React children
   const SectionHeader: React.FC<{ children: React.ReactNode }> = ({ children }) => (
-    <h2 className="px-6 pt-6 pb-2 text-[11px] font-bold text-orange-500 dark:text-orange-400 uppercase tracking-widest">
+    <h2 className="px-6 pt-6 pb-2 text-[11px] font-bold text-indigo-500 dark:text-orange-400 uppercase tracking-widest">
       {children}
     </h2>
   );
@@ -55,7 +55,7 @@ const SettingsView: React.FC<SettingsViewProps> = ({
   const Switch = ({ checked, onChange }: { checked: boolean, onChange: (val: boolean) => void }) => (
       <button 
         onClick={() => onChange(!checked)}
-        className={`w-12 h-6 rounded-full relative transition-colors duration-200 focus:outline-none ${checked ? 'bg-gradient-to-br from-orange-500 to-amber-400' : 'bg-slate-300 dark:bg-slate-700'}`}
+        className={`w-12 h-6 rounded-full relative transition-colors duration-200 focus:outline-none ${checked ? 'bg-gradient-to-br from-indigo-500 to-purple-500' : 'bg-slate-300 dark:bg-slate-700'}`}
       >
           <div className={`absolute top-1 left-1 w-4 h-4 bg-white rounded-full transition-transform duration-200 ${checked ? 'translate-x-6' : 'translate-x-0 shadow-sm'}`} />
       </button>

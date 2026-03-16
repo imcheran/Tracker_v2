@@ -50,7 +50,7 @@ type FilterMode = 'all' | 'pinned' | 'favorites' | 'archived' | 'locked' | 'tagg
 const NOTE_COLORS = [
   { label: 'Default',  value: 'bg-white dark:bg-slate-800',          border: 'border-slate-200 dark:border-slate-700' },
   { label: 'Rose',     value: 'bg-rose-50 dark:bg-rose-950',          border: 'border-rose-200 dark:border-rose-800' },
-  { label: 'Orange',   value: 'bg-orange-50 dark:bg-orange-950',      border: 'border-orange-200 dark:border-orange-800' },
+  { label: 'Orange',   value: 'bg-indigo-50 dark:bg-orange-950',      border: 'border-indigo-200 dark:border-orange-800' },
   { label: 'Amber',    value: 'bg-amber-50 dark:bg-amber-950',        border: 'border-amber-200 dark:border-amber-800' },
   { label: 'Green',    value: 'bg-green-50 dark:bg-green-950',        border: 'border-green-200 dark:border-green-800' },
   { label: 'Teal',     value: 'bg-teal-50 dark:bg-teal-950',          border: 'border-teal-200 dark:border-teal-800' },
@@ -317,7 +317,7 @@ const NoteEditor: React.FC<EditorProps> = ({ note, folders, onSave, onClose, onD
             <button onClick={() => toggleProp('isPinned')} title="Pin"
               className="p-1.5 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors">
               {draft.isPinned
-                ? <Pin size={16} className="text-orange-500" />
+                ? <Pin size={16} className="text-indigo-500" />
                 : <PinOff size={16} className="text-slate-400" />}
             </button>
             {/* Color */}
@@ -330,7 +330,7 @@ const NoteEditor: React.FC<EditorProps> = ({ note, folders, onSave, onClose, onD
                 <div className="absolute right-0 top-9 z-50 flex flex-wrap gap-2 p-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-xl w-52">
                   {NOTE_COLORS.map(c => (
                     <button key={c.value} onClick={() => setColor(c.value)} title={c.label}
-                      className={`w-7 h-7 rounded-full border-2 ${c.value} ${draft.color === c.value ? 'border-orange-500 scale-110' : c.border} transition-transform hover:scale-110`} />
+                      className={`w-7 h-7 rounded-full border-2 ${c.value} ${draft.color === c.value ? 'border-indigo-500 scale-110' : c.border} transition-transform hover:scale-110`} />
                   ))}
                 </div>
               )}
@@ -424,7 +424,7 @@ const NoteEditor: React.FC<EditorProps> = ({ note, folders, onSave, onClose, onD
           <div className="flex flex-wrap gap-1.5 px-4 py-2 border-b border-slate-200 dark:border-slate-700">
             {draft.tags.map(tag => (
               <span key={tag}
-                className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-orange-100 dark:bg-blue-900/50 text-blue-700 dark:text-orange-300 text-xs font-medium">
+                className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-indigo-100 dark:bg-blue-900/50 text-blue-700 dark:text-orange-300 text-xs font-medium">
                 #{tag}
                 <button onClick={() => removeTag(tag)} className="hover:text-red-500">
                   <X size={10} />
@@ -705,7 +705,7 @@ const FolderManager: React.FC<FolderManagerProps> = ({ folders, onAddFolder, onD
             />
             <button
               onClick={handleAdd}
-              className="px-3 py-2 rounded-lg bg-orange-500 hover:bg-gradient-to-br from-orange-500 to-amber-400 text-white text-sm font-medium transition-colors"
+              className="px-3 py-2 rounded-lg bg-indigo-500 hover:bg-gradient-to-br from-indigo-500 to-purple-500 text-white text-sm font-medium transition-colors"
             >Add</button>
           </div>
           {/* Icon picker */}
@@ -725,7 +725,7 @@ const FolderManager: React.FC<FolderManagerProps> = ({ folders, onAddFolder, onD
                 key={c}
                 onClick={() => setColor(c)}
                 style={{ background: c }}
-                className={`w-6 h-6 rounded-full transition-transform ${color === c ? 'scale-125 ring-2 ring-offset-2 ring-orange-500' : 'hover:scale-110'}`}
+                className={`w-6 h-6 rounded-full transition-transform ${color === c ? 'scale-125 ring-2 ring-offset-2 ring-indigo-500' : 'hover:scale-110'}`}
               />
             ))}
           </div>

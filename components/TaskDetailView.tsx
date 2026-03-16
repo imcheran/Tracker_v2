@@ -246,7 +246,7 @@ const TaskDetailView: React.FC<TaskDetailViewProps> = ({
       switch (p) {
           case Priority.High: return 'text-red-500';
           case Priority.Medium: return 'text-amber-500';
-          case Priority.Low: return 'text-orange-500';
+          case Priority.Low: return 'text-indigo-500';
           default: return 'text-slate-400';
       }
   };
@@ -256,7 +256,7 @@ const TaskDetailView: React.FC<TaskDetailViewProps> = ({
       switch (p) {
           case Priority.High: return 'border-red-500';
           case Priority.Medium: return 'border-amber-500';
-          case Priority.Low: return 'border-orange-500';
+          case Priority.Low: return 'border-indigo-500';
           default: return 'border-transparent';
       }
   };
@@ -312,7 +312,7 @@ const TaskDetailView: React.FC<TaskDetailViewProps> = ({
                  </button>
              </div>
              <div className="flex items-center gap-1 bg-black/5 dark:bg-white/5 backdrop-blur-md rounded-full p-1 pr-2">
-                 <button onClick={() => handleSave({ isPinned: !task.isPinned })} className={`p-2.5 rounded-full transition-colors ${task.isPinned ? 'text-orange-500 bg-orange-100' : iconColorClass}`}>
+                 <button onClick={() => handleSave({ isPinned: !task.isPinned })} className={`p-2.5 rounded-full transition-colors ${task.isPinned ? 'text-orange-500 bg-indigo-100' : iconColorClass}`}>
                      <Pin size={18} fill={task.isPinned ? 'currentColor' : 'none'} className={task.isPinned ? 'rotate-45' : ''} />
                  </button>
                  <button className={`p-2.5 rounded-full transition-colors ${iconColorClass}`}>
@@ -351,7 +351,7 @@ const TaskDetailView: React.FC<TaskDetailViewProps> = ({
               <div className="flex flex-wrap gap-2 pl-11">
                   {/* Date Chip */}
                   <div className="relative group">
-                      <button className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all border ${task.dueDate ? 'bg-orange-50 text-orange-500 border-blue-200' : 'bg-transparent border-slate-300/50 text-slate-500 hover:bg-black/5'}`}>
+                      <button className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all border ${task.dueDate ? 'bg-indigo-50 text-orange-500 border-blue-200' : 'bg-transparent border-slate-300/50 text-slate-500 hover:bg-black/5'}`}>
                           <Calendar size={14} />
                           {formatDueDate(task.dueDate)}
                       </button>
@@ -529,7 +529,7 @@ const TaskDetailView: React.FC<TaskDetailViewProps> = ({
                 <div className="flex gap-3 overflow-x-auto no-scrollbar pb-1">
                     {NOTE_THEMES.map(t => (
                         <button key={t.id} onClick={() => { setNoteTheme(t.id); handleSave({ backgroundImage: t.id }); }} className={`flex flex-col items-center gap-1.5 shrink-0 group`}>
-                            <div className={`w-14 h-14 rounded-2xl flex items-center justify-center text-xl border-2 transition-all overflow-hidden relative ${noteTheme === t.id ? 'border-orange-500 ring-2 ring-orange-500/20' : 'border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800'}`}>
+                            <div className={`w-14 h-14 rounded-2xl flex items-center justify-center text-xl border-2 transition-all overflow-hidden relative ${noteTheme === t.id ? 'border-orange-500 ring-2 ring-indigo-500/20' : 'border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800'}`}>
                                 {t.id === 'none' ? <X size={20} className="text-slate-400" /> : (
                                     <>
                                         <NoteBackground themeId={t.id} isDark={isDarkMode} className="scale-[0.5]" />

@@ -189,7 +189,7 @@ const HabitDetailView: React.FC<HabitDetailViewProps> = ({
                                       w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold transition-all relative
                                       ${isSelected ? 'ring-2 ring-white ring-offset-2 ring-offset-[#1c1c1e]' : ''}
                                       ${isCompleted 
-                                        ? 'bg-gradient-to-br from-orange-500 to-amber-400 text-white' 
+                                        ? 'bg-gradient-to-br from-indigo-500 to-purple-500 text-white' 
                                         : 'text-slate-400 hover:bg-white/5'
                                       }
                                       ${isFuture ? 'opacity-30 cursor-default' : ''}
@@ -232,7 +232,7 @@ const HabitDetailView: React.FC<HabitDetailViewProps> = ({
               </div>
               <div className="bg-[#1c1c1e] p-4 rounded-2xl">
                   <div className="flex items-center gap-2 mb-2">
-                      <div className="w-5 h-5 rounded-full bg-orange-500/20 text-orange-500 flex items-center justify-center"><CalendarIcon size={12} /></div>
+                      <div className="w-5 h-5 rounded-full bg-indigo-500/20 text-indigo-500 flex items-center justify-center"><CalendarIcon size={12} /></div>
                       <span className="text-xs text-slate-400">Total check-ins</span>
                   </div>
                   <div className="flex items-baseline gap-1">
@@ -242,7 +242,7 @@ const HabitDetailView: React.FC<HabitDetailViewProps> = ({
               </div>
               <div className="bg-[#1c1c1e] p-4 rounded-2xl">
                   <div className="flex items-center gap-2 mb-2">
-                      <div className="w-5 h-5 rounded-full bg-orange-500/20 text-orange-500 flex items-center justify-center"><Activity size={12} /></div>
+                      <div className="w-5 h-5 rounded-full bg-indigo-500/20 text-orange-500 flex items-center justify-center"><Activity size={12} /></div>
                       <span className="text-xs text-slate-400">Monthly check-in rate</span>
                   </div>
                   <div className="flex items-baseline gap-1">
@@ -346,7 +346,7 @@ const HabitDetailView: React.FC<HabitDetailViewProps> = ({
                         <div className="text-center text-slate-400 font-medium mb-6">{format(selectedDate, 'EEE, MMM d')}</div>
                         <div className="space-y-4 mb-8">
                             <label className="flex items-center gap-3 cursor-pointer group">
-                                <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center ${logStatus === 'achieved' ? 'border-orange-500' : 'border-slate-600'}`}>
+                                <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center ${logStatus === 'achieved' ? 'border-indigo-500' : 'border-slate-600'}`}>
                                     {logStatus === 'achieved' && <div className="w-3 h-3 bg-orange-500 rounded-full"/>}
                                 </div>
                                 <span className="text-white font-medium">Achieved</span>

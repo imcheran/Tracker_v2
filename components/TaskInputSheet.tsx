@@ -431,7 +431,7 @@ const TaskInputSheet: React.FC<TaskInputSheetProps> = ({ isOpen, onClose, onAddT
           <div className="bg-white dark:bg-slate-950 border-b border-slate-100 dark:border-slate-800 py-3 flex items-center justify-center gap-2">
               <Clock size={16} className="text-slate-400" />
               <span className="text-xs font-bold text-slate-500 uppercase tracking-wide">Duration:</span>
-              <span className="text-lg font-bold text-orange-500 dark:text-orange-400">{durationText}</span>
+              <span className="text-lg font-bold text-indigo-500 dark:text-orange-400">{durationText}</span>
           </div>
 
           <div className="flex-1 flex divide-x divide-slate-200 dark:divide-slate-800">
@@ -461,7 +461,7 @@ const TaskInputSheet: React.FC<TaskInputSheetProps> = ({ isOpen, onClose, onAddT
           <div className="p-3 bg-white dark:bg-slate-950 border-t border-slate-100 dark:border-slate-800 flex justify-center">
                <button 
                   onClick={() => setIsAllDay(!isAllDay)}
-                  className={`px-4 py-2 rounded-full text-sm font-bold transition-colors ${isAllDay ? 'bg-orange-100 text-orange-500 dark:bg-blue-900 dark:text-orange-300' : 'bg-slate-100 dark:bg-slate-800 text-slate-500'}`}
+                  className={`px-4 py-2 rounded-full text-sm font-bold transition-colors ${isAllDay ? 'bg-indigo-100 text-orange-500 dark:bg-blue-900 dark:text-orange-300' : 'bg-slate-100 dark:bg-slate-800 text-slate-500'}`}
                >
                    {isAllDay ? "All Day Task" : "Specific Time"}
                </button>
@@ -486,7 +486,7 @@ const TaskInputSheet: React.FC<TaskInputSheetProps> = ({ isOpen, onClose, onAddT
             <div className="flex items-center justify-between px-4 pt-4 pb-2 shrink-0 border-b border-slate-50 dark:border-slate-800">
                  <button onClick={() => togglePicker('none')} className="p-2 -ml-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"><X size={24}/></button>
                  <div className="flex gap-6 font-bold text-sm">
-                     <button onClick={() => setDateTab('date')} className={`pb-2 border-b-2 transition-colors ${dateTab === 'date' ? 'border-orange-500 text-slate-800 dark:text-white' : 'border-transparent text-slate-400'}`}>Date</button>
+                     <button onClick={() => setDateTab('date')} className={`pb-2 border-b-2 transition-colors ${dateTab === 'date' ? 'border-indigo-500 text-slate-800 dark:text-white' : 'border-transparent text-slate-400'}`}>Date</button>
                      <button onClick={() => setDateTab('time')} className={`pb-2 border-b-2 transition-colors ${dateTab === 'time' ? 'border-orange-500 text-slate-800 dark:text-white' : 'border-transparent text-slate-400'}`}>Time</button>
                  </div>
                  <button onClick={() => togglePicker('none')} className="p-2 -mr-2 text-orange-500 hover:text-orange-500"><Check size={24}/></button>
@@ -496,7 +496,7 @@ const TaskInputSheet: React.FC<TaskInputSheetProps> = ({ isOpen, onClose, onAddT
                 <div className="flex-1 overflow-y-auto custom-scrollbar px-4 pb-4">
                     <div className="grid grid-cols-4 gap-4 mb-8 mt-4">
                         <button onClick={() => setQuickDate(today)} className="flex flex-col items-center gap-2 group">
-                            <div className="w-10 h-10 bg-orange-50 dark:bg-orange-900/20 rounded-lg flex flex-col items-center justify-center text-orange-500 border border-orange-100 dark:border-orange-900 group-hover:bg-orange-100 dark:group-hover:bg-orange-900/40 transition-colors">
+                            <div className="w-10 h-10 bg-indigo-50 dark:bg-orange-900/20 rounded-lg flex flex-col items-center justify-center text-orange-500 border border-indigo-100 dark:border-orange-900 group-hover:bg-orange-100 dark:group-hover:bg-indigo-900/40 transition-colors">
                                 <span className="text-[9px] font-bold uppercase mt-0.5">{format(today, 'MMM')}</span>
                                 <span className="text-sm font-bold -mt-0.5">{format(today, 'd')}</span>
                             </div>
@@ -554,7 +554,7 @@ const TaskInputSheet: React.FC<TaskInputSheetProps> = ({ isOpen, onClose, onAddT
                                             onClick={() => setDueDate(day)}
                                             className={`
                                                 w-9 h-9 rounded-full flex items-center justify-center text-sm font-medium transition-all
-                                                ${isSelected ? 'bg-gradient-to-br from-orange-500 to-amber-400 text-white shadow-md' : (isCurrentMonth ? 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800' : 'text-slate-300 dark:text-slate-600')}
+                                                ${isSelected ? 'bg-gradient-to-br from-indigo-500 to-purple-500 text-white shadow-md' : (isCurrentMonth ? 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800' : 'text-slate-300 dark:text-slate-600')}
                                                 ${isTodayDate && !isSelected ? 'text-orange-500 dark:text-orange-400 font-bold bg-orange-50 dark:bg-orange-900/20' : ''}
                                             `}
                                         >

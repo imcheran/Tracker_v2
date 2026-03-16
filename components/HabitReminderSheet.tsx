@@ -42,7 +42,7 @@ export const HabitReminderSheet: React.FC<HabitReminderSheetProps> = ({ habit, o
             
             {/* Header */}
             <div className="flex justify-between items-start p-5">
-                <span className="text-sm font-medium text-orange-500 mt-2 ml-2">
+                <span className="text-sm font-medium text-indigo-500 mt-2 ml-2">
                     {format(new Date(), 'EEE, MMM d')}
                 </span>
                 
@@ -124,7 +124,7 @@ export const HabitReminderSheet: React.FC<HabitReminderSheetProps> = ({ habit, o
                     </button>
                     <button 
                         onClick={() => { onCheckIn(); onClose(); }}
-                        className="flex-1 py-3 text-orange-500 hover:bg-orange-50 rounded-lg transition-colors"
+                        className="flex-1 py-3 text-orange-500 hover:bg-indigo-50 rounded-lg transition-colors"
                         style={{ color: habit.color }}
                     >
                         Check In

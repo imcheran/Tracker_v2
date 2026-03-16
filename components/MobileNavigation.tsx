@@ -12,7 +12,7 @@ interface MobileNavigationProps {
 export const MobileNavigation: React.FC<MobileNavigationProps> = React.memo(
   ({ currentView, onChangeView, onMenuClick }) => {
     const navItems = [
-      { id: ViewType.Inbox,    icon: Layers,   label: 'Tasks',    activeClass: 'from-orange-500 to-amber-400',  glowClass: 'shadow-orange-400/40'  },
+      { id: ViewType.Inbox,    icon: Layers,   label: 'Tasks',    activeClass: 'from-indigo-500 to-purple-500',  glowClass: 'shadow-indigo-400/40'  },
       { id: ViewType.Calendar, icon: Calendar, label: 'Calendar', activeClass: 'from-teal-500 to-cyan-400',     glowClass: 'shadow-teal-400/40'    },
       { id: ViewType.Focus,    icon: Clock,    label: 'Focus',    activeClass: 'from-violet-500 to-purple-400', glowClass: 'shadow-violet-400/40'  },
     ];

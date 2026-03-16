@@ -51,7 +51,7 @@ const mergeArrays = <T extends { id: string; updatedAt?: Date | string }>(local:
 const LoadingFallback: React.FC = () => (
   <div className="flex-1 flex flex-col items-center justify-center h-full gap-3
     bg-white dark:bg-[#0f0f1a] rounded-[28px]">
-    <div className="w-10 h-10 rounded-full border-2 border-orange-500/20 border-t-orange-500
+    <div className="w-10 h-10 rounded-full border-2 border-indigo-500/20 border-t-orange-500
       animate-spin" />
     <p className="text-sm text-slate-400 dark:text-slate-500 font-medium animate-pulse">
       Loading…

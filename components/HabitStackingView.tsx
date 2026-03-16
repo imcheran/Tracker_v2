@@ -59,7 +59,7 @@ export const HabitStackingView: React.FC<HabitStackingViewProps> = ({
   if (activeRoutine && currentHabit) {
     const progress = ((currentIdx) / activeRoutine.habitIds.length) * 100;
     return (
-      <div className="fixed inset-0 z-60 flex flex-col items-center justify-center bg-gradient-to-br from-orange-500 to-amber-400 p-6">
+      <div className="fixed inset-0 z-60 flex flex-col items-center justify-center bg-gradient-to-br from-indigo-500 to-purple-500 p-6">
         <div className="w-full max-w-sm text-center text-white space-y-6">
           <p className="text-sm font-bold opacity-80">{activeRoutine.name}</p>
           <div className="w-full h-2 bg-white/30 rounded-full">
@@ -72,7 +72,7 @@ export const HabitStackingView: React.FC<HabitStackingViewProps> = ({
             {currentHabit.description && <p className="text-sm opacity-80 mt-2">{currentHabit.description}</p>}
           </div>
           <button onClick={handleNext}
-            className="w-full py-4 bg-white text-orange-500 rounded-2xl font-black text-lg shadow-xl active:scale-95 transition-transform">
+            className="w-full py-4 bg-white text-indigo-500 rounded-2xl font-black text-lg shadow-xl active:scale-95 transition-transform">
             {currentIdx < activeRoutine.habitIds.length - 1 ? '✓ Done, Next →' : '🎉 Complete!'}
           </button>
           <button onClick={() => setActiveRoutineId(null)} className="text-white/60 text-sm underline">Exit routine</button>
@@ -123,7 +123,7 @@ export const HabitStackingView: React.FC<HabitStackingViewProps> = ({
         })}
 
         {showForm && (
-          <div className="bg-orange-50 dark:bg-slate-800 rounded-2xl p-4 border border-orange-200 dark:border-orange-900/40 space-y-3 animate-scale-in">
+          <div className="bg-indigo-50 dark:bg-slate-800 rounded-2xl p-4 border border-indigo-200 dark:border-orange-900/40 space-y-3 animate-scale-in">
             <input value={name} onChange={e => setName(e.target.value)} placeholder="Routine name"
               className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm outline-none" />
             <select value={section} onChange={e => setSection(e.target.value as any)}

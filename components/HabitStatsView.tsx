@@ -127,7 +127,7 @@ const HabitStatsView: React.FC<HabitStatsViewProps> = ({ habits, onClose }) => {
               onClick={() => setRange(r)}
               className={`px-4 py-1.5 rounded-full text-sm font-medium transition-colors ${
                 range === r
-                  ? 'bg-orange-500 text-white'
+                  ? 'bg-indigo-500 text-white'
                   : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400'
               }`}
             >
@@ -138,8 +138,8 @@ const HabitStatsView: React.FC<HabitStatsViewProps> = ({ habits, onClose }) => {
 
         {/* Summary Cards */}
         <div className="grid grid-cols-3 gap-3">
-          <div className="bg-orange-50 dark:bg-blue-950/30 rounded-2xl p-3 text-center">
-            <CheckCircle2 size={20} className="text-orange-500 mx-auto mb-1" />
+          <div className="bg-indigo-50 dark:bg-blue-950/30 rounded-2xl p-3 text-center">
+            <CheckCircle2 size={20} className="text-indigo-500 mx-auto mb-1" />
             <div className="text-2xl font-bold text-orange-500">{overallRate}%</div>
             <div className="text-xs text-slate-500 dark:text-slate-400">Overall Rate</div>
           </div>

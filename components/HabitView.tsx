@@ -437,7 +437,7 @@ const HabitCard: React.FC<{
 
         <div className="flex items-center gap-2 flex-shrink-0">
           {streak > 0 && (
-            <span className="flex items-center gap-0.5 text-xs font-bold text-orange-500 bg-orange-50 dark:bg-orange-500/10 px-2 py-0.5 rounded-full">
+            <span className="flex items-center gap-0.5 text-xs font-bold text-indigo-500 bg-indigo-50 dark:bg-indigo-500/10 px-2 py-0.5 rounded-full">
               🔥{streak}
             </span>
           )}

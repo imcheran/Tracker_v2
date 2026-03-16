@@ -101,7 +101,7 @@ const MatrixView: React.FC<MatrixViewProps> = ({ tasks, lists, onMenuClick, onUp
     switch (p) {
         case Priority.High: return 'text-red-500';
         case Priority.Medium: return 'text-yellow-500';
-        case Priority.Low: return 'text-orange-500';
+        case Priority.Low: return 'text-indigo-500';
         default: return 'text-slate-400';
     }
   };
@@ -170,7 +170,7 @@ const MatrixView: React.FC<MatrixViewProps> = ({ tasks, lists, onMenuClick, onUp
        <div className="flex-1 grid grid-cols-1 md:grid-cols-2 grid-rows-2 md:grid-rows-2 gap-2 min-h-0 pb-safe">
           <Quadrant id="Q1" title="Urgent & Important" items={q1} color="text-red-600" bg="bg-red-50" border="border-red-100" />
           <Quadrant id="Q2" title="Not Urgent & Important" items={q2} color="text-yellow-600" bg="bg-yellow-50" border="border-yellow-100" />
-          <Quadrant id="Q3" title="Urgent & Unimportant" items={q3} color="text-orange-500" bg="bg-orange-50" border="border-blue-100" />
+          <Quadrant id="Q3" title="Urgent & Unimportant" items={q3} color="text-orange-500" bg="bg-indigo-50" border="border-blue-100" />
           <Quadrant id="Q4" title="Not Urgent & Unimportant" items={q4} color="text-slate-500" bg="bg-slate-100" border="border-slate-200" />
        </div>
 

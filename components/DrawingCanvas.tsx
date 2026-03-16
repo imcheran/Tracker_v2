@@ -93,7 +93,7 @@ const DrawingCanvas: React.FC<DrawingCanvasProps> = ({ onSave, onCancel }) => {
         <div className="flex items-center gap-1">
           <button 
             onClick={() => setIsEraser(false)}
-            className={`p-2.5 rounded-xl transition-all ${!isEraser ? 'bg-gradient-to-br from-orange-500 to-amber-400 text-white shadow-lg' : 'text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800'}`}
+            className={`p-2.5 rounded-xl transition-all ${!isEraser ? 'bg-gradient-to-br from-indigo-500 to-purple-500 text-white shadow-lg' : 'text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800'}`}
           >
             <Pen size={20} />
           </button>
@@ -104,7 +104,7 @@ const DrawingCanvas: React.FC<DrawingCanvasProps> = ({ onSave, onCancel }) => {
             <Eraser size={20} />
           </button>
         </div>
-        <button onClick={handleSave} className="p-2 text-orange-500 dark:text-orange-400 font-bold hover:bg-orange-50 dark:hover:bg-blue-900/30 rounded-lg">
+        <button onClick={handleSave} className="p-2 text-indigo-500 dark:text-orange-400 font-bold hover:bg-indigo-50 dark:hover:bg-blue-900/30 rounded-lg">
           <Check size={24} />
         </button>
       </div>
@@ -132,7 +132,7 @@ const DrawingCanvas: React.FC<DrawingCanvasProps> = ({ onSave, onCancel }) => {
           <div className="flex items-center gap-2">
             <button onClick={() => setBrushSize(Math.max(1, brushSize - 2))} className="p-2 text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-lg"><Minus size={18}/></button>
             <div className="w-24 h-2 bg-slate-100 dark:bg-slate-800 rounded-full relative overflow-hidden">
-              <div className="absolute inset-y-0 left-0 bg-orange-500 transition-all" style={{ width: `${(brushSize / 50) * 100}%` }} />
+              <div className="absolute inset-y-0 left-0 bg-indigo-500 transition-all" style={{ width: `${(brushSize / 50) * 100}%` }} />
             </div>
             <button onClick={() => setBrushSize(Math.min(50, brushSize + 2))} className="p-2 text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-lg"><Plus size={18}/></button>
           </div>
@@ -145,7 +145,7 @@ const DrawingCanvas: React.FC<DrawingCanvasProps> = ({ onSave, onCancel }) => {
               <button
                 key={c}
                 onClick={() => setColor(c)}
-                className={`w-9 h-9 rounded-full shrink-0 border-2 transition-transform ${color === c ? 'scale-110 border-orange-500' : 'border-slate-100 dark:border-slate-800'}`}
+                className={`w-9 h-9 rounded-full shrink-0 border-2 transition-transform ${color === c ? 'scale-110 border-indigo-500' : 'border-slate-100 dark:border-slate-800'}`}
                 style={{ backgroundColor: c }}
               />
             ))}

@@ -722,7 +722,7 @@ const FinanceView: React.FC<FinanceViewProps> = ({
                       <button 
                         onClick={handleSmsSync} 
                         disabled={isReadingSms}
-                        className="p-3 bg-orange-50 text-orange-500 rounded-[20px] hover:bg-orange-100 transition-colors"
+                        className="p-3 bg-indigo-50 text-indigo-500 rounded-[20px] hover:bg-indigo-100 transition-colors"
                       >
                           {isReadingSms ? <Loader2 size={20} className="animate-spin"/> : <MessageSquare size={20} />}
                       </button>
