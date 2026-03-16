@@ -171,7 +171,7 @@ const FocusStatsView: React.FC<FocusStatsViewProps> = ({ sessions, onClose }) =>
           
           {/* Smart Insight Banner */}
           <div className="bg-gradient-to-r from-blue-900/40 to-purple-900/40 border border-indigo-500/20 rounded-2xl p-4 flex items-start gap-3">
-              <div className="p-2 bg-indigo-500/20 rounded-full text-orange-400 shrink-0">
+              <div className="p-2 bg-indigo-500/20 rounded-full text-indigo-400 shrink-0">
                   <Zap size={18} fill="currentColor" />
               </div>
               <div>

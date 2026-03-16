@@ -312,7 +312,7 @@ const TaskDetailView: React.FC<TaskDetailViewProps> = ({
                  </button>
              </div>
              <div className="flex items-center gap-1 bg-black/5 dark:bg-white/5 backdrop-blur-md rounded-full p-1 pr-2">
-                 <button onClick={() => handleSave({ isPinned: !task.isPinned })} className={`p-2.5 rounded-full transition-colors ${task.isPinned ? 'text-orange-500 bg-indigo-100' : iconColorClass}`}>
+                 <button onClick={() => handleSave({ isPinned: !task.isPinned })} className={`p-2.5 rounded-full transition-colors ${task.isPinned ? 'text-indigo-500 bg-indigo-100' : iconColorClass}`}>
                      <Pin size={18} fill={task.isPinned ? 'currentColor' : 'none'} className={task.isPinned ? 'rotate-45' : ''} />
                  </button>
                  <button className={`p-2.5 rounded-full transition-colors ${iconColorClass}`}>
@@ -333,7 +333,7 @@ const TaskDetailView: React.FC<TaskDetailViewProps> = ({
               <div className="flex items-start gap-4">
                   <button 
                       onClick={() => handleSave({ isCompleted: !task.isCompleted })}
-                      className={`mt-1.5 flex-shrink-0 transition-colors ${task.isCompleted ? 'text-orange-500' : 'text-slate-400 hover:text-orange-400'}`}
+                      className={`mt-1.5 flex-shrink-0 transition-colors ${task.isCompleted ? 'text-indigo-500' : 'text-slate-400 hover:text-indigo-400'}`}
                   >
                       {task.isCompleted ? <CheckCircle2 size={28} className="fill-current" /> : <Circle size={28} strokeWidth={2} />}
                   </button>
@@ -351,7 +351,7 @@ const TaskDetailView: React.FC<TaskDetailViewProps> = ({
               <div className="flex flex-wrap gap-2 pl-11">
                   {/* Date Chip */}
                   <div className="relative group">
-                      <button className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all border ${task.dueDate ? 'bg-indigo-50 text-orange-500 border-blue-200' : 'bg-transparent border-slate-300/50 text-slate-500 hover:bg-black/5'}`}>
+                      <button className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all border ${task.dueDate ? 'bg-indigo-50 text-indigo-500 border-blue-200' : 'bg-transparent border-slate-300/50 text-slate-500 hover:bg-black/5'}`}>
                           <Calendar size={14} />
                           {formatDueDate(task.dueDate)}
                       </button>
@@ -428,7 +428,7 @@ const TaskDetailView: React.FC<TaskDetailViewProps> = ({
 
                               <button 
                                   onClick={(e) => { e.stopPropagation(); onUpdateTask({...child, isCompleted: !child.isCompleted}); }}
-                                  className={`flex-shrink-0 transition-all duration-300 transform ${child.isCompleted ? 'text-orange-500 scale-110' : 'text-slate-400 hover:text-slate-500 hover:scale-105'}`}
+                                  className={`flex-shrink-0 transition-all duration-300 transform ${child.isCompleted ? 'text-indigo-500 scale-110' : 'text-slate-400 hover:text-slate-500 hover:scale-105'}`}
                               >
                                   {child.isCompleted ? <CheckCircle2 size={20} className="fill-current" /> : <Circle size={20} />}
                               </button>
@@ -451,7 +451,7 @@ const TaskDetailView: React.FC<TaskDetailViewProps> = ({
                   {/* Add Item Button */}
                   <button 
                     onClick={handleAddChecklistItem} 
-                    className="flex items-center gap-3 px-4 py-3 mt-2 text-slate-500 hover:text-orange-500 transition-colors w-full text-left font-medium text-sm group"
+                    className="flex items-center gap-3 px-4 py-3 mt-2 text-slate-500 hover:text-indigo-500 transition-colors w-full text-left font-medium text-sm group"
                   >
                       <Plus size={20} className="group-hover:rotate-90 transition-transform duration-200" />
                       Add item
@@ -466,7 +466,7 @@ const TaskDetailView: React.FC<TaskDetailViewProps> = ({
               <button onClick={handleAddChecklistItem} className={`p-3 rounded-full hover:bg-black/5 transition-colors ${iconColorClass}`}>
                   <CheckSquare size={20} />
               </button>
-              <button onClick={() => setShowThemePicker(!showThemePicker)} className={`p-3 rounded-full transition-colors ${showThemePicker ? 'bg-black/10 text-orange-500' : iconColorClass} hover:bg-black/5`}>
+              <button onClick={() => setShowThemePicker(!showThemePicker)} className={`p-3 rounded-full transition-colors ${showThemePicker ? 'bg-black/10 text-indigo-500' : iconColorClass} hover:bg-black/5`}>
                   <Palette size={20} />
               </button>
               <div className="relative">
@@ -489,7 +489,7 @@ const TaskDetailView: React.FC<TaskDetailViewProps> = ({
 
           <div className="flex items-center gap-1">
               <div className="relative">
-                  <button onClick={() => setShowReminderPicker(!showReminderPicker)} className={`p-3 rounded-full hover:bg-black/5 transition-colors ${showReminderPicker ? 'bg-black/10 text-orange-500' : iconColorClass}`}>
+                  <button onClick={() => setShowReminderPicker(!showReminderPicker)} className={`p-3 rounded-full hover:bg-black/5 transition-colors ${showReminderPicker ? 'bg-black/10 text-indigo-500' : iconColorClass}`}>
                       <Bell size={20} />
                   </button>
                   {showReminderPicker && (
@@ -520,7 +520,7 @@ const TaskDetailView: React.FC<TaskDetailViewProps> = ({
                 <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-1">Color</span>
                 <div className="flex gap-3 overflow-x-auto no-scrollbar pb-1">
                     {KEEP_COLORS.map(c => (
-                        <button key={c.color} onClick={() => { setNoteColor(c.color); handleSave({ color: c.color }); }} className={`w-10 h-10 rounded-full shrink-0 border-2 transition-transform shadow-sm ${noteColor === c.color ? 'border-orange-500 scale-110' : 'border-slate-200 dark:border-slate-700'}`} style={{ backgroundColor: c.color }} />
+                        <button key={c.color} onClick={() => { setNoteColor(c.color); handleSave({ color: c.color }); }} className={`w-10 h-10 rounded-full shrink-0 border-2 transition-transform shadow-sm ${noteColor === c.color ? 'border-indigo-500 scale-110' : 'border-slate-200 dark:border-slate-700'}`} style={{ backgroundColor: c.color }} />
                     ))}
                 </div>
               </div>
@@ -529,7 +529,7 @@ const TaskDetailView: React.FC<TaskDetailViewProps> = ({
                 <div className="flex gap-3 overflow-x-auto no-scrollbar pb-1">
                     {NOTE_THEMES.map(t => (
                         <button key={t.id} onClick={() => { setNoteTheme(t.id); handleSave({ backgroundImage: t.id }); }} className={`flex flex-col items-center gap-1.5 shrink-0 group`}>
-                            <div className={`w-14 h-14 rounded-2xl flex items-center justify-center text-xl border-2 transition-all overflow-hidden relative ${noteTheme === t.id ? 'border-orange-500 ring-2 ring-indigo-500/20' : 'border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800'}`}>
+                            <div className={`w-14 h-14 rounded-2xl flex items-center justify-center text-xl border-2 transition-all overflow-hidden relative ${noteTheme === t.id ? 'border-indigo-500 ring-2 ring-indigo-500/20' : 'border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800'}`}>
                                 {t.id === 'none' ? <X size={20} className="text-slate-400" /> : (
                                     <>
                                         <NoteBackground themeId={t.id} isDark={isDarkMode} className="scale-[0.5]" />

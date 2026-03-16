@@ -30,7 +30,7 @@ export const NetWorthDashboard: React.FC<NetWorthDashboardProps> = ({
 
   const cards = [
     { label: 'Cash Balance', value: stats.cashBalance, icon: Wallet, color: '#14b8a6', bg: 'from-teal-50 to-cyan-50 dark:from-teal-900/20 dark:to-cyan-900/10' },
-    { label: 'Savings Goals', value: stats.totalSavings, icon: PiggyBank, color: '#f97316', bg: 'from-orange-50 to-amber-50 dark:from-orange-900/20 dark:to-amber-900/10' },
+    { label: 'Savings Goals', value: stats.totalSavings, icon: PiggyBank, color: '#f97316', bg: 'from-indigo-50 to-amber-50 dark:from-indigo-900/20 dark:to-amber-900/10' },
     { label: 'Investments', value: stats.investmentValue, icon: Briefcase, color: '#8b5cf6', bg: 'from-violet-50 to-purple-50 dark:from-violet-900/20 dark:to-purple-900/10' },
     { label: 'Debts & Liabilities', value: stats.totalDebt, icon: CreditCard, color: '#f43f5e', bg: 'from-rose-50 to-pink-50 dark:from-rose-900/20 dark:to-pink-900/10' },
   ];

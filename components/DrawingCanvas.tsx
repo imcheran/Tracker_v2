@@ -99,12 +99,12 @@ const DrawingCanvas: React.FC<DrawingCanvasProps> = ({ onSave, onCancel }) => {
           </button>
           <button 
             onClick={() => setIsEraser(true)}
-            className={`p-2.5 rounded-xl transition-all ${isEraser ? 'bg-gradient-to-br from-orange-500 to-amber-400 text-white shadow-lg' : 'text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800'}`}
+            className={`p-2.5 rounded-xl transition-all ${isEraser ? 'bg-gradient-to-br from-indigo-500 to-purple-500 text-white shadow-lg' : 'text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800'}`}
           >
             <Eraser size={20} />
           </button>
         </div>
-        <button onClick={handleSave} className="p-2 text-indigo-500 dark:text-orange-400 font-bold hover:bg-indigo-50 dark:hover:bg-blue-900/30 rounded-lg">
+        <button onClick={handleSave} className="p-2 text-indigo-500 dark:text-indigo-400 font-bold hover:bg-indigo-50 dark:hover:bg-blue-900/30 rounded-lg">
           <Check size={24} />
         </button>
       </div>

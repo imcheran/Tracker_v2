@@ -113,7 +113,7 @@ export const RecurringTransactionManager: React.FC<RecurringTransactionManagerPr
         ))}
 
         {showForm && (
-          <div className="bg-indigo-50 dark:bg-slate-800 rounded-2xl p-4 border border-indigo-200 dark:border-orange-900/40 space-y-3 animate-scale-in">
+          <div className="bg-indigo-50 dark:bg-slate-800 rounded-2xl p-4 border border-indigo-200 dark:border-indigo-900/40 space-y-3 animate-scale-in">
             <input value={title} onChange={e => setTitle(e.target.value)} placeholder="Title (e.g. Rent)"
               className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm outline-none" />
             <div className="flex gap-2">
@@ -135,7 +135,7 @@ export const RecurringTransactionManager: React.FC<RecurringTransactionManagerPr
             </div>
             <div className="flex gap-2">
               <button onClick={() => setShowForm(false)} className="flex-1 py-2 text-sm font-bold text-slate-500 bg-white dark:bg-slate-700 rounded-xl border border-slate-200 dark:border-slate-600">Cancel</button>
-              <button onClick={handleAdd} className="flex-1 py-2 text-sm font-bold text-white bg-gradient-to-br from-orange-500 to-amber-400 rounded-xl">Save</button>
+              <button onClick={handleAdd} className="flex-1 py-2 text-sm font-bold text-white bg-gradient-to-br from-indigo-500 to-purple-500 rounded-xl">Save</button>
             </div>
           </div>
         )}

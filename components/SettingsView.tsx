@@ -27,7 +27,7 @@ const SettingsView: React.FC<SettingsViewProps> = ({
 
   // Fixed SectionHeader to correctly handle React children
   const SectionHeader: React.FC<{ children: React.ReactNode }> = ({ children }) => (
-    <h2 className="px-6 pt-6 pb-2 text-[11px] font-bold text-indigo-500 dark:text-orange-400 uppercase tracking-widest">
+    <h2 className="px-6 pt-6 pb-2 text-[11px] font-bold text-indigo-500 dark:text-indigo-400 uppercase tracking-widest">
       {children}
     </h2>
   );
@@ -131,7 +131,7 @@ const SettingsView: React.FC<SettingsViewProps> = ({
                                 e.stopPropagation();
                                 user ? onLogout() : onLogin();
                             }}
-                            className={`px-4 py-1.5 rounded-lg text-xs font-bold transition-colors flex items-center gap-2 ${user ? 'bg-red-50 text-red-600 hover:bg-red-100 dark:bg-red-900/20 dark:text-red-400' : 'bg-gradient-to-br from-orange-500 to-amber-400 text-white hover:from-orange-600 hover:to-amber-500'}`}
+                            className={`px-4 py-1.5 rounded-lg text-xs font-bold transition-colors flex items-center gap-2 ${user ? 'bg-red-50 text-red-600 hover:bg-red-100 dark:bg-red-900/20 dark:text-red-400' : 'bg-gradient-to-br from-indigo-500 to-purple-500 text-white hover:from-indigo-600 hover:to-purple-500'}`}
                         >
                             {user ? (
                                 <>

@@ -47,7 +47,7 @@ export const TaskDependencies: React.FC<TaskDependenciesProps> = ({ task, allTas
       {available.length > 0 && (
         <select
           onChange={e => { if (e.target.value) addDep(e.target.value); e.target.value = ''; }}
-          className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-xs outline-none focus:border-orange-400"
+          className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-xs outline-none focus:border-indigo-400"
           defaultValue="">
           <option value="">+ Add dependency (blocked by)...</option>
           {available.map(t => <option key={t.id} value={t.id}>{t.title}</option>)}

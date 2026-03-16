@@ -90,7 +90,7 @@ export const HabitStackingView: React.FC<HabitStackingViewProps> = ({
           </button>
           <h1 className="text-lg font-bold text-slate-800 dark:text-white flex-1">Habit Routines</h1>
           <button onClick={() => setShowForm(true)}
-            className="flex items-center gap-1 bg-gradient-to-br from-orange-500 to-amber-400 text-white text-xs font-bold px-3 py-1.5 rounded-xl shadow">
+            className="flex items-center gap-1 bg-gradient-to-br from-indigo-500 to-purple-500 text-white text-xs font-bold px-3 py-1.5 rounded-xl shadow">
             <Plus size={14} /> New
           </button>
         </div>
@@ -107,7 +107,7 @@ export const HabitStackingView: React.FC<HabitStackingViewProps> = ({
                   <p className="text-xs text-slate-400">{r.section} · {routineHabits.length} habits · {doneCount}/{routineHabits.length} done</p>
                 </div>
                 <button onClick={() => handleStart(r)}
-                  className="flex items-center gap-1.5 bg-gradient-to-br from-orange-500 to-amber-400 text-white text-xs font-bold px-3 py-2 rounded-xl shadow">
+                  className="flex items-center gap-1.5 bg-gradient-to-br from-indigo-500 to-purple-500 text-white text-xs font-bold px-3 py-2 rounded-xl shadow">
                   <Play size={13} /> Start
                 </button>
               </div>
@@ -123,7 +123,7 @@ export const HabitStackingView: React.FC<HabitStackingViewProps> = ({
         })}
 
         {showForm && (
-          <div className="bg-indigo-50 dark:bg-slate-800 rounded-2xl p-4 border border-indigo-200 dark:border-orange-900/40 space-y-3 animate-scale-in">
+          <div className="bg-indigo-50 dark:bg-slate-800 rounded-2xl p-4 border border-indigo-200 dark:border-indigo-900/40 space-y-3 animate-scale-in">
             <input value={name} onChange={e => setName(e.target.value)} placeholder="Routine name"
               className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm outline-none" />
             <select value={section} onChange={e => setSection(e.target.value as any)}
@@ -139,7 +139,7 @@ export const HabitStackingView: React.FC<HabitStackingViewProps> = ({
             ))}
             <div className="flex gap-2">
               <button onClick={() => setShowForm(false)} className="flex-1 py-2 text-sm font-bold text-slate-500 bg-white dark:bg-slate-700 rounded-xl border border-slate-200 dark:border-slate-600">Cancel</button>
-              <button onClick={handleSave} className="flex-1 py-2 text-sm font-bold text-white bg-gradient-to-br from-orange-500 to-amber-400 rounded-xl">Save</button>
+              <button onClick={handleSave} className="flex-1 py-2 text-sm font-bold text-white bg-gradient-to-br from-indigo-500 to-purple-500 rounded-xl">Save</button>
             </div>
           </div>
         )}

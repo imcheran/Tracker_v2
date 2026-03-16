@@ -37,7 +37,7 @@ const VIEW_COLORS: Record<string, string> = {
 
 const TEXT_COLORS: Record<string, string> = {
     [ViewType.Inbox]: 'text-indigo-500',
-    [ViewType.Today]: 'text-orange-500',
+    [ViewType.Today]: 'text-indigo-500',
     [ViewType.Next7Days]: 'text-violet-500',
     [ViewType.All]: 'text-slate-500',
     [ViewType.Calendar]: 'text-rose-500',
@@ -250,7 +250,7 @@ const Sidebar: React.FC<SidebarProps> = React.memo(({
                             placeholder="New List Name"
                             className="flex-1 text-sm bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-all dark:text-white"
                         />
-                        <button onClick={handleCreateList} disabled={!newListTitle.trim()} className="bg-gradient-to-br from-indigo-500 to-purple-500 text-white p-3 rounded-xl hover:from-orange-600 hover:to-amber-500 disabled:opacity-50 transition-colors active:scale-95 shadow-lg shadow-indigo-500/30">
+                        <button onClick={handleCreateList} disabled={!newListTitle.trim()} className="bg-gradient-to-br from-indigo-500 to-purple-500 text-white p-3 rounded-xl hover:from-indigo-600 hover:to-purple-500 disabled:opacity-50 transition-colors active:scale-95 shadow-lg shadow-indigo-500/30">
                             <Plus size={20} />
                         </button>
                     </div>

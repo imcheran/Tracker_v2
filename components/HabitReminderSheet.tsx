@@ -49,7 +49,7 @@ export const HabitReminderSheet: React.FC<HabitReminderSheetProps> = ({ habit, o
                 <div className="flex items-center gap-1">
                     <button 
                         onClick={onFocus}
-                        className="p-2 rounded-full hover:bg-slate-100 text-slate-400 hover:text-orange-500 transition-colors"
+                        className="p-2 rounded-full hover:bg-slate-100 text-slate-400 hover:text-indigo-500 transition-colors"
                         title="Focus"
                     >
                         <Zap size={20} />
@@ -124,7 +124,7 @@ export const HabitReminderSheet: React.FC<HabitReminderSheetProps> = ({ habit, o
                     </button>
                     <button 
                         onClick={() => { onCheckIn(); onClose(); }}
-                        className="flex-1 py-3 text-orange-500 hover:bg-indigo-50 rounded-lg transition-colors"
+                        className="flex-1 py-3 text-indigo-500 hover:bg-indigo-50 rounded-lg transition-colors"
                         style={{ color: habit.color }}
                     >
                         Check In

@@ -461,7 +461,7 @@ const FocusView: React.FC<FocusViewProps> = ({
               className="w-4 h-4 accent-blue-500"
             />
             <span className="text-xs text-slate-600 dark:text-slate-300">Desktop notifications</span>
-            {notificationsEnabled ? <Bell size={13} className="text-orange-500" /> : <BellOff size={13} className="text-slate-400" />}
+            {notificationsEnabled ? <Bell size={13} className="text-indigo-500" /> : <BellOff size={13} className="text-slate-400" />}
           </label>
         </div>
       )}
@@ -477,7 +477,7 @@ const FocusView: React.FC<FocusViewProps> = ({
               <div className="flex items-center justify-between mb-2">
                 <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide">Category</span>
                 <button onClick={() => { resetCatForm(); setShowNewCategory(true); }}
-                  className="flex items-center gap-1 text-xs text-orange-500 hover:text-orange-500 font-medium">
+                  className="flex items-center gap-1 text-xs text-indigo-500 hover:text-indigo-500 font-medium">
                   <Plus size={13} /> New
                 </button>
               </div>
@@ -729,7 +729,7 @@ const FocusView: React.FC<FocusViewProps> = ({
                   <button key={s.id} onClick={() => setAmbientSound(s.id)}
                     className={`flex-shrink-0 flex items-center gap-1.5 px-3 py-2 rounded-xl border-2 text-xs font-medium transition-all ${
                       ambientSound === s.id
-                        ? 'bg-orange-500 border-indigo-500 text-white'
+                        ? 'bg-indigo-500 border-indigo-500 text-white'
                         : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:border-blue-300'
                     }`}>
                     {s.icon} {s.label}
@@ -804,7 +804,7 @@ const FocusView: React.FC<FocusViewProps> = ({
                       <span className="text-xs text-slate-400">{mins > 0 ? `${mins}m` : ''}</span>
                       <div className="w-full rounded-t-lg transition-all"
                         style={{ height: h, background: isToday ? '#3b82f6' : '#93c5fd', opacity: isToday ? 1 : 0.7 }} />
-                      <span className={`text-xs font-medium ${isToday ? 'text-orange-500' : 'text-slate-400'}`}>
+                      <span className={`text-xs font-medium ${isToday ? 'text-indigo-500' : 'text-slate-400'}`}>
                         {['S','M','T','W','T','F','S'][d.getDay()]}
                       </span>
                     </div>

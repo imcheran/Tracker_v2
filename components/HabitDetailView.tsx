@@ -242,7 +242,7 @@ const HabitDetailView: React.FC<HabitDetailViewProps> = ({
               </div>
               <div className="bg-[#1c1c1e] p-4 rounded-2xl">
                   <div className="flex items-center gap-2 mb-2">
-                      <div className="w-5 h-5 rounded-full bg-indigo-500/20 text-orange-500 flex items-center justify-center"><Activity size={12} /></div>
+                      <div className="w-5 h-5 rounded-full bg-indigo-500/20 text-indigo-500 flex items-center justify-center"><Activity size={12} /></div>
                       <span className="text-xs text-slate-400">Monthly check-in rate</span>
                   </div>
                   <div className="flex items-baseline gap-1">
@@ -347,22 +347,22 @@ const HabitDetailView: React.FC<HabitDetailViewProps> = ({
                         <div className="space-y-4 mb-8">
                             <label className="flex items-center gap-3 cursor-pointer group">
                                 <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center ${logStatus === 'achieved' ? 'border-indigo-500' : 'border-slate-600'}`}>
-                                    {logStatus === 'achieved' && <div className="w-3 h-3 bg-orange-500 rounded-full"/>}
+                                    {logStatus === 'achieved' && <div className="w-3 h-3 bg-indigo-500 rounded-full"/>}
                                 </div>
                                 <span className="text-white font-medium">Achieved</span>
                                 <input type="radio" className="hidden" checked={logStatus === 'achieved'} onChange={() => setLogStatus('achieved')} />
                             </label>
                             <label className="flex items-center gap-3 cursor-pointer group">
-                                <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center ${logStatus === 'unachieved' ? 'border-orange-500' : 'border-slate-600'}`}>
-                                    {logStatus === 'unachieved' && <div className="w-3 h-3 bg-orange-500 rounded-full"/>}
+                                <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center ${logStatus === 'unachieved' ? 'border-indigo-500' : 'border-slate-600'}`}>
+                                    {logStatus === 'unachieved' && <div className="w-3 h-3 bg-indigo-500 rounded-full"/>}
                                 </div>
                                 <span className="text-white font-medium">Unachieved</span>
                                 <input type="radio" className="hidden" checked={logStatus === 'unachieved'} onChange={() => setLogStatus('unachieved')} />
                             </label>
                             
                             <label className={`flex items-center gap-3 cursor-pointer group ${(habit.streakFreezes || 0) > 0 || habit.freezeDates?.includes(format(selectedDate, 'yyyy-MM-dd')) ? '' : 'opacity-50 pointer-events-none'}`}>
-                                <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center ${logStatus === 'skipped' ? 'border-orange-500' : 'border-slate-600'}`}>
-                                    {logStatus === 'skipped' && <div className="w-3 h-3 bg-orange-500 rounded-full"/>}
+                                <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center ${logStatus === 'skipped' ? 'border-indigo-500' : 'border-slate-600'}`}>
+                                    {logStatus === 'skipped' && <div className="w-3 h-3 bg-indigo-500 rounded-full"/>}
                                 </div>
                                 <div className="flex flex-col">
                                     <span className="text-white font-medium">Skip (Use Freeze)</span>
@@ -381,9 +381,9 @@ const HabitDetailView: React.FC<HabitDetailViewProps> = ({
                         <textarea value={logNote} onChange={(e) => setLogNote(e.target.value)} placeholder="What do you have in mind?" className="w-full bg-[#2c2c2e] text-white p-4 rounded-2xl h-32 outline-none resize-none placeholder:text-slate-500 text-sm"/>
                     </div>
                     <div className="flex border-t border-white/10">
-                        <button onClick={() => setShowLogModal(false)} className="flex-1 py-4 text-orange-500 font-bold hover:bg-white/5">Cancel</button>
+                        <button onClick={() => setShowLogModal(false)} className="flex-1 py-4 text-indigo-500 font-bold hover:bg-white/5">Cancel</button>
                         <div className="w-px bg-white/10"></div>
-                        <button onClick={handleSaveLog} className="flex-1 py-4 text-orange-500 font-bold hover:bg-white/5">Save</button>
+                        <button onClick={handleSaveLog} className="flex-1 py-4 text-indigo-500 font-bold hover:bg-white/5">Save</button>
                     </div>
                 </div>
             </div>

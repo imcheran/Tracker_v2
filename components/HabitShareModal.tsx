@@ -104,7 +104,7 @@ const HabitShareModal: React.FC<HabitShareModalProps> = ({ isOpen, onClose, habi
             <div className="p-6 mt-auto">
                 <div className="flex items-center gap-3">
                     <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-white/50">
-                        <div className="w-full h-full bg-orange-200 flex items-center justify-center">
+                        <div className="w-full h-full bg-indigo-200 flex items-center justify-center">
                             <User size={20} className="text-indigo-600"/>
                         </div>
                     </div>
@@ -126,7 +126,7 @@ const HabitShareModal: React.FC<HabitShareModalProps> = ({ isOpen, onClose, habi
             </button>
             <button 
                 onClick={handleShare}
-                className="bg-gradient-to-br from-indigo-500 to-purple-500 text-white px-8 py-3 rounded-full font-bold text-sm shadow-lg flex items-center gap-2 hover:from-orange-600 hover:to-amber-500"
+                className="bg-gradient-to-br from-indigo-500 to-purple-500 text-white px-8 py-3 rounded-full font-bold text-sm shadow-lg flex items-center gap-2 hover:from-indigo-600 hover:to-purple-500"
             >
                 <Share2 size={18} />
                 Share

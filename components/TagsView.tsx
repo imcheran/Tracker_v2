@@ -175,7 +175,7 @@ const TagsView: React.FC<TagsViewProps> = ({ tasks, onUpdateTask, onMenuClick })
                                     {isEditingThis ? (
                                         <button 
                                             onMouseDown={(e) => { e.preventDefault(); handleRenameTag(tag); }}
-                                            className="p-2 text-orange-500 dark:text-orange-400"
+                                            className="p-2 text-indigo-500 dark:text-indigo-400"
                                         >
                                             <Check size={20} />
                                         </button>

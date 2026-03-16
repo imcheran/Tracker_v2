@@ -140,12 +140,12 @@ const HabitStatsView: React.FC<HabitStatsViewProps> = ({ habits, onClose }) => {
         <div className="grid grid-cols-3 gap-3">
           <div className="bg-indigo-50 dark:bg-blue-950/30 rounded-2xl p-3 text-center">
             <CheckCircle2 size={20} className="text-indigo-500 mx-auto mb-1" />
-            <div className="text-2xl font-bold text-orange-500">{overallRate}%</div>
+            <div className="text-2xl font-bold text-indigo-500">{overallRate}%</div>
             <div className="text-xs text-slate-500 dark:text-slate-400">Overall Rate</div>
           </div>
-          <div className="bg-orange-50 dark:bg-orange-950/30 rounded-2xl p-3 text-center">
-            <Flame size={20} className="text-orange-500 mx-auto mb-1" />
-            <div className="text-2xl font-bold text-orange-500">{topStreak}</div>
+          <div className="bg-indigo-50 dark:bg-indigo-950/30 rounded-2xl p-3 text-center">
+            <Flame size={20} className="text-indigo-500 mx-auto mb-1" />
+            <div className="text-2xl font-bold text-indigo-500">{topStreak}</div>
             <div className="text-xs text-slate-500 dark:text-slate-400">Top Streak</div>
           </div>
           <div className="bg-green-50 dark:bg-green-950/30 rounded-2xl p-3 text-center">
@@ -226,7 +226,7 @@ const HabitStatsView: React.FC<HabitStatsViewProps> = ({ habits, onClose }) => {
                       <span>{h.icon}</span> {h.fullName}
                     </span>
                     <div className="flex items-center gap-2">
-                      <span className="text-xs text-orange-500 flex items-center gap-0.5">
+                      <span className="text-xs text-indigo-500 flex items-center gap-0.5">
                         <Flame size={10} /> {h.streak}
                       </span>
                       <span className="text-xs font-semibold text-slate-700 dark:text-slate-300">{h.rate}%</span>

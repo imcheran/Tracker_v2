@@ -243,7 +243,7 @@ const NoteItem: React.FC<NoteItemProps> = ({ note, childTasks, onClick, onLongPr
         >
             {/* Selection Checkmark */}
             {isSelected && (
-                <div className="absolute top-3 right-3 z-30 bg-orange-500 text-white rounded-full p-1 shadow-md animate-scale-in">
+                <div className="absolute top-3 right-3 z-30 bg-indigo-500 text-white rounded-full p-1 shadow-md animate-scale-in">
                     <Check size={14} strokeWidth={3} />
                 </div>
             )}
@@ -578,7 +578,7 @@ const TaskView: React.FC<TaskViewProps> = ({
                     </div>
                     <button 
                         onClick={() => createBlankNote('text')}
-                        className="w-12 h-12 bg-gradient-to-br from-amber-500 to-orange-600 text-white rounded-xl flex items-center justify-center shadow-lg hover:scale-105 active:scale-95 transition-transform"
+                        className="w-12 h-12 bg-gradient-to-br from-indigo-500 to-purple-600 text-white rounded-xl flex items-center justify-center shadow-lg hover:scale-105 active:scale-95 transition-transform"
                     >
                          <Plus size={24} strokeWidth={3} />
                     </button>
