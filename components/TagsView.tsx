@@ -112,7 +112,7 @@ const TagsView: React.FC<TagsViewProps> = ({ tasks, onUpdateTask, onMenuClick })
                     />
 
                     {(isCreating && newTagInput.trim()) && (
-                        <button onClick={handleCreateTag} className="p-2 text-slate-400 hover:text-indigo-500">
+                        <button onClick={handleCreateTag} className="p-2 text-slate-400 hover:text-blue-500">
                             <Check size={20} />
                         </button>
                     )}
@@ -175,7 +175,7 @@ const TagsView: React.FC<TagsViewProps> = ({ tasks, onUpdateTask, onMenuClick })
                                     {isEditingThis ? (
                                         <button 
                                             onMouseDown={(e) => { e.preventDefault(); handleRenameTag(tag); }}
-                                            className="p-2 text-indigo-500 dark:text-indigo-400"
+                                            className="p-2 text-blue-600 dark:text-blue-400"
                                         >
                                             <Check size={20} />
                                         </button>

@@ -170,8 +170,8 @@ const FocusStatsView: React.FC<FocusStatsViewProps> = ({ sessions, onClose }) =>
       <div className="flex-1 overflow-y-auto custom-scrollbar p-4 space-y-4 pb-safe">
           
           {/* Smart Insight Banner */}
-          <div className="bg-gradient-to-r from-blue-900/40 to-purple-900/40 border border-indigo-500/20 rounded-2xl p-4 flex items-start gap-3">
-              <div className="p-2 bg-indigo-500/20 rounded-full text-indigo-400 shrink-0">
+          <div className="bg-gradient-to-r from-blue-900/40 to-purple-900/40 border border-blue-500/20 rounded-2xl p-4 flex items-start gap-3">
+              <div className="p-2 bg-blue-500/20 rounded-full text-blue-400 shrink-0">
                   <Zap size={18} fill="currentColor" />
               </div>
               <div>
@@ -202,7 +202,7 @@ const FocusStatsView: React.FC<FocusStatsViewProps> = ({ sessions, onClose }) =>
           <div className="bg-[#1c1c1e] p-5 rounded-3xl">
               <div className="flex justify-between items-center mb-6">
                   <h3 className="font-bold text-lg">Activity</h3>
-                  <div className="flex items-center gap-2 text-sm text-indigo-500 font-bold cursor-pointer select-none">
+                  <div className="flex items-center gap-2 text-sm text-blue-500 font-bold cursor-pointer select-none">
                       <ChevronLeft size={16} onClick={() => handleNav('prev')} />
                       <span>{range === 'Week' ? 'Week' : range === 'Month' ? 'Month' : 'Year'}</span>
                       <ChevronRight size={16} onClick={() => handleNav('next')} />
@@ -216,7 +216,7 @@ const FocusStatsView: React.FC<FocusStatsViewProps> = ({ sessions, onClose }) =>
                           <button
                               key={r}
                               onClick={() => setRange(r)}
-                              className={`px-6 py-1.5 rounded-lg text-xs font-bold transition-all ${range === r ? 'bg-gradient-to-br from-indigo-500 to-purple-500 text-white' : 'text-slate-400 hover:text-white'}`}
+                              className={`px-6 py-1.5 rounded-lg text-xs font-bold transition-all ${range === r ? 'bg-blue-600 text-white' : 'text-slate-400 hover:text-white'}`}
                           >
                               {r}
                           </button>

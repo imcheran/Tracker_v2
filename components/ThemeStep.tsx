@@ -10,7 +10,7 @@ export const ThemeStep: React.FC<ThemeStepProps> = ({ selected, onSelect }) => {
   const themes = [
     { id: 'blue', color: '#3b82f6', name: 'TickBlue' },
     { id: 'green', color: '#10b981', name: 'Mint' },
-    { id: 'indigo', color: '#6366f1', name: 'Indigo' },
+    { id: 'orange', color: '#f59e0b', name: 'Sunset' },
     { id: 'purple', color: '#8b5cf6', name: 'Grape' },
     { id: 'slate', color: '#475569', name: 'Dark' },
   ];

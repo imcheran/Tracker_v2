@@ -50,7 +50,7 @@ type FilterMode = 'all' | 'pinned' | 'favorites' | 'archived' | 'locked' | 'tagg
 const NOTE_COLORS = [
   { label: 'Default',  value: 'bg-white dark:bg-slate-800',          border: 'border-slate-200 dark:border-slate-700' },
   { label: 'Rose',     value: 'bg-rose-50 dark:bg-rose-950',          border: 'border-rose-200 dark:border-rose-800' },
-  { label: 'Indigo',   value: 'bg-indigo-50 dark:bg-indigo-950',      border: 'border-indigo-200 dark:border-indigo-800' },
+  { label: 'Orange',   value: 'bg-orange-50 dark:bg-orange-950',      border: 'border-orange-200 dark:border-orange-800' },
   { label: 'Amber',    value: 'bg-amber-50 dark:bg-amber-950',        border: 'border-amber-200 dark:border-amber-800' },
   { label: 'Green',    value: 'bg-green-50 dark:bg-green-950',        border: 'border-green-200 dark:border-green-800' },
   { label: 'Teal',     value: 'bg-teal-50 dark:bg-teal-950',          border: 'border-teal-200 dark:border-teal-800' },
@@ -61,7 +61,7 @@ const NOTE_COLORS = [
 ];
 
 const FOLDER_ICONS = ['📁', '📂', '🗂️', '📚', '📝', '💡', '🎯', '🔖', '🗒️', '📌'];
-const FOLDER_COLORS = ['#6366f1','#8b5cf6','#ec4899','#f43f5e','#f59e0b','#10b981','#06b6d4','#3b82f6'];
+const FOLDER_COLORS = ['#3b82f6','#10b981','#f59e0b','#ef4444','#8b5cf6','#ec4899','#06b6d4','#84cc16'];
 
 const STORAGE_KEY = 'ticktickclone_notes_v2';
 const FOLDERS_KEY = 'ticktickclone_notes_folders';
@@ -317,7 +317,7 @@ const NoteEditor: React.FC<EditorProps> = ({ note, folders, onSave, onClose, onD
             <button onClick={() => toggleProp('isPinned')} title="Pin"
               className="p-1.5 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors">
               {draft.isPinned
-                ? <Pin size={16} className="text-indigo-500" />
+                ? <Pin size={16} className="text-blue-500" />
                 : <PinOff size={16} className="text-slate-400" />}
             </button>
             {/* Color */}
@@ -330,7 +330,7 @@ const NoteEditor: React.FC<EditorProps> = ({ note, folders, onSave, onClose, onD
                 <div className="absolute right-0 top-9 z-50 flex flex-wrap gap-2 p-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-xl w-52">
                   {NOTE_COLORS.map(c => (
                     <button key={c.value} onClick={() => setColor(c.value)} title={c.label}
-                      className={`w-7 h-7 rounded-full border-2 ${c.value} ${draft.color === c.value ? 'border-indigo-500 scale-110' : c.border} transition-transform hover:scale-110`} />
+                      className={`w-7 h-7 rounded-full border-2 ${c.value} ${draft.color === c.value ? 'border-blue-500 scale-110' : c.border} transition-transform hover:scale-110`} />
                   ))}
                 </div>
               )}
@@ -354,7 +354,7 @@ const NoteEditor: React.FC<EditorProps> = ({ note, folders, onSave, onClose, onD
                   </button>
                   {folders.map(f => (
                     <button key={f.id} onClick={() => setFolder(f.id)}
-                      className={`w-full text-left px-3 py-2 hover:bg-slate-100 dark:hover:bg-slate-700 text-sm text-slate-600 dark:text-slate-300 ${draft.folderId === f.id ? 'bg-indigo-50 dark:bg-indigo-950' : ''}`}>
+                      className={`w-full text-left px-3 py-2 hover:bg-slate-100 dark:hover:bg-slate-700 text-sm text-slate-600 dark:text-slate-300 ${draft.folderId === f.id ? 'bg-blue-50 dark:bg-blue-950' : ''}`}>
                       {f.icon} {f.name}
                     </button>
                   ))}
@@ -379,7 +379,7 @@ const NoteEditor: React.FC<EditorProps> = ({ note, folders, onSave, onClose, onD
             {/* Lock */}
             <button onClick={() => toggleProp('isLocked')} title="Lock"
               className="p-1.5 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors">
-              {draft.isLocked ? <Lock size={16} className="text-indigo-500" /> : <Unlock size={16} className="text-slate-400" />}
+              {draft.isLocked ? <Lock size={16} className="text-blue-500" /> : <Unlock size={16} className="text-slate-400" />}
             </button>
             {/* Archive */}
             <button onClick={() => { toggleProp('isArchived'); onClose(); }} title="Archive"
@@ -415,7 +415,7 @@ const NoteEditor: React.FC<EditorProps> = ({ note, folders, onSave, onClose, onD
               placeholder="Add tag and press Enter…"
               className="flex-1 bg-transparent outline-none text-sm text-slate-700 dark:text-slate-200 placeholder-slate-400"
             />
-            <button onClick={addTag} className="text-xs text-indigo-500 font-medium">Add</button>
+            <button onClick={addTag} className="text-xs text-blue-500 font-medium">Add</button>
           </div>
         )}
 
@@ -424,7 +424,7 @@ const NoteEditor: React.FC<EditorProps> = ({ note, folders, onSave, onClose, onD
           <div className="flex flex-wrap gap-1.5 px-4 py-2 border-b border-slate-200 dark:border-slate-700">
             {draft.tags.map(tag => (
               <span key={tag}
-                className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-indigo-100 dark:bg-indigo-900/50 text-indigo-700 dark:text-indigo-300 text-xs font-medium">
+                className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300 text-xs font-medium">
                 #{tag}
                 <button onClick={() => removeTag(tag)} className="hover:text-red-500">
                   <X size={10} />
@@ -503,7 +503,7 @@ const NoteCard: React.FC<CardProps> = ({ note, viewMode, onClick, onPin, onFavor
       >
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 mb-0.5">
-            {note.isPinned && <Pin size={11} className="text-indigo-400 shrink-0" />}
+            {note.isPinned && <Pin size={11} className="text-blue-400 shrink-0" />}
             {note.isFavorite && <Star size={11} className="text-yellow-400 fill-yellow-400 shrink-0" />}
             {note.isLocked && <Lock size={11} className="text-slate-400 shrink-0" />}
             <span className="font-medium text-sm text-slate-800 dark:text-slate-100 truncate">
@@ -548,8 +548,8 @@ const NoteCard: React.FC<CardProps> = ({ note, viewMode, onClick, onPin, onFavor
       {/* Indicators */}
       <div className="absolute top-2 right-2 flex items-center gap-1 z-10">
         {note.isPinned && (
-          <span className="p-1 rounded-full bg-indigo-100 dark:bg-indigo-900/50">
-            <Pin size={10} className="text-indigo-500" />
+          <span className="p-1 rounded-full bg-blue-100 dark:bg-blue-900/50">
+            <Pin size={10} className="text-blue-500" />
           </span>
         )}
         {note.isFavorite && (
@@ -701,11 +701,11 @@ const FolderManager: React.FC<FolderManagerProps> = ({ folders, onAddFolder, onD
               onChange={e => setName(e.target.value)}
               onKeyDown={e => e.key === 'Enter' && handleAdd()}
               placeholder="Folder name..."
-              className="flex-1 px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-600 bg-transparent text-sm text-slate-800 dark:text-slate-100 outline-none focus:border-indigo-500"
+              className="flex-1 px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-600 bg-transparent text-sm text-slate-800 dark:text-slate-100 outline-none focus:border-blue-500"
             />
             <button
               onClick={handleAdd}
-              className="px-3 py-2 rounded-lg bg-indigo-500 hover:bg-gradient-to-br from-indigo-500 to-purple-500 text-white text-sm font-medium transition-colors"
+              className="px-3 py-2 rounded-lg bg-blue-500 hover:bg-blue-600 text-white text-sm font-medium transition-colors"
             >Add</button>
           </div>
           {/* Icon picker */}
@@ -714,7 +714,7 @@ const FolderManager: React.FC<FolderManagerProps> = ({ folders, onAddFolder, onD
               <button
                 key={i}
                 onClick={() => setIcon(i)}
-                className={`w-8 h-8 rounded-lg text-base transition-all ${icon === i ? 'bg-indigo-100 dark:bg-indigo-900 scale-110' : 'hover:bg-slate-100 dark:hover:bg-slate-700'}`}
+                className={`w-8 h-8 rounded-lg text-base transition-all ${icon === i ? 'bg-blue-100 dark:bg-blue-900 scale-110' : 'hover:bg-slate-100 dark:hover:bg-slate-700'}`}
               >{i}</button>
             ))}
           </div>
@@ -725,7 +725,7 @@ const FolderManager: React.FC<FolderManagerProps> = ({ folders, onAddFolder, onD
                 key={c}
                 onClick={() => setColor(c)}
                 style={{ background: c }}
-                className={`w-6 h-6 rounded-full transition-transform ${color === c ? 'scale-125 ring-2 ring-offset-2 ring-indigo-500' : 'hover:scale-110'}`}
+                className={`w-6 h-6 rounded-full transition-transform ${color === c ? 'scale-125 ring-2 ring-offset-2 ring-blue-500' : 'hover:scale-110'}`}
               />
             ))}
           </div>
@@ -880,7 +880,7 @@ const NotesView: React.FC<NotesViewProps> = ({ onMenuClick }) => {
           <Menu size={18} className="text-slate-500" />
         </button>
         <div className="flex items-center gap-2 flex-1">
-          <FileText size={18} className="text-indigo-500 shrink-0" />
+          <FileText size={18} className="text-blue-500 shrink-0" />
           <h1 className="font-bold text-slate-800 dark:text-slate-100 text-base hidden sm:block">Notes</h1>
           <span className="px-1.5 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500 text-xs">{stats.total}</span>
         </div>
@@ -912,7 +912,7 @@ const NotesView: React.FC<NotesViewProps> = ({ onMenuClick }) => {
                 <button
                   key={s}
                   onClick={() => { setSortBy(s); setShowSortMenu(false); }}
-                  className={`w-full text-left px-3 py-2 text-sm hover:bg-slate-100 dark:hover:bg-slate-700 ${sortBy === s ? 'text-indigo-500 font-medium' : 'text-slate-600 dark:text-slate-300'}`}
+                  className={`w-full text-left px-3 py-2 text-sm hover:bg-slate-100 dark:hover:bg-slate-700 ${sortBy === s ? 'text-blue-500 font-medium' : 'text-slate-600 dark:text-slate-300'}`}
                 >
                   {s === 'updatedAt' ? 'Modified' : s === 'createdAt' ? 'Created' : s === 'wordCount' ? 'Length' : 'Title'}
                 </button>
@@ -933,7 +933,7 @@ const NotesView: React.FC<NotesViewProps> = ({ onMenuClick }) => {
             <button
               key={m}
               onClick={() => setViewMode(m)}
-              className={`p-1.5 transition-colors ${viewMode === m ? 'bg-indigo-500 text-white' : 'text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'}`}
+              className={`p-1.5 transition-colors ${viewMode === m ? 'bg-blue-500 text-white' : 'text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'}`}
               title={m.charAt(0).toUpperCase() + m.slice(1)}
             >
               {m === 'grid' ? <Grid size={14}/> : m === 'list' ? <LayoutList size={14}/> : <Type size={14}/>}
@@ -943,7 +943,7 @@ const NotesView: React.FC<NotesViewProps> = ({ onMenuClick }) => {
         {/* New note */}
         <button
           onClick={createNote}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-indigo-500 hover:bg-gradient-to-br from-indigo-500 to-purple-500 text-white text-sm font-medium transition-colors shadow-sm"
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-blue-500 hover:bg-blue-600 text-white text-sm font-medium transition-colors shadow-sm"
         >
           <Plus size={15} />
           <span className="hidden sm:inline">New</span>
@@ -963,7 +963,7 @@ const NotesView: React.FC<NotesViewProps> = ({ onMenuClick }) => {
           <button
             key={f.id}
             onClick={() => setFilterMode(f.id)}
-            className={`shrink-0 px-3 py-1 rounded-full text-xs font-medium transition-all ${filterMode === f.id ? 'bg-indigo-500 text-white shadow-sm' : 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'}`}
+            className={`shrink-0 px-3 py-1 rounded-full text-xs font-medium transition-all ${filterMode === f.id ? 'bg-blue-500 text-white shadow-sm' : 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'}`}
           >{f.label}</button>
         ))}
         <div className="w-px h-4 bg-slate-200 dark:bg-slate-700 shrink-0 mx-1" />
@@ -980,7 +980,7 @@ const NotesView: React.FC<NotesViewProps> = ({ onMenuClick }) => {
         ))}
         <button
           onClick={() => setShowFolderManager(true)}
-          className="shrink-0 flex items-center gap-1 px-3 py-1 rounded-full text-xs text-slate-400 hover:text-indigo-500 hover:bg-indigo-50 dark:hover:bg-indigo-950/40 border border-dashed border-slate-300 dark:border-slate-600 transition-all"
+          className="shrink-0 flex items-center gap-1 px-3 py-1 rounded-full text-xs text-slate-400 hover:text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-950/40 border border-dashed border-slate-300 dark:border-slate-600 transition-all"
         >
           <FolderPlus size={11} /> Folders
         </button>
@@ -994,7 +994,7 @@ const NotesView: React.FC<NotesViewProps> = ({ onMenuClick }) => {
             <button
               key={tag}
               onClick={() => setSelectedTags(prev => prev.includes(tag) ? prev.filter(t => t !== tag) : [...prev, tag])}
-              className={`shrink-0 px-2 py-0.5 rounded-full text-xs transition-all ${selectedTags.includes(tag) ? 'bg-indigo-500 text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'}`}
+              className={`shrink-0 px-2 py-0.5 rounded-full text-xs transition-all ${selectedTags.includes(tag) ? 'bg-blue-500 text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'}`}
             >#{tag}</button>
           ))}
           {selectedTags.length > 0 && (
@@ -1007,9 +1007,9 @@ const NotesView: React.FC<NotesViewProps> = ({ onMenuClick }) => {
       <div className="flex items-center gap-4 px-4 py-1.5 bg-slate-50 dark:bg-slate-900/50 border-b border-slate-100 dark:border-slate-800 text-xs text-slate-400 shrink-0">
         <span>{filtered.length} note{filtered.length !== 1 ? 's' : ''}</span>
         <span>{stats.words.toLocaleString()} total words</span>
-        {searchQuery && <span className="text-indigo-500">Searching: "{searchQuery}"</span>}
-        {selectedFolder && <span className="text-indigo-500">📁 {folders.find(f => f.id === selectedFolder)?.name}</span>}
-        {selectedTags.length > 0 && <span className="text-indigo-500">Tags: {selectedTags.map(t => `#${t}`).join(', ')}</span>}
+        {searchQuery && <span className="text-blue-500">Searching: "{searchQuery}"</span>}
+        {selectedFolder && <span className="text-blue-500">📁 {folders.find(f => f.id === selectedFolder)?.name}</span>}
+        {selectedTags.length > 0 && <span className="text-blue-500">Tags: {selectedTags.map(t => `#${t}`).join(', ')}</span>}
       </div>
 
       {/* ── NOTES GRID / LIST ── */}
@@ -1023,7 +1023,7 @@ const NotesView: React.FC<NotesViewProps> = ({ onMenuClick }) => {
             {!searchQuery && filterMode === 'all' && (
               <button
                 onClick={createNote}
-                className="flex items-center gap-2 px-4 py-2 rounded-xl bg-indigo-500 hover:bg-gradient-to-br from-indigo-500 to-purple-500 text-white text-sm font-medium transition-colors"
+                className="flex items-center gap-2 px-4 py-2 rounded-xl bg-blue-500 hover:bg-blue-600 text-white text-sm font-medium transition-colors"
               >
                 <Plus size={15}/> Create your first note
               </button>

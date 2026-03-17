@@ -34,7 +34,7 @@ type ViewMode = 'grid' | 'list';
 const SECTIONS: HabitSection[] = ['Morning', 'Afternoon', 'Night', 'Others'];
 
 const SECTION_META: Record<HabitSection, { icon: React.ReactNode; gradient: string; time: string }> = {
-  Morning:   { icon: <Sun size={14} />,     gradient: 'from-amber-400 to-indigo-400',   time: '5am – 12pm' },
+  Morning:   { icon: <Sun size={14} />,     gradient: 'from-amber-400 to-orange-400',   time: '5am – 12pm' },
   Afternoon: { icon: <Sunset size={14} />,  gradient: 'from-sky-400 to-blue-500',       time: '12pm – 5pm' },
   Night:     { icon: <Moon size={14} />,    gradient: 'from-indigo-500 to-violet-600',  time: '5pm – 10pm' },
   Others:    { icon: <Star size={14} />,    gradient: 'from-slate-400 to-slate-600',    time: 'Anytime'    },
@@ -437,7 +437,7 @@ const HabitCard: React.FC<{
 
         <div className="flex items-center gap-2 flex-shrink-0">
           {streak > 0 && (
-            <span className="flex items-center gap-0.5 text-xs font-bold text-indigo-500 bg-indigo-50 dark:bg-indigo-500/10 px-2 py-0.5 rounded-full">
+            <span className="flex items-center gap-0.5 text-xs font-bold text-orange-500 bg-orange-50 dark:bg-orange-500/10 px-2 py-0.5 rounded-full">
               🔥{streak}
             </span>
           )}
@@ -490,7 +490,7 @@ const HabitCard: React.FC<{
 
       {/* Stats row */}
       <div className="flex gap-2">
-        <StatPill label="Streak" value={`${streak}🔥`} color="text-indigo-500" />
+        <StatPill label="Streak" value={`${streak}🔥`} color="text-orange-500" />
         <StatPill label="30d Rate" value={`${rate}%`} color={rate >= 70 ? 'text-green-500' : rate >= 40 ? 'text-yellow-500' : 'text-red-400'} />
         {habit.isNegative && <StatPill label="Type" value="🚫" color="text-red-400" />}
       </div>

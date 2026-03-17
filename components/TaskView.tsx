@@ -76,7 +76,7 @@ const SwipeableWrapper: React.FC<{
   return (
     <div className="relative overflow-hidden rounded-[24px]">
       {/* Background Actions */}
-      <div className={`absolute inset-0 flex items-center justify-between px-6 text-white transition-colors ${offset > 0 ? 'bg-indigo-500' : 'bg-indigo-500'}`}>
+      <div className={`absolute inset-0 flex items-center justify-between px-6 text-white transition-colors ${offset > 0 ? 'bg-blue-500' : 'bg-orange-500'}`}>
          {/* Right Swipe Content (shown on left side when swiping right) */}
          <div style={{ opacity: offset > 0 ? opacity : 0 }} className="font-bold flex items-center gap-2 transform transition-transform">
              <CheckCircle2 size={24} /> 
@@ -169,7 +169,7 @@ const BentoTaskCard: React.FC<BentoTaskCardProps> = ({ task, onToggle, onSelect,
                 </h3>
                 <button 
                     onClick={(e) => { e.stopPropagation(); onToggle(); }}
-                    className={`shrink-0 w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all shadow-sm ${task.isCompleted ? 'bg-slate-400 border-slate-400 text-white' : 'border-slate-300 hover:border-indigo-500 bg-white dark:bg-transparent'}`}
+                    className={`shrink-0 w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all shadow-sm ${task.isCompleted ? 'bg-slate-400 border-slate-400 text-white' : 'border-slate-300 hover:border-blue-500 bg-white dark:bg-transparent'}`}
                 >
                     {task.isCompleted && <Check size={14} strokeWidth={3} />}
                 </button>
@@ -234,7 +234,7 @@ const NoteItem: React.FC<NoteItemProps> = ({ note, childTasks, onClick, onLongPr
             onMouseUp={handleTouchEnd}
             className={`
                 break-inside-avoid mb-3 rounded-[24px] overflow-hidden cursor-pointer flex flex-col group relative transition-all duration-300
-                ${isSelected ? 'ring-4 ring-indigo-500 shadow-xl scale-95 z-10' : 'hover:-translate-y-1 hover:shadow-lg'}
+                ${isSelected ? 'ring-4 ring-blue-500 shadow-xl scale-95 z-10' : 'hover:-translate-y-1 hover:shadow-lg'}
                 ${!hasCustomBg ? 'bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800' : 'border border-black/5'}
             `}
             style={{ 
@@ -243,7 +243,7 @@ const NoteItem: React.FC<NoteItemProps> = ({ note, childTasks, onClick, onLongPr
         >
             {/* Selection Checkmark */}
             {isSelected && (
-                <div className="absolute top-3 right-3 z-30 bg-indigo-500 text-white rounded-full p-1 shadow-md animate-scale-in">
+                <div className="absolute top-3 right-3 z-30 bg-blue-500 text-white rounded-full p-1 shadow-md animate-scale-in">
                     <Check size={14} strokeWidth={3} />
                 </div>
             )}
@@ -578,7 +578,7 @@ const TaskView: React.FC<TaskViewProps> = ({
                     </div>
                     <button 
                         onClick={() => createBlankNote('text')}
-                        className="w-12 h-12 bg-gradient-to-br from-indigo-500 to-purple-600 text-white rounded-xl flex items-center justify-center shadow-lg hover:scale-105 active:scale-95 transition-transform"
+                        className="w-12 h-12 bg-gradient-to-br from-amber-500 to-orange-600 text-white rounded-xl flex items-center justify-center shadow-lg hover:scale-105 active:scale-95 transition-transform"
                     >
                          <Plus size={24} strokeWidth={3} />
                     </button>

@@ -24,8 +24,8 @@ interface SidebarProps {
 }
 
 const VIEW_COLORS: Record<string, string> = {
-    [ViewType.Inbox]: 'bg-indigo-500',
-    [ViewType.Today]: 'bg-indigo-500',
+    [ViewType.Inbox]: 'bg-blue-500',
+    [ViewType.Today]: 'bg-orange-500',
     [ViewType.Next7Days]: 'bg-violet-500',
     [ViewType.All]: 'bg-slate-500',
     [ViewType.Calendar]: 'bg-rose-500',
@@ -36,8 +36,8 @@ const VIEW_COLORS: Record<string, string> = {
 };
 
 const TEXT_COLORS: Record<string, string> = {
-    [ViewType.Inbox]: 'text-indigo-500',
-    [ViewType.Today]: 'text-indigo-500',
+    [ViewType.Inbox]: 'text-blue-500',
+    [ViewType.Today]: 'text-orange-500',
     [ViewType.Next7Days]: 'text-violet-500',
     [ViewType.All]: 'text-slate-500',
     [ViewType.Calendar]: 'text-rose-500',
@@ -56,21 +56,26 @@ const Sidebar: React.FC<SidebarProps> = React.memo(({
 
   // Pill style navigation items
   const navItemClass = (view: ViewType | string) => {
+      const activeColor = VIEW_COLORS[view] || 'bg-blue-600';
       const isActive = currentView === view;
       
       return `
-        relative flex items-center gap-3 px-4 py-3 rounded-2xl cursor-pointer transition-all duration-200 select-none group
+        relative flex items-center gap-3 px-4 py-3 rounded-2xl cursor-pointer transition-all duration-300 select-none group
         ${isActive 
-            ? `bg-white dark:bg-slate-800 shadow-sm border border-slate-200/60 dark:border-slate-700 text-indigo-600 dark:text-indigo-400 font-bold` 
-            : 'text-slate-600 dark:text-slate-400 hover:bg-slate-200/50 dark:hover:bg-slate-800/50 hover:text-slate-900 dark:hover:text-slate-200 font-medium'
+            ? `${activeColor} text-white shadow-lg shadow-black/5 translate-x-1` 
+            : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/50 hover:text-slate-900 dark:hover:text-slate-200'
         }
       `;
   };
 
   const iconClass = (view: ViewType | string) => {
       const isActive = currentView === view;
-      const activeColor = TEXT_COLORS[view] || 'text-indigo-500';
-      return `transition-colors duration-200 ${activeColor} ${isActive ? '' : 'opacity-70 group-hover:opacity-100'}`;
+      const textColor = TEXT_COLORS[view] || 'text-slate-400';
+      
+      return `
+        transition-colors duration-300
+        ${isActive ? 'text-white' : `${textColor} dark:text-slate-500 group-hover:text-slate-900 dark:group-hover:text-white`}
+      `;
   };
 
   const showFeature = (id: string) => enabledFeatures.includes(id);
@@ -95,31 +100,31 @@ const Sidebar: React.FC<SidebarProps> = React.memo(({
         <div className={`
             fixed md:static inset-y-0 left-0 z-50
             h-full md:h-auto md:rounded-[32px]
-            bg-slate-50 dark:bg-slate-950/95 flex flex-col 
+            bg-white dark:bg-slate-950 flex flex-col 
             transition-transform duration-300 ease-[cubic-bezier(0.2,0.8,0.2,1)]
             w-[85vw] max-w-[280px]
             ${isOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0 md:ml-0'}
-            shadow-2xl md:shadow-none border-r border-slate-200 dark:border-slate-800 md:border-r-0
+            shadow-2xl md:shadow-none md:border-0
         `}>
         
         <div className="flex flex-col h-full px-4 pt-safe">
             {/* Header / Branding */}
             <div className="py-6 flex items-center justify-between px-2">
-                <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center text-white shadow-lg shadow-indigo-500/30 ring-2 ring-white dark:ring-slate-900 transform -rotate-6">
-                        <Zap size={20} fill="currentColor" className="transform rotate-6" />
+                <div className="flex items-center gap-4">
+                    <div className="w-11 h-11 bg-blue-600 rounded-2xl flex items-center justify-center text-white shadow-xl shadow-blue-600/20">
+                        <CheckSquare size={24} strokeWidth={2.5} />
                     </div>
-                    <span className="text-2xl font-black bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 to-purple-600 dark:from-indigo-400 dark:to-purple-400 tracking-tight">Tracker</span>
+                    <span className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">Tracker</span>
                 </div>
                 
                 <button 
                   onClick={onOpenProfile}
-                  className="w-10 h-10 rounded-full border-2 border-slate-200 dark:border-slate-800 overflow-hidden hover:scale-105 active:scale-95 transition-transform"
+                  className="w-10 h-10 rounded-full border-2 border-slate-100 dark:border-slate-800 overflow-hidden hover:scale-105 active:scale-95 transition-transform"
                 >
                     {user?.photoURL ? (
                         <img src={user.photoURL} alt="User" className="w-full h-full object-cover" />
                     ) : (
-                        <div className="w-full h-full bg-slate-200 dark:bg-slate-800 flex items-center justify-center text-slate-500">
+                        <div className="w-full h-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-400">
                             <User size={20} />
                         </div>
                     )}
@@ -128,7 +133,7 @@ const Sidebar: React.FC<SidebarProps> = React.memo(({
 
             {/* Global Search */}
             <div className="mb-6 mx-1">
-                <div className="bg-slate-200/50 dark:bg-slate-900/50 flex items-center px-4 py-3 rounded-2xl gap-3 focus-within:ring-2 focus-within:ring-indigo-500/30 transition-all focus-within:bg-white dark:focus-within:bg-slate-800 shadow-sm border border-transparent focus-within:border-indigo-200 dark:focus-within:border-slate-700">
+                <div className="bg-slate-100/50 dark:bg-slate-900/50 flex items-center px-4 py-3 rounded-2xl gap-3 focus-within:ring-2 focus-within:ring-blue-500/20 transition-all focus-within:bg-white dark:focus-within:bg-slate-800 shadow-sm border border-transparent focus-within:border-blue-100 dark:focus-within:border-slate-700">
                     <Search size={18} className="text-slate-400" />
                     <input 
                         id="sidebar-search"
@@ -198,8 +203,8 @@ const Sidebar: React.FC<SidebarProps> = React.memo(({
                 {/* Custom Lists */}
                 <div>
                     <div className="flex items-center justify-between px-4 mb-2 group cursor-pointer" onClick={() => setIsManagingLists(true)}>
-                        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest group-hover:text-indigo-500 transition-colors">Lists</span>
-                        <Plus size={14} className="text-slate-400 group-hover:text-indigo-500" />
+                        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest group-hover:text-blue-600 transition-colors">Lists</span>
+                        <Plus size={14} className="text-slate-400 group-hover:text-blue-600" />
                     </div>
                     
                     <div className="space-y-1">
@@ -217,13 +222,13 @@ const Sidebar: React.FC<SidebarProps> = React.memo(({
             </div>
 
             {/* Footer Settings */}
-            <div className="py-4 border-t border-slate-200 dark:border-slate-800 pb-safe">
+            <div className="py-4 border-t border-slate-100 dark:border-slate-800 pb-safe">
                 <button 
                     onClick={() => {
                         if (onOpenSettings) onOpenSettings();
                         onClose();
                     }}
-                    className="w-full flex items-center gap-3 px-4 py-3 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200/50 dark:hover:bg-slate-800 rounded-2xl transition-all active:scale-95 group"
+                    className="w-full flex items-center gap-3 px-4 py-3 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-slate-800 rounded-2xl transition-all active:scale-95 group"
                 >
                     <Settings size={20} className="group-hover:rotate-45 transition-transform duration-500" />
                     <span className="text-sm font-bold">Settings</span>
@@ -248,9 +253,9 @@ const Sidebar: React.FC<SidebarProps> = React.memo(({
                             value={newListTitle}
                             onChange={(e) => setNewListTitle(e.target.value)}
                             placeholder="New List Name"
-                            className="flex-1 text-sm bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-all dark:text-white"
+                            className="flex-1 text-sm bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all dark:text-white"
                         />
-                        <button onClick={handleCreateList} disabled={!newListTitle.trim()} className="bg-gradient-to-br from-indigo-500 to-purple-500 text-white p-3 rounded-xl hover:from-indigo-600 hover:to-purple-500 disabled:opacity-50 transition-colors active:scale-95 shadow-lg shadow-indigo-500/30">
+                        <button onClick={handleCreateList} disabled={!newListTitle.trim()} className="bg-blue-600 text-white p-3 rounded-xl hover:bg-blue-700 disabled:opacity-50 transition-colors active:scale-95 shadow-lg shadow-blue-500/30">
                             <Plus size={20} />
                         </button>
                     </div>

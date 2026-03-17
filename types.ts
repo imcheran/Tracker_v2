@@ -23,13 +23,7 @@ export enum ViewType {
   Archive = 'archive',
   Finance = 'finance',
   Matrix = 'matrix',
-  Kanban = 'kanban',
-  BudgetPlanner = 'budgetplanner',
-  NetWorth = 'networth',
-  WeeklyReview = 'weeklyreview',
-  FocusHeatmap = 'focusheatmap',
-  TagAnalytics = 'taganalytics',
-  ProductivityScore = 'productivityscore'
+  Kanban = 'kanban'
 }
 
 export interface Subtask {
@@ -88,63 +82,6 @@ export interface List {
   name: string;
   color: string;
   updatedAt?: Date;
-}
-
-// ── Budget ────────────────────────────────────────────────────────
-export interface BudgetCategory {
-  id: string;
-  category: string; // matches Transaction.category
-  monthlyLimit: number;
-  color: string;
-  icon?: string;
-  createdAt: Date;
-  updatedAt: Date;
-}
-
-// ── Recurring Transaction Template ───────────────────────────────
-export interface RecurringTransaction {
-  id: string;
-  title: string;       // e.g. "Rent"
-  amount: number;
-  type: 'debit' | 'credit';
-  category: string;
-  merchant: string;
-  paymentmethod: string;
-  period: 'daily' | 'weekly' | 'monthly' | 'yearly';
-  nextDate: string;    // YYYY-MM-DD
-  isActive: boolean;
-  createdAt: Date;
-  updatedAt: Date;
-}
-
-// ── Habit Routine (Habit Stacking) ───────────────────────────────
-export interface HabitRoutine {
-  id: string;
-  name: string;            // e.g. "Morning Routine"
-  section: 'Morning' | 'Evening' | 'Custom';
-  habitIds: string[];      // ordered list
-  color: string;
-  icon: string;
-  createdAt: Date;
-  updatedAt: Date;
-}
-
-// ── Mood Log (surface the existing mood field) ───────────────────
-export interface MoodEntry {
-  date: string;            // YYYY-MM-DD
-  mood: 'great' | 'good' | 'okay' | 'bad' | 'awful';
-  note?: string;
-}
-
-// ── Task Template ─────────────────────────────────────────────────
-export interface TaskTemplate {
-  id: string;
-  title: string;
-  description?: string;
-  priority: Priority;
-  tags: string[];
-  subtasks: Subtask[];
-  listId: string;
 }
 
 export interface Habit {

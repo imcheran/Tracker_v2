@@ -24,61 +24,17 @@
               sans: ['Inter', 'system-ui', 'sans-serif'],
             },
             colors: {
-              // Warm theme palette
-              warm: {
-                bg:      '#FAF6F0',
-                surface: '#FFFFFF',
-                border:  '#EDE8E0',
-                header:  '#F5A623',
-                muted:   '#7C7C8A',
-              },
-              brand: {
-                teal:  '#2BBFAA',
-                rose:  '#E05C7A',
-                amber: '#F5A623',
-                blue:  '#4A90D9',
-              },
-              // Override Tailwind blue with warm amber
-              blue: {
-                50:  '#FFF8EE',
-                100: '#FFE9C2',
-                400: '#FFBC5C',
-                500: '#F5A623',
-                600: '#E09318',
-                700: '#C47D10',
-              },
-              // Override Tailwind slate for warm neutrals
               slate: {
-                50:  '#FAF6F0',
-                100: '#F3EEE8',
-                200: '#EDE8E0',
-                300: '#D9D3CA',
-                400: '#AFA9A0',
-                500: '#7C7C8A',
-                600: '#5C5C6A',
-                700: '#3C3C4A',
-                800: '#2A2A35',
-                900: '#1A1A2E',
-                950: '#0F0F1A',
+                850: '#1e293b',
+                950: '#020617', // Deeper dark
               },
-              // Keep emerald for "done/habits" -> remap to teal
-              emerald: {
-                400: '#2BBFAA',
-                500: '#2BBFAA',
-                600: '#22A896',
-              },
-            },
-            borderRadius: {
-              '2xl':  '16px',
-              '3xl':  '24px',
-              '4xl':  '32px',
-              'pill': '9999px',
-            },
-            boxShadow: {
-              'warm-sm': '0 2px 8px rgba(245,166,35,0.10)',
-              'warm-md': '0 4px 20px rgba(245,166,35,0.15)',
-              'warm-lg': '0 8px 40px rgba(245,166,35,0.20)',
-              'card':    '0 2px 16px rgba(0,0,0,0.06)',
+              primary: {
+                50: '#eff6ff',
+                100: '#dbeafe',
+                500: '#3b82f6',
+                600: '#2563eb',
+                700: '#1d4ed8',
+              }
             },
             animation: {
               'fade-in': 'fadeIn 0.4s cubic-bezier(0.2, 0.8, 0.2, 1)',
@@ -113,223 +69,27 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
       :root {
-        --color-bg:           #FAF6F0;
-        --color-surface:      #FFFFFF;
-        --color-header:       #F5A623;
-        --color-header-end:   #F0875A;
-        --color-accent-teal:  #2BBFAA;
-        --color-accent-rose:  #E05C7A;
-        --color-accent-amber: #F5A623;
-        --color-accent-blue:  #4A90D9;
-        --color-text-primary: #1A1A2E;
-        --color-text-muted:   #7C7C8A;
-        --color-border:       #EDE8E0;
-        --color-nav-active:   #F5A623;
-        --font-sans: 'Inter', system-ui, sans-serif;
+        --font-sans: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        --accent: #6366f1;
+        --accent-light: #818cf8;
+        --radius-xl: 24px;
+        --radius-2xl: 32px;
+        --shadow-card: 0 4px 24px -4px rgba(0,0,0,0.08), 0 1px 4px rgba(0,0,0,0.04);
+        --shadow-float: 0 8px 40px -8px rgba(99,102,241,0.18);
       }
-
       body {
         font-family: var(--font-sans);
-        background-color: var(--color-bg) !important;
-        color: var(--color-text-primary) !important;
+        background-color: #eef0f6;
+        color: #0F172A;
         -webkit-font-smoothing: antialiased;
         -moz-osx-font-smoothing: grayscale;
         overscroll-behavior-y: none;
         touch-action: manipulation;
         margin: 0;
       }
-      
       html.dark body {
-        background-color: #09090b !important;
-        color: #F8FAFC !important;
-      }
-
-      /* ── App root shell ── */
-      #root > div {
-        background-color: var(--color-bg) !important;
-      }
-      html.dark #root > div {
-        background-color: #09090b !important;
-      }
-
-      /* ── Sidebar ── */
-      [class*="Sidebar"] > div,
-      aside,
-      nav.sidebar {
-        background-color: var(--color-surface) !important;
-        border-right-color: var(--color-border) !important;
-      }
-      html.dark [class*="Sidebar"] > div,
-      html.dark aside,
-      html.dark nav.sidebar {
-        background-color: #1A1A2E !important;
-        border-right-color: #2A2A35 !important;
-      }
-
-      /* ── Top Header / AppBar ── */
-      .pt-safe,
-      [class*="pt-safe"] {
-        background: linear-gradient(135deg, var(--color-header) 0%, var(--color-header-end) 100%) !important;
-        color: #fff !important;
-      }
-
-      .pt-safe h1,
-      .pt-safe span,
-      .pt-safe button {
-        color: #fff !important;
-      }
-
-      /* ── Main content area ── */
-      main,
-      [class*="flex-1 h-full flex flex-col"],
-      [class*="bg-slate-50"],
-      [class*="bg-white"] {
-        background-color: var(--color-bg) !important;
-      }
-      html.dark main,
-      html.dark [class*="flex-1 h-full flex flex-col"],
-      html.dark [class*="bg-slate-50"],
-      html.dark [class*="bg-white"] {
-        background-color: #09090b !important;
-      }
-
-      /* ── Cards ── */
-      [class*="bg-white rounded"],
-      [class*="rounded-2xl"],
-      [class*="rounded-3xl"] {
-        background-color: var(--color-surface) !important;
-        border-color: var(--color-border) !important;
-      }
-      html.dark [class*="bg-white rounded"],
-      html.dark [class*="rounded-2xl"],
-      html.dark [class*="rounded-3xl"] {
-        background-color: #1A1A2E !important;
-        border-color: #2A2A35 !important;
-      }
-
-      /* ── Bottom Navigation ── */
-      [class*="h-14 border-t"],
-      [class*="MobileNavigation"],
-      nav[class*="fixed bottom"] {
-        background-color: rgba(255,255,255,0.95) !important;
-        border-top-color: var(--color-border) !important;
-        backdrop-filter: blur(12px);
-      }
-      html.dark [class*="h-14 border-t"],
-      html.dark [class*="MobileNavigation"],
-      html.dark nav[class*="fixed bottom"] {
-        background-color: rgba(26,26,46,0.95) !important;
-        border-top-color: #2A2A35 !important;
-      }
-
-      /* Active nav icon */
-      [class*="text-blue-600"],
-      [class*="text-blue-500"] {
-        color: var(--color-nav-active) !important;
-      }
-
-      [class*="bg-blue-600"],
-      [class*="bg-blue-500"] {
-        background-color: var(--color-nav-active) !important;
-      }
-
-      /* ── Buttons ── */
-      button[class*="bg-blue-600"],
-      button[class*="bg-blue"] {
-        background-color: var(--color-accent-teal) !important;
-        border-color: var(--color-accent-teal) !important;
-        color: #fff !important;
-        border-radius: 999px !important;
-      }
-
-      /* ── Task status chips ── */
-      /* "To Do" — soft red */
-      [class*="bg-red-"],
-      [class*="border-red-500"] {
-        background-color: #FDDDE6 !important;
-        color: var(--color-accent-rose) !important;
-      }
-      html.dark [class*="bg-red-"],
-      html.dark [class*="border-red-500"] {
-        background-color: rgba(224, 92, 122, 0.15) !important;
-      }
-      /* "In Progress" — amber */
-      [class*="bg-yellow-"],
-      [class*="border-yellow-500"] {
-        background-color: #FFF0D6 !important;
-        color: var(--color-accent-amber) !important;
-      }
-      html.dark [class*="bg-yellow-"],
-      html.dark [class*="border-yellow-500"] {
-        background-color: rgba(245, 166, 35, 0.15) !important;
-      }
-      /* "Done" / checkmarks — teal */
-      [class*="bg-emerald-"],
-      [class*="bg-green-"],
-      [class*="border-emerald-500"] {
-        background-color: #D4F5F0 !important;
-        color: var(--color-accent-teal) !important;
-      }
-      html.dark [class*="bg-emerald-"],
-      html.dark [class*="bg-green-"],
-      html.dark [class*="border-emerald-500"] {
-        background-color: rgba(43, 191, 170, 0.15) !important;
-      }
-
-      /* ── Progress / habit ring circle backgrounds ── */
-      [class*="bg-teal-"],
-      [class*="text-teal-"] {
-        color: var(--color-accent-teal) !important;
-      }
-
-      /* ── Section headings ── */
-      h1, h2, h3 {
-        color: var(--color-text-primary) !important;
-        font-weight: 800 !important;
-      }
-      html.dark h1, html.dark h2, html.dark h3 {
-        color: #F8FAFC !important;
-      }
-
-      p, span, label {
-        color: var(--color-text-muted);
-      }
-
-      /* ── Inputs & Textareas ── */
-      input, textarea {
-        background-color: #F3EEE8 !important;
-        border-color: var(--color-border) !important;
-        color: var(--color-text-primary) !important;
-        border-radius: 12px !important;
-      }
-      html.dark input, html.dark textarea {
-        background-color: #2A2A35 !important;
-        border-color: #3C3C4A !important;
-        color: #F8FAFC !important;
-      }
-
-      input:focus, textarea:focus {
-        outline: none !important;
-        border-color: var(--color-accent-teal) !important;
-        box-shadow: 0 0 0 3px rgba(43,191,170,0.15) !important;
-      }
-
-      /* ── Active Project cards ── */
-      /* Teal card */
-      .project-card-teal,
-      [class*="bg-teal-500"],
-      [class*="bg-emerald-500"] {
-        background: linear-gradient(145deg, #2BBFAA, #22A896) !important;
-        color: #fff !important;
-        border-radius: 20px !important;
-      }
-      /* Rose card */
-      .project-card-rose,
-      [class*="bg-rose-500"],
-      [class*="bg-pink-500"] {
-        background: linear-gradient(145deg, #E05C7A, #C94B68) !important;
-        color: #fff !important;
-        border-radius: 20px !important;
+        background-color: #09090b;
+        color: #F8FAFC;
       }
 
       /* ── Loading Screen ── */
@@ -340,7 +100,7 @@
         flex-direction: column;
         align-items: center;
         justify-content: center;
-        background: linear-gradient(135deg, #FAF6F0 0%, #FFFFFF 100%);
+        background: linear-gradient(135deg, #f0f2ff 0%, #faf5ff 100%);
         z-index: 9999;
         transition: opacity 0.4s ease-out;
       }
@@ -350,18 +110,18 @@
       .loader-spinner {
         width: 52px;
         height: 52px;
-        border: 3px solid rgba(245,166,35,0.15);
-        border-top-color: #F5A623;
+        border: 3px solid rgba(99,102,241,0.15);
+        border-top-color: #6366f1;
         border-radius: 50%;
         animation: spin 0.9s linear infinite;
         margin-bottom: 20px;
-        box-shadow: 0 0 20px rgba(245,166,35,0.2);
+        box-shadow: 0 0 20px rgba(99,102,241,0.2);
       }
       .loader-text {
         font-weight: 700;
         font-size: 1.25rem;
         letter-spacing: -0.02em;
-        background: linear-gradient(135deg, #F5A623, #F0875A);
+        background: linear-gradient(135deg, #6366f1, #8b5cf6);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
         background-clip: text;
@@ -375,10 +135,16 @@
       }
 
       /* ── Scrollbar ── */
-      ::-webkit-scrollbar { width: 4px; height: 4px; }
-      ::-webkit-scrollbar-track { background: transparent; }
-      ::-webkit-scrollbar-thumb { background: #DDD8D0; border-radius: 99px; }
-      ::-webkit-scrollbar-thumb:hover { background: #B8B2AA; }
+      ::-webkit-scrollbar { width: 0; background: transparent; }
+      .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+      .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+      .custom-scrollbar::-webkit-scrollbar-thumb {
+        background: rgba(99,102,241,0.2);
+        border-radius: 99px;
+      }
+      .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+        background: rgba(99,102,241,0.4);
+      }
 
       /* ── Safe Area ── */
       .pt-safe { padding-top: env(safe-area-inset-top); }
@@ -404,20 +170,20 @@
       }
       .bento-card:hover {
         transform: translateY(-3px) scale(1.015);
-        box-shadow: 0 8px 40px rgba(245,166,35,0.20);
+        box-shadow: var(--shadow-float);
       }
       .bento-card:active { transform: scale(0.975); }
 
       /* ── Sidebar nav item active pill ── */
       .nav-item-active {
-        background: linear-gradient(135deg, rgba(245,166,35,0.12), rgba(240,135,90,0.08));
-        color: #F5A623;
-        border-left: 3px solid #F5A623;
+        background: linear-gradient(135deg, rgba(99,102,241,0.12), rgba(139,92,246,0.08));
+        color: #6366f1;
+        border-left: 3px solid #6366f1;
       }
       html.dark .nav-item-active {
-        background: rgba(245,166,35,0.18);
-        color: #FFBC5C;
-        border-left-color: #FFBC5C;
+        background: rgba(99,102,241,0.18);
+        color: #818cf8;
+        border-left-color: #818cf8;
       }
 
       /* ── Floating Mobile Nav ── */
@@ -426,13 +192,23 @@
         backdrop-filter: blur(20px) saturate(180%);
         -webkit-backdrop-filter: blur(20px) saturate(180%);
         border: 1px solid rgba(255,255,255,0.6);
-        box-shadow: 0 8px 32px -4px rgba(245,166,35,0.18), 0 2px 8px rgba(0,0,0,0.06);
+        box-shadow: 0 8px 32px -4px rgba(99,102,241,0.18), 0 2px 8px rgba(0,0,0,0.06);
       }
       html.dark .mobile-nav-float {
         background: rgba(15,17,30,0.85);
         border-color: rgba(255,255,255,0.08);
         box-shadow: 0 8px 32px -4px rgba(0,0,0,0.4), 0 2px 8px rgba(0,0,0,0.2);
       }
+
+      /* ── Priority badge colors ── */
+      .priority-urgent { background: #fef2f2; color: #ef4444; }
+      .priority-high    { background: #fff7ed; color: #f97316; }
+      .priority-medium  { background: #fefce8; color: #eab308; }
+      .priority-low     { background: #f0fdf4; color: #22c55e; }
+      html.dark .priority-urgent { background: rgba(239,68,68,0.15); color: #f87171; }
+      html.dark .priority-high   { background: rgba(249,115,22,0.15); color: #fb923c; }
+      html.dark .priority-medium { background: rgba(234,179,8,0.15);  color: #facc15; }
+      html.dark .priority-low    { background: rgba(34,197,94,0.15);  color: #4ade80; }
 
       /* ── Animations ── */
       @keyframes fadeIn  { from { opacity:0 } to { opacity:1 } }
@@ -447,7 +223,7 @@
 
       /* ── Focus ring ── */
       *:focus-visible {
-        outline: 2px solid #F5A623;
+        outline: 2px solid #6366f1;
         outline-offset: 2px;
         border-radius: 6px;
       }

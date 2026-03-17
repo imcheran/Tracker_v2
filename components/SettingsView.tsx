@@ -27,7 +27,7 @@ const SettingsView: React.FC<SettingsViewProps> = ({
 
   // Fixed SectionHeader to correctly handle React children
   const SectionHeader: React.FC<{ children: React.ReactNode }> = ({ children }) => (
-    <h2 className="px-6 pt-6 pb-2 text-[11px] font-bold text-indigo-500 dark:text-indigo-400 uppercase tracking-widest">
+    <h2 className="px-6 pt-6 pb-2 text-[11px] font-bold text-blue-600 dark:text-blue-400 uppercase tracking-widest">
       {children}
     </h2>
   );
@@ -55,7 +55,7 @@ const SettingsView: React.FC<SettingsViewProps> = ({
   const Switch = ({ checked, onChange }: { checked: boolean, onChange: (val: boolean) => void }) => (
       <button 
         onClick={() => onChange(!checked)}
-        className={`w-12 h-6 rounded-full relative transition-colors duration-200 focus:outline-none ${checked ? 'bg-gradient-to-br from-indigo-500 to-purple-500' : 'bg-slate-300 dark:bg-slate-700'}`}
+        className={`w-12 h-6 rounded-full relative transition-colors duration-200 focus:outline-none ${checked ? 'bg-blue-600' : 'bg-slate-300 dark:bg-slate-700'}`}
       >
           <div className={`absolute top-1 left-1 w-4 h-4 bg-white rounded-full transition-transform duration-200 ${checked ? 'translate-x-6' : 'translate-x-0 shadow-sm'}`} />
       </button>
@@ -131,7 +131,7 @@ const SettingsView: React.FC<SettingsViewProps> = ({
                                 e.stopPropagation();
                                 user ? onLogout() : onLogin();
                             }}
-                            className={`px-4 py-1.5 rounded-lg text-xs font-bold transition-colors flex items-center gap-2 ${user ? 'bg-red-50 text-red-600 hover:bg-red-100 dark:bg-red-900/20 dark:text-red-400' : 'bg-gradient-to-br from-indigo-500 to-purple-500 text-white hover:from-indigo-600 hover:to-purple-500'}`}
+                            className={`px-4 py-1.5 rounded-lg text-xs font-bold transition-colors flex items-center gap-2 ${user ? 'bg-red-50 text-red-600 hover:bg-red-100 dark:bg-red-900/20 dark:text-red-400' : 'bg-blue-600 text-white hover:bg-blue-700'}`}
                         >
                             {user ? (
                                 <>
@@ -154,7 +154,7 @@ const SettingsView: React.FC<SettingsViewProps> = ({
                     {settings.couples?.partnerId ? (
                         <div className="bg-purple-50 dark:bg-purple-900/20 rounded-xl p-4 border border-purple-100 dark:border-purple-800">
                             <div className="flex items-center gap-3 mb-3">
-                                <div className="p-2 bg-violet-100 dark:bg-purple-800 rounded-full text-purple-600 dark:text-violet-300">
+                                <div className="p-2 bg-purple-100 dark:bg-purple-800 rounded-full text-purple-600 dark:text-purple-300">
                                     <Heart size={20} fill="currentColor" />
                                 </div>
                                 <div>
@@ -203,7 +203,7 @@ const SettingsView: React.FC<SettingsViewProps> = ({
                                                 value={partnerCode}
                                                 onChange={(e) => setPartnerCode(e.target.value)}
                                                 placeholder="Paste code here"
-                                                className="flex-1 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg px-3 py-2 text-sm outline-none focus:border-violet-500"
+                                                className="flex-1 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg px-3 py-2 text-sm outline-none focus:border-purple-500"
                                             />
                                             <button 
                                                 onClick={handleJoinHousehold}

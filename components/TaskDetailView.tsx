@@ -53,11 +53,6 @@ const TaskDetailView: React.FC<TaskDetailViewProps> = ({
   const [showThemePicker, setShowThemePicker] = useState(false);
   const [showDrawing, setShowDrawing] = useState(false);
   const [showShareModal, setShowShareModal] = useState(false);
-  const [showReminderPicker, setShowReminderPicker] = useState(false);
-  const [isRecording, setIsRecording] = useState(false);
-  
-  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
-  const audioChunksRef = useRef<Blob[]>([]);
   
   const [fullScreenImage, setFullScreenImage] = useState<string | null>(null);
   
@@ -104,50 +99,6 @@ const TaskDetailView: React.FC<TaskDetailViewProps> = ({
       updatedAt: new Date(),
       ...updatedFields
     });
-  };
-
-  // Bell / Reminder handler
-  const handleSetReminder = (minutesBefore: number) => {
-    const reminderDate = task.dueDate
-      ? new Date(new Date(task.dueDate).getTime() - minutesBefore * 60 * 1000)
-      : new Date(Date.now() + minutesBefore * 60 * 1000);
-    handleSave({ reminderAt: reminderDate });
-    setShowReminderPicker(false);
-  };
-
-  // Mic / Voice recording handler
-  const handleToggleVoiceRecord = async () => {
-    if (isRecording) {
-      // Stop recording
-      mediaRecorderRef.current?.stop();
-      setIsRecording(false);
-      return;
-    }
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      const recorder = new MediaRecorder(stream);
-      audioChunksRef.current = [];
-
-      recorder.ondataavailable = (e) => {
-        if (e.data.size > 0) audioChunksRef.current.push(e.data);
-      };
-
-      recorder.onstop = () => {
-        const blob    = new Blob(audioChunksRef.current, { type: 'audio/webm' });
-        const url     = URL.createObjectURL(blob);
-        const id      = Date.now().toString();
-        const newAtt  = { id, url, title: `Voice ${new Date().toLocaleTimeString()}`, type: 'audio' as const };
-        handleSave({ attachments: [...(task.attachments || []), newAtt] });
-        stream.getTracks().forEach((t) => t.stop());
-      };
-
-      recorder.start();
-      mediaRecorderRef.current = recorder;
-      setIsRecording(true);
-    } catch (err) {
-      console.error('Mic access denied', err);
-      alert('Microphone access is required to record voice notes.');
-    }
   };
 
   const handleEditorBlur = () => {
@@ -246,7 +197,7 @@ const TaskDetailView: React.FC<TaskDetailViewProps> = ({
       switch (p) {
           case Priority.High: return 'text-red-500';
           case Priority.Medium: return 'text-amber-500';
-          case Priority.Low: return 'text-indigo-500';
+          case Priority.Low: return 'text-blue-500';
           default: return 'text-slate-400';
       }
   };
@@ -256,7 +207,7 @@ const TaskDetailView: React.FC<TaskDetailViewProps> = ({
       switch (p) {
           case Priority.High: return 'border-red-500';
           case Priority.Medium: return 'border-amber-500';
-          case Priority.Low: return 'border-indigo-500';
+          case Priority.Low: return 'border-blue-500';
           default: return 'border-transparent';
       }
   };
@@ -312,7 +263,7 @@ const TaskDetailView: React.FC<TaskDetailViewProps> = ({
                  </button>
              </div>
              <div className="flex items-center gap-1 bg-black/5 dark:bg-white/5 backdrop-blur-md rounded-full p-1 pr-2">
-                 <button onClick={() => handleSave({ isPinned: !task.isPinned })} className={`p-2.5 rounded-full transition-colors ${task.isPinned ? 'text-indigo-500 bg-indigo-100' : iconColorClass}`}>
+                 <button onClick={() => handleSave({ isPinned: !task.isPinned })} className={`p-2.5 rounded-full transition-colors ${task.isPinned ? 'text-blue-600 bg-blue-100' : iconColorClass}`}>
                      <Pin size={18} fill={task.isPinned ? 'currentColor' : 'none'} className={task.isPinned ? 'rotate-45' : ''} />
                  </button>
                  <button className={`p-2.5 rounded-full transition-colors ${iconColorClass}`}>
@@ -333,7 +284,7 @@ const TaskDetailView: React.FC<TaskDetailViewProps> = ({
               <div className="flex items-start gap-4">
                   <button 
                       onClick={() => handleSave({ isCompleted: !task.isCompleted })}
-                      className={`mt-1.5 flex-shrink-0 transition-colors ${task.isCompleted ? 'text-indigo-500' : 'text-slate-400 hover:text-indigo-400'}`}
+                      className={`mt-1.5 flex-shrink-0 transition-colors ${task.isCompleted ? 'text-blue-500' : 'text-slate-400 hover:text-blue-400'}`}
                   >
                       {task.isCompleted ? <CheckCircle2 size={28} className="fill-current" /> : <Circle size={28} strokeWidth={2} />}
                   </button>
@@ -351,7 +302,7 @@ const TaskDetailView: React.FC<TaskDetailViewProps> = ({
               <div className="flex flex-wrap gap-2 pl-11">
                   {/* Date Chip */}
                   <div className="relative group">
-                      <button className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all border ${task.dueDate ? 'bg-indigo-50 text-indigo-500 border-blue-200' : 'bg-transparent border-slate-300/50 text-slate-500 hover:bg-black/5'}`}>
+                      <button className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all border ${task.dueDate ? 'bg-blue-50 text-blue-600 border-blue-200' : 'bg-transparent border-slate-300/50 text-slate-500 hover:bg-black/5'}`}>
                           <Calendar size={14} />
                           {formatDueDate(task.dueDate)}
                       </button>
@@ -428,7 +379,7 @@ const TaskDetailView: React.FC<TaskDetailViewProps> = ({
 
                               <button 
                                   onClick={(e) => { e.stopPropagation(); onUpdateTask({...child, isCompleted: !child.isCompleted}); }}
-                                  className={`flex-shrink-0 transition-all duration-300 transform ${child.isCompleted ? 'text-indigo-500 scale-110' : 'text-slate-400 hover:text-slate-500 hover:scale-105'}`}
+                                  className={`flex-shrink-0 transition-all duration-300 transform ${child.isCompleted ? 'text-blue-500 scale-110' : 'text-slate-400 hover:text-slate-500 hover:scale-105'}`}
                               >
                                   {child.isCompleted ? <CheckCircle2 size={20} className="fill-current" /> : <Circle size={20} />}
                               </button>
@@ -451,7 +402,7 @@ const TaskDetailView: React.FC<TaskDetailViewProps> = ({
                   {/* Add Item Button */}
                   <button 
                     onClick={handleAddChecklistItem} 
-                    className="flex items-center gap-3 px-4 py-3 mt-2 text-slate-500 hover:text-indigo-500 transition-colors w-full text-left font-medium text-sm group"
+                    className="flex items-center gap-3 px-4 py-3 mt-2 text-slate-500 hover:text-blue-600 transition-colors w-full text-left font-medium text-sm group"
                   >
                       <Plus size={20} className="group-hover:rotate-90 transition-transform duration-200" />
                       Add item
@@ -466,7 +417,7 @@ const TaskDetailView: React.FC<TaskDetailViewProps> = ({
               <button onClick={handleAddChecklistItem} className={`p-3 rounded-full hover:bg-black/5 transition-colors ${iconColorClass}`}>
                   <CheckSquare size={20} />
               </button>
-              <button onClick={() => setShowThemePicker(!showThemePicker)} className={`p-3 rounded-full transition-colors ${showThemePicker ? 'bg-black/10 text-indigo-500' : iconColorClass} hover:bg-black/5`}>
+              <button onClick={() => setShowThemePicker(!showThemePicker)} className={`p-3 rounded-full transition-colors ${showThemePicker ? 'bg-black/10 text-blue-500' : iconColorClass} hover:bg-black/5`}>
                   <Palette size={20} />
               </button>
               <div className="relative">
@@ -478,7 +429,7 @@ const TaskDetailView: React.FC<TaskDetailViewProps> = ({
               <button onClick={() => setShowDrawing(true)} className={`p-3 rounded-full hover:bg-black/5 transition-colors ${iconColorClass}`}>
                    <PenTool size={20} />
               </button>
-              <button onClick={handleToggleVoiceRecord} className={`p-3 rounded-full hover:bg-black/5 transition-colors ${isRecording ? 'bg-red-100 text-red-500 animate-pulse' : iconColorClass}`}>
+              <button className={`p-3 rounded-full hover:bg-black/5 transition-colors ${iconColorClass}`}>
                    <Mic size={20} />
               </button>
           </div>
@@ -488,20 +439,6 @@ const TaskDetailView: React.FC<TaskDetailViewProps> = ({
           </div>
 
           <div className="flex items-center gap-1">
-              <div className="relative">
-                  <button onClick={() => setShowReminderPicker(!showReminderPicker)} className={`p-3 rounded-full hover:bg-black/5 transition-colors ${showReminderPicker ? 'bg-black/10 text-indigo-500' : iconColorClass}`}>
-                      <Bell size={20} />
-                  </button>
-                  {showReminderPicker && (
-                      <div className="absolute bottom-full right-0 mb-2 w-48 bg-white dark:bg-slate-900 rounded-2xl shadow-xl border border-slate-100 dark:border-slate-800 p-2 z-50 animate-in fade-in slide-in-from-bottom-2">
-                          <div className="text-xs font-bold text-slate-400 uppercase tracking-wider px-3 py-2">Set Reminder</div>
-                          <button onClick={() => handleSetReminder(5)} className="w-full text-left px-3 py-2 text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-xl transition-colors">5 min before</button>
-                          <button onClick={() => handleSetReminder(15)} className="w-full text-left px-3 py-2 text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-xl transition-colors">15 min before</button>
-                          <button onClick={() => handleSetReminder(60)} className="w-full text-left px-3 py-2 text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-xl transition-colors">1 hour before</button>
-                          <button onClick={() => handleSetReminder(1440)} className="w-full text-left px-3 py-2 text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-xl transition-colors">1 day before</button>
-                      </div>
-                  )}
-              </div>
               <button onClick={() => setShowOptions(!showOptions)} className={`p-3 rounded-full hover:bg-black/5 transition-colors ${iconColorClass}`}>
                   <MoreVertical size={20} />
               </button>
@@ -520,7 +457,7 @@ const TaskDetailView: React.FC<TaskDetailViewProps> = ({
                 <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-1">Color</span>
                 <div className="flex gap-3 overflow-x-auto no-scrollbar pb-1">
                     {KEEP_COLORS.map(c => (
-                        <button key={c.color} onClick={() => { setNoteColor(c.color); handleSave({ color: c.color }); }} className={`w-10 h-10 rounded-full shrink-0 border-2 transition-transform shadow-sm ${noteColor === c.color ? 'border-indigo-500 scale-110' : 'border-slate-200 dark:border-slate-700'}`} style={{ backgroundColor: c.color }} />
+                        <button key={c.color} onClick={() => { setNoteColor(c.color); handleSave({ color: c.color }); }} className={`w-10 h-10 rounded-full shrink-0 border-2 transition-transform shadow-sm ${noteColor === c.color ? 'border-blue-500 scale-110' : 'border-slate-200 dark:border-slate-700'}`} style={{ backgroundColor: c.color }} />
                     ))}
                 </div>
               </div>
@@ -529,7 +466,7 @@ const TaskDetailView: React.FC<TaskDetailViewProps> = ({
                 <div className="flex gap-3 overflow-x-auto no-scrollbar pb-1">
                     {NOTE_THEMES.map(t => (
                         <button key={t.id} onClick={() => { setNoteTheme(t.id); handleSave({ backgroundImage: t.id }); }} className={`flex flex-col items-center gap-1.5 shrink-0 group`}>
-                            <div className={`w-14 h-14 rounded-2xl flex items-center justify-center text-xl border-2 transition-all overflow-hidden relative ${noteTheme === t.id ? 'border-indigo-500 ring-2 ring-indigo-500/20' : 'border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800'}`}>
+                            <div className={`w-14 h-14 rounded-2xl flex items-center justify-center text-xl border-2 transition-all overflow-hidden relative ${noteTheme === t.id ? 'border-blue-500 ring-2 ring-blue-500/20' : 'border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800'}`}>
                                 {t.id === 'none' ? <X size={20} className="text-slate-400" /> : (
                                     <>
                                         <NoteBackground themeId={t.id} isDark={isDarkMode} className="scale-[0.5]" />

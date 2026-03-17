@@ -422,7 +422,7 @@ const App: React.FC = () => {
   };
 
   return (
-    <div className="flex h-screen w-full bg-transparent text-slate-900 dark:text-slate-100 transition-colors duration-300 p-0 md:p-3 gap-3 overflow-hidden">
+    <div className="flex h-screen w-full bg-[#eef0f6] dark:bg-[#09090b] text-slate-900 dark:text-slate-100 transition-colors duration-300 p-0 md:p-3 gap-3 overflow-hidden">
         {/* Sidebar as a Floating Card on Desktop */}
         <Sidebar 
             currentView={currentView}
