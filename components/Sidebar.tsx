@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { 
   Inbox, Calendar, Target, Clock, Layers, Tags, 
-  Settings, Plus, Search, Zap, Notebook, Wallet, Sun, CalendarDays, Trash2, X, User, Cloud, CloudOff, Loader2, Check,
+  Settings, Plus, Search, Zap, Notebook, Wallet, Sun, CalendarDays, Trash2, X, User, Cloud, CloudOff, Loader2, Check, Heart,
   ListTodo, CheckSquare
 } from 'lucide-react';
 import { ViewType } from '../types';
@@ -33,6 +33,7 @@ const VIEW_COLORS: Record<string, string> = {
     [ViewType.Focus]: 'bg-indigo-500',
     [ViewType.Notes]: 'bg-amber-500',
     [ViewType.Finance]: 'bg-cyan-600',
+    [ViewType.Together]: 'bg-rose-500',
 };
 
 const TEXT_COLORS: Record<string, string> = {
@@ -45,6 +46,7 @@ const TEXT_COLORS: Record<string, string> = {
     [ViewType.Focus]: 'text-indigo-500',
     [ViewType.Notes]: 'text-amber-500',
     [ViewType.Finance]: 'text-cyan-600',
+    [ViewType.Together]: 'text-rose-500',
 };
 
 const Sidebar: React.FC<SidebarProps> = React.memo(({ 
@@ -197,6 +199,9 @@ const Sidebar: React.FC<SidebarProps> = React.memo(({
                                 <Wallet size={20} className={iconClass(ViewType.Finance)} /> <span>Finance</span>
                             </div>
                         )}
+                        <div onClick={() => onChangeView(ViewType.Together)} className={navItemClass(ViewType.Together)}>
+                            <Heart size={20} className={iconClass(ViewType.Together)} /> <span>Together</span>
+                        </div>
                     </div>
                 </div>
 

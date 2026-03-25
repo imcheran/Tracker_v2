@@ -13,7 +13,8 @@ export const STORAGE_KEYS = {
   INVESTMENTS: 'ticktick_clone_investments',
   SETTINGS: 'ticktick_clone_settings',
   TOKEN: 'ticktick_clone_token',
-  USER: 'ticktick_clone_user'
+  USER: 'ticktick_clone_user',
+  COUPLES_DATA: 'tracker_couples_data'
 };
 
 export const loadFromStorage = <T,>(key: string, defaultValue: T): T => {

@@ -13,9 +13,10 @@ const FinanceView = lazy(() => import('./components/FinanceView'));
 const NotesView = lazy(() => import('./components/NotesView'));
 const SettingsView = lazy(() => import('./components/SettingsView'));
 const ProfileMenu = lazy(() => import('./components/ProfileMenu'));
+const CouplesView = lazy(() => import('./components/CouplesView'));
 
 import { MobileNavigation } from './components/MobileNavigation';
-import { Task, ViewType, Habit, FocusCategory, List, AppSettings, FocusSession, Transaction, Debt, Debtor, SavingsGoal, Subscription, Investment } from './types';
+import { Task, ViewType, Habit, FocusCategory, List, AppSettings, FocusSession, Transaction, Debt, Debtor, SavingsGoal, Subscription, Investment, CouplesData, CoupleProfile } from './types';
 import { loadFromStorage, saveToStorage, STORAGE_KEYS } from './services/storageService';
 import { loginWithGoogle, logoutUser, subscribeToAuthChanges, saveUserDataToFirestore, subscribeToDataChanges, loadUserDataFromFirestore } from './services/firebaseService';
 import { fetchCalendarEvents, updateCalendarEvent, deleteCalendarEvent, createCalendarEvent } from './services/googleCalendarService';
@@ -134,6 +135,24 @@ const App: React.FC = () => {
   const [goals, setGoals] = useState<SavingsGoal[]>(() => loadFromStorage(STORAGE_KEYS.GOALS, []));
   const [subscriptions, setSubscriptions] = useState<Subscription[]>(() => loadFromStorage(STORAGE_KEYS.SUBSCRIPTIONS, []));
   const [investments, setInvestments] = useState<Investment[]>(() => loadFromStorage(STORAGE_KEYS.INVESTMENTS, []));
+
+  // ── Couples Space ───────────────────────────────────────────────────────
+  const [couplesData, setCouplesData] = useState<CouplesData>(() => {
+    const saved = loadFromStorage<CouplesData | null>(STORAGE_KEYS.COUPLES_DATA, null);
+    if (saved) return saved;
+    return {
+      myProfile: {
+        uid: '',
+        displayName: 'You',
+        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+        status: 'free',
+      },
+      photoWall: [],
+      journal: [],
+      checkIns: [],
+      sharedChallenges: [],
+    };
+  });
 
   // --- Partner Data State ---
   const [partnerTransactions, setPartnerTransactions] = useState<Transaction[]>([]);
@@ -263,6 +282,14 @@ const App: React.FC = () => {
       if (data.focusCategories) setFocusCategories(prev => mergeArrays(prev, data.focusCategories));
       if (data.focusSessions) setFocusSessions(prev => mergeArrays(prev, data.focusSessions));
       
+      if (data.couplesData) {
+        setCouplesData((prev: CouplesData) => ({
+          ...prev,
+          ...data.couplesData,
+          myProfile: prev.myProfile,
+        }));
+      }
+      
       if (data.settings) {
           const defaultFeatures = { tasks: true, calendar: true, habits: true, focus: true, notes: true, finance: true };
           const mergedFeatures = { ...defaultFeatures, ...(data.settings.features || {}) };
@@ -334,7 +361,7 @@ const App: React.FC = () => {
   // --- Auto-Save Logic ---
   useEffect(() => {
       if (!isAuthReady) return; 
-      const currentData = { tasks, lists, habits, focusCategories, focusSessions, transactions, debtors, debts, goals, subscriptions, investments, settings };
+      const currentData = { tasks, lists, habits, focusCategories, focusSessions, transactions, debtors, debts, goals, subscriptions, investments, settings, couplesData };
       latestDataRef.current = currentData;
       
       // Save to Local Storage immediately
@@ -351,6 +378,7 @@ const App: React.FC = () => {
           saveToStorage(STORAGE_KEYS.SUBSCRIPTIONS, subscriptions);
           saveToStorage(STORAGE_KEYS.INVESTMENTS, investments);
           saveToStorage(STORAGE_KEYS.SETTINGS, settings);
+          saveToStorage(STORAGE_KEYS.COUPLES_DATA, couplesData);
       }, 0);
 
       // Debounce Save to Firestore
@@ -362,7 +390,7 @@ const App: React.FC = () => {
               setSyncStatus('saved');
           }, 2000);
       }
-  }, [tasks, lists, habits, focusCategories, focusSessions, transactions, debtors, debts, goals, subscriptions, investments, settings, user, isAuthReady]);
+  }, [tasks, lists, habits, focusCategories, focusSessions, transactions, debtors, debts, goals, subscriptions, investments, settings, couplesData, user, isAuthReady]);
 
   // --- Handlers ---
   const handleAddTask = useCallback((task: Task) => setTasks(prev => [...prev, task]), []);
@@ -408,7 +436,7 @@ const App: React.FC = () => {
   const handleManualSync = async () => {
       if(!user) return;
       setSyncStatus('saving');
-      const currentData = { tasks, lists, habits, focusCategories, focusSessions, transactions, debtors, debts, goals, subscriptions, investments, settings };
+      const currentData = { tasks, lists, habits, focusCategories, focusSessions, transactions, debtors, debts, goals, subscriptions, investments, settings, couplesData };
       await saveUserDataToFirestore(user.uid, currentData);
       
       const remoteData = await loadUserDataFromFirestore(user.uid);
@@ -580,6 +608,25 @@ const App: React.FC = () => {
                     <NotesView 
                         onMenuClick={() => setIsSidebarOpen(true)}
                     />
+                )}
+                {currentView === ViewType.Together && (
+                    <Suspense fallback={<LoadingFallback />}>
+                        <CouplesView
+                            couplesData={{
+                                ...couplesData,
+                                myProfile: {
+                                    ...couplesData.myProfile,
+                                    uid: user?.uid || '',
+                                    displayName: user?.displayName || 'You',
+                                    photoURL: user?.photoURL || undefined,
+                                },
+                            }}
+                            onUpdateCouplesData={setCouplesData}
+                            onMenuClick={() => setIsSidebarOpen(true)}
+                            myUid={user?.uid || ''}
+                            habits={habits}
+                        />
+                    </Suspense>
                 )}
             </Suspense>
             

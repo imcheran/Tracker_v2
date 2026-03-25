@@ -23,7 +23,8 @@ export enum ViewType {
   Archive = 'archive',
   Finance = 'finance',
   Matrix = 'matrix',
-  Kanban = 'kanban'
+  Kanban = 'kanban',
+  Together = 'together'
 }
 
 export interface Subtask {
@@ -258,4 +259,73 @@ export interface AppSettings {
       partnerName?: string;
       householdId?: string;
   }
+}
+
+export interface CoupleProfile {
+  uid: string;
+  displayName: string;
+  photoURL?: string;
+  timezone: string;
+  status: 'free' | 'busy' | 'sleeping' | 'studying' | 'working' | 'do_not_disturb';
+  statusUntil?: string;
+  statusMessage?: string;
+  lastSeen?: string;
+}
+
+export interface PhotoMoment {
+  id: string;
+  uid: string;
+  imageUrl: string;
+  caption?: string;
+  timestamp: string;
+  reactions?: { uid: string; emoji: string }[];
+}
+
+export interface JournalEntry {
+  id: string;
+  uid: string;
+  content: string;
+  mood?: 'love' | 'happy' | 'miss' | 'sad' | 'excited';
+  timestamp: string;
+  isRead?: boolean;
+}
+
+export interface CheckIn {
+  id: string;
+  uid: string;
+  type: 'morning' | 'night';
+  message: string;
+  mood?: string;
+  timestamp: string;
+}
+
+export interface CouplesMeetup {
+  id: string;
+  title: string;
+  date: string;
+  location?: string;
+  notes?: string;
+}
+
+export interface SharedHabitChallenge {
+  id: string;
+  habitId: string;
+  partnerHabitId?: string;
+  name: string;
+  icon: string;
+  color: string;
+  durationDays: number;
+  startDate: string;
+  myProgress: Record<string, boolean>;
+  partnerProgress: Record<string, boolean>;
+}
+
+export interface CouplesData {
+  myProfile: CoupleProfile;
+  partnerProfile?: CoupleProfile;
+  photoWall: PhotoMoment[];
+  journal: JournalEntry[];
+  checkIns: CheckIn[];
+  nextMeetup?: CouplesMeetup;
+  sharedChallenges: SharedHabitChallenge[];
 }

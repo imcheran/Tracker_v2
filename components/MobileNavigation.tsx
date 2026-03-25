@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { ViewType } from '../types';
-import { CheckSquare, Calendar, Zap, BarChart2, Repeat, Menu } from 'lucide-react';
+import { CheckSquare, Calendar, Zap, BarChart2, Repeat, Menu, Heart } from 'lucide-react';
 
 interface MobileNavigationProps {
   currentView: ViewType | string;
@@ -14,6 +14,7 @@ const navItems = [
   { view: ViewType.Calendar, icon: Calendar,    label: 'Calendar' },
   { view: ViewType.Habits,   icon: Repeat,      label: 'Habits'   },
   { view: ViewType.Focus,    icon: Zap,         label: 'Focus'    },
+  { view: ViewType.Together, icon: Heart,       label: 'Together' },
   { view: ViewType.Finance,  icon: BarChart2,   label: 'Finance'  },
 ];
 
