@@ -148,108 +148,101 @@ const SettingsView: React.FC<SettingsViewProps> = ({
 
                 <div className="h-px bg-slate-100 dark:bg-slate-800 mx-6 my-2" />
 
-                {/* Your UID - Share for Couples Linking */}
+                {/* UNIFIED Partner Linking Section */}
+                <SectionHeader>Partner Connection</SectionHeader>
                 <div className="px-6 py-4">
                   {user ? (
-                    <div className="bg-blue-50 dark:bg-blue-900/20 rounded-xl p-4 border border-blue-100 dark:border-blue-800">
-                      <div className="text-[10px] font-bold text-blue-600 dark:text-blue-400 uppercase tracking-widest mb-2">Your Unique ID</div>
-                      <p className="text-xs text-slate-600 dark:text-slate-300 mb-3">Share this code with your partner to link accounts in Couples Space.</p>
-                      <div className="flex gap-2">
-                        <div className="flex-1 bg-white dark:bg-slate-900 border border-blue-200 dark:border-blue-800 rounded-lg px-3 py-2.5 font-mono text-sm text-slate-700 dark:text-slate-300 break-all">
-                          {user.uid}
+                    <div className="space-y-4">
+                      {/* Your Unified Code - works for both Couples & Finance */}
+                      <div className="bg-gradient-to-br from-pink-50 to-rose-50 dark:from-pink-900/20 dark:to-rose-900/20 rounded-xl p-4 border border-pink-200 dark:border-pink-800">
+                        <div className="text-[10px] font-bold text-pink-600 dark:text-pink-400 uppercase tracking-widest mb-2">📲 Your Invite Code</div>
+                        <p className="text-xs text-slate-600 dark:text-slate-300 mb-3">Share this code with your partner for Couples Space & Joint Finances</p>
+                        <div className="flex gap-2">
+                          <input
+                            type="text"
+                            readOnly
+                            value={user.uid}
+                            className="flex-1 bg-white dark:bg-slate-900 border border-pink-300 dark:border-pink-700 rounded-lg px-3 py-2.5 font-mono text-sm text-slate-700 dark:text-slate-300"
+                          />
+                          <button 
+                            onClick={() => {
+                              navigator.clipboard.writeText(user.uid);
+                              alert('✓ Code copied!');
+                            }}
+                            className="px-3 py-2 bg-pink-600 hover:bg-pink-700 text-white rounded-lg transition-colors flex items-center gap-1.5 flex-shrink-0 text-xs font-bold"
+                          >
+                            <Copy size={14} /> Copy
+                          </button>
                         </div>
-                        <button 
-                          onClick={() => {
-                            navigator.clipboard.writeText(user.uid);
-                            alert('UID copied to clipboard! Share with your partner.');
-                          }}
-                          className="px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors flex items-center gap-2 flex-shrink-0"
-                        >
-                          <Copy size={16} />
-                        </button>
                       </div>
+
+                      {/* Partner Status */}
+                      {settings.couples?.partnerId && (
+                        <div className="bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 rounded-xl p-4 border border-purple-200 dark:border-purple-800">
+                          <div className="flex items-center gap-3 mb-3">
+                            <div className="p-2 bg-purple-100 dark:bg-purple-800 rounded-full text-purple-600 dark:text-purple-300">
+                              <Heart size={18} fill="currentColor" />
+                            </div>
+                            <div>
+                              <div className="font-bold text-slate-900 dark:text-white text-sm">✓ Partner Connected</div>
+                              <div className="text-xs text-slate-500 dark:text-slate-400">Both Couples & Finance active</div>
+                            </div>
+                          </div>
+                          <button 
+                            onClick={handleUnlink}
+                            className="w-full py-2 bg-white dark:bg-slate-800 border border-red-200 dark:border-red-800 rounded-lg text-xs font-bold text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
+                          >
+                            Disconnect Partner
+                          </button>
+                        </div>
+                      )}
+
+                      {/* Link New Partner */}
+                      {!settings.couples?.partnerId && (
+                        <div className="bg-slate-50 dark:bg-slate-800/50 rounded-xl p-4 border border-slate-200 dark:border-slate-700">
+                          {!showInvite ? (
+                            <button 
+                              onClick={() => setShowInvite(true)}
+                              className="w-full py-3 bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 text-white rounded-lg text-sm font-bold transition-all"
+                            >
+                              Link a Partner
+                            </button>
+                          ) : (
+                            <div className="space-y-3 animate-in fade-in">
+                              <div>
+                                <label className="text-[10px] font-bold text-slate-400 uppercase block mb-2">Enter Their Code</label>
+                                <input 
+                                  value={partnerCode}
+                                  onChange={(e) => setPartnerCode(e.target.value)}
+                                  placeholder="Paste their code here"
+                                  className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg px-3 py-2.5 text-sm outline-none focus:border-pink-500"
+                                />
+                              </div>
+                              <div className="flex gap-2">
+                                <button 
+                                  onClick={handleJoinHousehold}
+                                  disabled={!partnerCode}
+                                  className="flex-1 px-4 py-2 bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 text-white rounded-lg text-sm font-bold disabled:opacity-50 transition-all"
+                                >
+                                  Confirm Connection
+                                </button>
+                                <button 
+                                  onClick={() => setShowInvite(false)} 
+                                  className="px-4 py-2 border border-slate-200 dark:border-slate-700 rounded-lg text-sm font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800"
+                                >
+                                  Cancel
+                                </button>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      )}
                     </div>
                   ) : (
                     <div className="bg-slate-50 dark:bg-slate-800/50 rounded-xl p-4 border border-slate-100 dark:border-slate-800 text-center">
-                      <p className="text-sm text-slate-600 dark:text-slate-300">Sign in to see your unique ID for Couples linking</p>
+                      <p className="text-sm text-slate-600 dark:text-slate-300">📱 Sign in to get your invite code</p>
                     </div>
                   )}
-                </div>
-
-                <div className="h-px bg-slate-100 dark:bg-slate-800 mx-6 my-2" />
-
-                {/* Couples Finance Section - NEW */}
-                <SectionHeader>Couples Finance</SectionHeader>
-                <div className="px-6 py-4">
-                    {settings.couples?.partnerId ? (
-                        <div className="bg-purple-50 dark:bg-purple-900/20 rounded-xl p-4 border border-purple-100 dark:border-purple-800">
-                            <div className="flex items-center gap-3 mb-3">
-                                <div className="p-2 bg-purple-100 dark:bg-purple-800 rounded-full text-purple-600 dark:text-purple-300">
-                                    <Heart size={20} fill="currentColor" />
-                                </div>
-                                <div>
-                                    <div className="font-bold text-slate-900 dark:text-white">Partner Linked</div>
-                                    <div className="text-xs text-slate-500 dark:text-slate-400">ID: {settings.couples.partnerId.substring(0,8)}...</div>
-                                </div>
-                            </div>
-                            <button 
-                                onClick={handleUnlink}
-                                className="w-full py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-xs font-bold text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20"
-                            >
-                                Unlink Partner
-                            </button>
-                        </div>
-                    ) : (
-                        <div className="bg-slate-50 dark:bg-slate-800/50 rounded-xl p-4 border border-slate-100 dark:border-slate-800">
-                            <p className="text-sm text-slate-600 dark:text-slate-300 mb-3">Link accounts to track shared expenses and budget together.</p>
-                            
-                            {!showInvite ? (
-                                <div className="flex gap-2">
-                                    <button 
-                                        onClick={() => setShowInvite(true)}
-                                        className="flex-1 py-2 bg-purple-600 text-white rounded-lg text-xs font-bold hover:bg-purple-700"
-                                    >
-                                        Link Partner
-                                    </button>
-                                </div>
-                            ) : (
-                                <div className="space-y-3 animate-in fade-in">
-                                    <div>
-                                        <label className="text-[10px] font-bold text-slate-400 uppercase">Your Invite Code</label>
-                                        <div className="flex gap-2 mt-1">
-                                            <div className="flex-1 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg px-3 py-2 text-sm font-mono truncate text-slate-600 dark:text-slate-300">
-                                                {user?.uid || "Sign in first"}
-                                            </div>
-                                            <button onClick={copyMyCode} className="p-2 bg-slate-200 dark:bg-slate-700 rounded-lg text-slate-600 dark:text-slate-300">
-                                                <Copy size={16} />
-                                            </button>
-                                        </div>
-                                    </div>
-                                    
-                                    <div className="border-t border-slate-200 dark:border-slate-700 pt-3">
-                                        <label className="text-[10px] font-bold text-slate-400 uppercase">Enter Partner's Code</label>
-                                        <div className="flex gap-2 mt-1">
-                                            <input 
-                                                value={partnerCode}
-                                                onChange={(e) => setPartnerCode(e.target.value)}
-                                                placeholder="Paste code here"
-                                                className="flex-1 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg px-3 py-2 text-sm outline-none focus:border-purple-500"
-                                            />
-                                            <button 
-                                                onClick={handleJoinHousehold}
-                                                disabled={!partnerCode}
-                                                className="px-4 bg-purple-600 text-white rounded-lg text-xs font-bold hover:bg-purple-700 disabled:opacity-50"
-                                            >
-                                                Link
-                                            </button>
-                                        </div>
-                                    </div>
-                                    
-                                    <button onClick={() => setShowInvite(false)} className="text-xs text-slate-400 underline w-full text-center">Cancel</button>
-                                </div>
-                            )}
-                        </div>
-                    )}
                 </div>
 
                 <div className="h-px bg-slate-100 dark:bg-slate-800 mx-6 my-2" />

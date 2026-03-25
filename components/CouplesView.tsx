@@ -559,12 +559,26 @@ const PhotoWall: React.FC<{
   const [caption, setCaption] = useState('');
   const [preview, setPreview] = useState<string | null>(null);
   const [showAdd, setShowAdd] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const handleFile = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setError(null);
     const f = e.target.files?.[0];
     if (!f) return;
+    
+    // Check file size (max 5MB)
+    if (f.size > 5 * 1024 * 1024) {
+      setError('Photo is too large (max 5MB)');
+      return;
+    }
+    
     const reader = new FileReader();
-    reader.onload = ev => setPreview(ev.target?.result as string);
+    reader.onload = ev => {
+      if (ev.target?.result) {
+        setPreview(ev.target.result as string);
+      }
+    };
+    reader.onerror = () => setError('Failed to read photo');
     reader.readAsDataURL(f);
   };
 
@@ -600,39 +614,58 @@ const PhotoWall: React.FC<{
       </div>
 
       {showAdd && (
-        <div className="mb-4 p-4 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-100 dark:border-slate-800 animate-fade-in">
+        <div className="mb-4 p-4 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-100 dark:border-slate-800 animate-fade-in space-y-3">
           {!preview ? (
             <div className="space-y-2">
               <button
                 onClick={() => cameraRef.current?.click()}
-                className="w-full h-28 flex flex-col items-center justify-center gap-2 border-2 border-dashed border-slate-200 dark:border-slate-700 rounded-xl text-slate-400 hover:border-pink-300 hover:text-pink-400 transition-colors bg-white dark:bg-slate-900/30"
+                className="w-full h-32 flex flex-col items-center justify-center gap-2 border-2 border-dashed border-pink-300 dark:border-pink-700 rounded-xl text-pink-600 dark:text-pink-400 hover:bg-pink-50 dark:hover:bg-pink-900/20 transition-colors bg-pink-50/30  dark:bg-pink-900/5"
               >
-                <Camera size={24} />
-                <span className="text-sm">Tap to take a photo</span>
+                <Camera size={28} />
+                <div>
+                  <div className="text-sm font-bold">📸 Take a Photo</div>
+                  <div className="text-xs opacity-70">Use your camera</div>
+                </div>
               </button>
               <button
                 onClick={() => fileRef.current?.click()}
-                className="w-full h-12 flex flex-col items-center justify-center gap-1 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-400 hover:border-pink-300 hover:text-pink-400 transition-colors text-sm"
+                className="w-full h-24 flex flex-col items-center justify-center gap-2 border border-slate-300 dark:border-slate-700 rounded-xl text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
               >
-                <ImageIcon size={16} />
-                Or choose from gallery
+                <ImageIcon size={24} />
+                <div className="text-sm font-bold">🖼️ Choose from Gallery</div>
               </button>
             </div>
           ) : (
             <div className="space-y-3">
+              {error && (
+                <div className="p-2 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg text-xs text-red-600 dark:text-red-400">
+                  ⚠️ {error}
+                </div>
+              )}
               <img src={preview} alt="preview" className="w-full h-40 object-cover rounded-xl" />
               <input
                 value={caption}
                 onChange={e => setCaption(e.target.value)}
                 placeholder="Add a caption..."
-                className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm outline-none focus:border-pink-400 text-slate-800 dark:text-slate-100"
+                maxLength={200}
+                className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-sm outline-none focus:border-pink-400 text-slate-800 dark:text-slate-100 placeholder-slate-400"
               />
               <div className="flex gap-2">
-                <button onClick={() => setPreview(null)} className="flex-1 py-2 text-sm text-slate-500 border border-slate-200 dark:border-slate-700 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800">
+                <button 
+                  onClick={() => {
+                    setPreview(null);
+                    setCaption('');
+                    setError(null);
+                  }} 
+                  className="flex-1 py-2 text-sm font-bold text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
+                >
                   Remove
                 </button>
-                <button onClick={handleSubmit} className="flex-1 py-2 text-sm font-bold text-white bg-pink-500 rounded-xl hover:bg-pink-600">
-                  Share moment
+                <button 
+                  onClick={handleSubmit} 
+                  className="flex-1 py-2 text-sm font-bold text-white bg-gradient-to-r from-pink-500 to-rose-500 rounded-xl hover:from-pink-600 hover:to-rose-600 transition-all"
+                >
+                  ✓ Share
                 </button>
               </div>
             </div>
@@ -1058,7 +1091,7 @@ const MeetupEditor: React.FC<{
 type Tab = 'home' | 'photos' | 'journal' | 'challenges';
 
 const CouplesView: React.FC<CouplesViewProps> = ({
-  couplesData, onUpdateCouplesData, onMenuClick, myUid, habits
+  couplesData, onUpdateCouplesData, onLinkPartner, onUpdateHabits, onAddTask, onMenuClick, myUid, habits
 }) => {
   const [activeTab, setActiveTab]       = useState<Tab>('home');
   const [showStatusPicker, setShowStatusPicker] = useState(false);
@@ -1083,10 +1116,14 @@ const CouplesView: React.FC<CouplesViewProps> = ({
       // Call the parent callback (App.tsx) which handles Firestore integration
       await onLinkPartner(partnerUid);
       
+      // Update local state to show partner immediately
+      const updatedData = { ...couplesData };
+      onUpdateCouplesData(updatedData);
+      
       // Close the modal after successful linking
       setShowPartnerLinkModal(false);
     } catch (error) {
-      throw new Error(`Failed to link partner: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      alert(`Failed to link partner: ${error instanceof Error ? error.message : 'Unknown error'}`);
     } finally {
       setIsLinkingPartner(false);
     }

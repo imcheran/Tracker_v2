@@ -605,10 +605,49 @@ const FinanceView: React.FC<FinanceViewProps> = ({
 
   const renderOverview = () => (
       <div className="space-y-6 animate-in fade-in pb-20 p-4">
-          <div className="flex justify-center mb-2">
-              <div className="bg-white dark:bg-slate-900 p-1.5 rounded-[20px] flex relative shadow-sm border border-slate-100 dark:border-slate-800">
-                  <button onClick={() => setWorkspaceMode('personal')} className={`px-6 py-2 rounded-[16px] text-xs font-bold transition-all z-10 ${workspaceMode === 'personal' ? 'bg-[#6B4DFF] text-white shadow-md' : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'}`}>Personal</button>
-                  <button onClick={() => setWorkspaceMode('joint')} className={`px-6 py-2 rounded-[16px] text-xs font-bold transition-all z-10 flex items-center gap-1 ${workspaceMode === 'joint' ? 'bg-[#6B4DFF] text-white shadow-md' : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'}`}><Heart size={12} fill="currentColor" /> Joint</button>
+          {/* Partner Connection Status Banner */}
+          {partnerTransactions && partnerTransactions.length > 0 ? (
+              <div className="bg-gradient-to-r from-pink-50 to-rose-50 dark:from-pink-900/20 dark:to-rose-900/20 rounded-[24px] p-5 border border-pink-200 dark:border-pink-800">
+                  <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-full bg-pink-200 dark:bg-pink-800 flex items-center justify-center text-lg flex-shrink-0">
+                          👫
+                      </div>
+                      <div className="flex-1 min-w-0">
+                          <p className="font-bold text-slate-800 dark:text-white text-sm">Connected for Joint Spending</p>
+                          <p className="text-xs text-slate-600 dark:text-slate-300">Tracking expenses together</p>
+                      </div>
+                      <div className="flex-shrink-0 px-3 py-1 bg-pink-600 rounded-full text-xs font-bold text-white">Active</div>
+                  </div>
+              </div>
+          ) : (
+              <div className="bg-gradient-to-r from-slate-50 to-slate-100 dark:from-slate-800/50 dark:to-slate-900/50 rounded-[24px] p-5 border border-slate-200 dark:border-slate-700">
+                  <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center text-lg flex-shrink-0">
+                          👤
+                      </div>
+                      <div className="flex-1 min-w-0">
+                          <p className="font-bold text-slate-800 dark:text-white text-sm">Personal Mode</p>
+                          <p className="text-xs text-slate-600 dark:text-slate-300">Invite a partner in Settings to track joint finances</p>
+                      </div>
+                  </div>
+              </div>
+          )}
+
+          {/* Workspace Mode Toggle - Improved */}
+          <div className="flex justify-center">
+              <div className="bg-white dark:bg-slate-900 p-2 rounded-[24px] flex relative shadow-md border border-slate-100 dark:border-slate-800">
+                  <button 
+                      onClick={() => setWorkspaceMode('personal')} 
+                      className={`px-6 py-3 rounded-[20px] text-sm font-bold transition-all z-10 flex items-center gap-2 ${workspaceMode === 'personal' ? 'bg-gradient-to-r from-slate-800 to-slate-700 text-white shadow-lg' : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'}`}
+                  >
+                      💰 Personal
+                  </button>
+                  <button 
+                      onClick={() => setWorkspaceMode('joint')} 
+                      className={`px-6 py-3 rounded-[20px] text-sm font-bold transition-all z-10 flex items-center gap-2 ${workspaceMode === 'joint' ? 'bg-gradient-to-r from-pink-500 to-rose-500 text-white shadow-lg' : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'}`}
+                  >
+                      <Heart size={16} fill="currentColor" /> Joint
+                  </button>
               </div>
           </div>
 
@@ -696,8 +735,46 @@ const FinanceView: React.FC<FinanceViewProps> = ({
       </div>
   );
 
-  const renderTransactions = () => (
+  const renderTransactions = () => {
+    // Calculate joint spending summary
+    const jointTotal = displayTransactions
+      .filter(t => t.type === 'debit' && t.personalShare !== undefined)
+      .reduce((sum, t) => sum + t.amount, 0);
+    
+    const myShare = displayTransactions
+      .filter(t => t.type === 'debit' && t.personalShare !== undefined)
+      .reduce((sum, t) => sum + (t.personalShare || t.amount), 0);
+    
+    const partnerShare = jointTotal - myShare;
+
+    return (
       <div className="flex flex-col h-full bg-slate-50 dark:bg-slate-950">
+          {/* Joint Spending Summary - Only show in joint mode */}
+          {workspaceMode === 'joint' && partnerTransactions && partnerTransactions.length > 0 && (
+              <div className="px-4 py-4 bg-white dark:bg-slate-900 border-b border-slate-100 dark:border-slate-800">
+                  <div className="space-y-3">
+                      <h3 className="text-sm font-bold text-slate-800 dark:text-white flex items-center gap-2">
+                          <Heart size={16} className="text-pink-500" /> Joint Spending Summary
+                      </h3>
+                      <div className="grid grid-cols-3 gap-3">
+                          <div className="bg-gradient-to-br from-pink-50 to-rose-50 dark:from-pink-900/20 dark:to-rose-900/20 rounded-[16px] p-3 border border-pink-200 dark:border-pink-800">
+                              <p className="text-[10px] font-bold text-pink-600 dark:text-pink-400 uppercase">Total</p>
+                              <p className="text-lg font-black text-pink-700 dark:text-pink-300">{formatCurrency(jointTotal)}</p>
+                          </div>
+                          <div className="bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-blue-900/20 dark:to-cyan-900/20 rounded-[16px] p-3 border border-blue-200 dark:border-blue-800">
+                              <p className="text-[10px] font-bold text-blue-600 dark:text-blue-400 uppercase">You</p>
+                              <p className="text-lg font-black text-blue-700 dark:text-blue-300">{formatCurrency(myShare)}</p>
+                          </div>
+                          <div className="bg-gradient-to-br from-purple-50 to-indigo-50 dark:from-purple-900/20 dark:to-indigo-900/20 rounded-[16px] p-3 border border-purple-200 dark:border-purple-800">
+                              <p className="text-[10px] font-bold text-purple-600 dark:text-purple-400 uppercase">Partner</p>
+                              <p className="text-lg font-black text-purple-700 dark:text-purple-300">{formatCurrency(partnerShare)}</p>
+                          </div>
+                      </div>
+                  </div>
+              </div>
+          )}
+
+          {/* Transactions Search */}
           <div className="px-4 py-3 bg-white dark:bg-slate-900 border-b border-slate-100 dark:border-slate-800 sticky top-0 z-10">
              <div className="flex items-center gap-3">
                   <div className="bg-slate-100 dark:bg-slate-800 flex items-center px-4 py-3 rounded-[20px] gap-2 flex-1 focus-within:ring-2 focus-within:ring-[#6B4DFF]/20 transition-all">
@@ -742,15 +819,15 @@ const FinanceView: React.FC<FinanceViewProps> = ({
                           {txns.map((t, i) => (
                               <div key={t.id} onClick={() => setEditingTransaction(t)} className="bg-white dark:bg-slate-900 rounded-[24px] p-4 flex items-center justify-between shadow-sm border border-slate-100 dark:border-slate-800 cursor-pointer hover:scale-[1.01] active:scale-[0.99] transition-all">
                                   <div className="flex items-center gap-4 overflow-hidden">
-                                      <div className={`w-12 h-12 rounded-[18px] flex items-center justify-center text-slate-500 shrink-0 ${t.type === 'credit' ? 'bg-emerald-50 text-emerald-600 dark:bg-emerald-900/20' : 'bg-slate-100 dark:bg-slate-800'}`}>
+                                      <div className={`w-12 h-12 rounded-[18px] flex items-center justify-center text-slate-500 shrink-0 ${t.type === 'credit' ? 'bg-emerald-50 text-emerald-600 dark:bg-emerald-900/20' : t.personalShare !== undefined ? 'bg-pink-50 text-pink-600 dark:bg-pink-900/20' : 'bg-slate-100 dark:bg-slate-800'}`}>
                                           <CategoryIcon iconName={DEFAULT_CATEGORIES.find(c => c.name === normalizeCategory(t.category))?.icon || 'circle-dot'} className="w-6 h-6" />
                                       </div>
                                       <div className="min-w-0">
                                           <div className="font-bold text-slate-800 dark:text-white text-sm truncate">{t.merchant}</div>
                                           <div className="text-[11px] text-slate-400 font-bold mt-0.5">{t.category}</div>
                                           {t.personalShare !== undefined && t.personalShare !== t.amount && (
-                                              <div className="text-[10px] text-blue-500 font-bold mt-0.5 flex items-center gap-1">
-                                                  <Split size={10} /> My share: {formatCurrency(t.personalShare)}
+                                              <div className="text-[10px] text-pink-600 dark:text-pink-400 font-bold mt-0.5 flex items-center gap-1">
+                                                  <Heart size={9} fill="currentColor" /> Split: {formatCurrency(t.personalShare)} · Partner: {formatCurrency(t.amount - t.personalShare)}
                                               </div>
                                           )}
                                       </div>
@@ -773,7 +850,8 @@ const FinanceView: React.FC<FinanceViewProps> = ({
               )}
           </div>
       </div>
-  );
+    );
+  };
 
   const renderAssets = () => (
       <div className="p-4 space-y-8 pb-24">
