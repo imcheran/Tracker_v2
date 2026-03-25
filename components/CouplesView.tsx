@@ -6,7 +6,7 @@ import {
   MapPin, Plane, Sparkles, Bell, BellOff, Users, Lock
 } from 'lucide-react';
 import { format, formatDistanceToNow, differenceInDays, differenceInHours, differenceInMinutes, differenceInSeconds } from 'date-fns';
-import { Habit } from '../types';
+import { Habit, Task } from '../types';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -83,10 +83,79 @@ export interface CouplesData {
 interface CouplesViewProps {
   couplesData: CouplesData;
   onUpdateCouplesData: (data: CouplesData) => void;
+  onLinkPartner?: (partnerUid: string) => Promise<void>;
+  onUpdateHabits?: (habits: Habit[]) => void;
+  onAddTask?: (task: Task) => void;
   onMenuClick?: () => void;
   myUid: string;
   habits: Habit[];
 }
+
+// ─── Partner Linking Modal ────────────────────────────────────────────
+
+const PartnerLinkingModal: React.FC<{
+  onLink: (partnerUid: string) => Promise<void>;
+  onClose: () => void;
+  isLoading?: boolean;
+}> = ({ onLink, onClose, isLoading }) => {
+  const [partnerUid, setPartnerUid] = useState('');
+  const [error, setError] = useState('');
+
+  const handleLink = async () => {
+    if (!partnerUid.trim()) {
+      setError('Please enter your partner\'s UID');
+      return;
+    }
+    try {
+      await onLink(partnerUid.trim());
+      onClose();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to link partner');
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 z-[200] bg-black/40 backdrop-blur-sm flex items-end justify-center">
+      <div className="w-full max-w-sm bg-white dark:bg-slate-900 rounded-t-3xl p-5 pb-10 animate-slide-up space-y-4">
+        <div className="flex items-center justify-between">
+          <h3 className="font-bold text-slate-900 dark:text-white flex items-center gap-2">
+            <Heart size={20} className="text-pink-500" /> Link your partner
+          </h3>
+          <button onClick={onClose} className="p-1.5 text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full">
+            <X size={20} />
+          </button>
+        </div>
+
+        <div className="space-y-2">
+          <label className="text-xs font-bold text-slate-400 uppercase">Your partner's UID</label>
+          <div className="relative">
+            <input
+              value={partnerUid}
+              onChange={e => { setPartnerUid(e.target.value); setError(''); }}
+              placeholder="Ask them to share their UID from settings"
+              className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-sm outline-none focus:border-pink-400 text-slate-800 dark:text-slate-100"
+              disabled={isLoading}
+            />
+            {isLoading && <div className="absolute right-3 top-3 w-5 h-5 border-2 border-pink-400/20 border-t-pink-500 rounded-full animate-spin" />}
+          </div>
+          {error && <p className="text-xs text-red-500">{error}</p>}
+        </div>
+
+        <p className="text-xs text-slate-400 text-center">
+          You'll see their status, share photos & moments, and sync your schedules
+        </p>
+
+        <button
+          onClick={handleLink}
+          disabled={isLoading || !partnerUid.trim()}
+          className="w-full py-3 bg-gradient-to-r from-pink-500 to-rose-500 text-white rounded-xl font-bold hover:from-pink-600 hover:to-rose-600 disabled:opacity-40 transition-all"
+        >
+          {isLoading ? 'Linking...' : 'Link Partner'}
+        </button>
+      </div>
+    </div>
+  );
+};
 
 // ─── Status config ─────────────────────────────────────────────────────────────
 
@@ -486,6 +555,7 @@ const PhotoWall: React.FC<{
   partnerName: string;
 }> = ({ photos, myUid, onAdd, onReact, partnerName }) => {
   const fileRef = useRef<HTMLInputElement>(null);
+  const cameraRef = useRef<HTMLInputElement>(null);
   const [caption, setCaption] = useState('');
   const [preview, setPreview] = useState<string | null>(null);
   const [showAdd, setShowAdd] = useState(false);
@@ -532,13 +602,22 @@ const PhotoWall: React.FC<{
       {showAdd && (
         <div className="mb-4 p-4 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-100 dark:border-slate-800 animate-fade-in">
           {!preview ? (
-            <button
-              onClick={() => fileRef.current?.click()}
-              className="w-full h-28 flex flex-col items-center justify-center gap-2 border-2 border-dashed border-slate-200 dark:border-slate-700 rounded-xl text-slate-400 hover:border-pink-300 hover:text-pink-400 transition-colors"
-            >
-              <Camera size={24} />
-              <span className="text-sm">Tap to add a photo</span>
-            </button>
+            <div className="space-y-2">
+              <button
+                onClick={() => cameraRef.current?.click()}
+                className="w-full h-28 flex flex-col items-center justify-center gap-2 border-2 border-dashed border-slate-200 dark:border-slate-700 rounded-xl text-slate-400 hover:border-pink-300 hover:text-pink-400 transition-colors bg-white dark:bg-slate-900/30"
+              >
+                <Camera size={24} />
+                <span className="text-sm">Tap to take a photo</span>
+              </button>
+              <button
+                onClick={() => fileRef.current?.click()}
+                className="w-full h-12 flex flex-col items-center justify-center gap-1 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-400 hover:border-pink-300 hover:text-pink-400 transition-colors text-sm"
+              >
+                <ImageIcon size={16} />
+                Or choose from gallery
+              </button>
+            </div>
           ) : (
             <div className="space-y-3">
               <img src={preview} alt="preview" className="w-full h-40 object-cover rounded-xl" />
@@ -559,6 +638,7 @@ const PhotoWall: React.FC<{
             </div>
           )}
           <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handleFile} />
+          <input ref={cameraRef} type="file" accept="image/*" capture="environment" className="hidden" onChange={handleFile} />
         </div>
       )}
 
@@ -983,6 +1063,8 @@ const CouplesView: React.FC<CouplesViewProps> = ({
   const [activeTab, setActiveTab]       = useState<Tab>('home');
   const [showStatusPicker, setShowStatusPicker] = useState(false);
   const [showMeetupEditor, setShowMeetupEditor] = useState(false);
+  const [showPartnerLinkModal, setShowPartnerLinkModal] = useState(false);
+  const [isLinkingPartner, setIsLinkingPartner] = useState(false);
   const [nudgeCount, setNudgeCount]     = useState(0);
   const [lastNudge, setLastNudge]       = useState<string | undefined>(undefined);
 
@@ -990,6 +1072,25 @@ const CouplesView: React.FC<CouplesViewProps> = ({
 
   const update = (partial: Partial<CouplesData>) =>
     onUpdateCouplesData({ ...couplesData, ...partial });
+
+  const handleLinkPartner = async (partnerUid: string) => {
+    setIsLinkingPartner(true);
+    try {
+      if (!onLinkPartner) {
+        throw new Error('Partner linking callback not provided');
+      }
+      
+      // Call the parent callback (App.tsx) which handles Firestore integration
+      await onLinkPartner(partnerUid);
+      
+      // Close the modal after successful linking
+      setShowPartnerLinkModal(false);
+    } catch (error) {
+      throw new Error(`Failed to link partner: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    } finally {
+      setIsLinkingPartner(false);
+    }
+  };
 
   const handleNudge = () => {
     setNudgeCount(n => n + 1);
@@ -1025,13 +1126,34 @@ const CouplesView: React.FC<CouplesViewProps> = ({
   };
 
   const handleChallengeToggle = (challengeId: string, date: string) => {
+    const challenge = sharedChallenges.find(c => c.id === challengeId);
+    const cur = challenge?.myProgress[date];
+    
+    // Update challenge progress
     update({
       sharedChallenges: sharedChallenges.map(c => {
         if (c.id !== challengeId) return c;
-        const cur = c.myProgress[date];
         return { ...c, myProgress: { ...c.myProgress, [date]: !cur } };
       }),
     });
+    
+    // Also update the corresponding habit's history
+    if (challenge && challenge.habitId && onUpdateHabits) {
+      const habit = habits.find(h => h.id === challenge.habitId);
+      if (habit) {
+        const updatedHabit = {
+          ...habit,
+          history: {
+            ...habit.history,
+            [date]: {
+              completed: !cur,
+              timestamp: new Date(date).getTime(),
+            },
+          },
+        };
+        onUpdateHabits(habits.map(h => h.id === habit.id ? updatedHabit : h));
+      }
+    }
   };
 
   const partnerName = partnerProfile?.displayName.split(' ')[0] || 'Partner';
@@ -1073,6 +1195,15 @@ const CouplesView: React.FC<CouplesViewProps> = ({
             <div className={`w-1.5 h-1.5 rounded-full ${STATUS_CONFIG[myProfile.status].color}`} />
             {STATUS_CONFIG[myProfile.status].label}
           </button>
+          {!partnerProfile && (
+            <button
+              onClick={() => setShowPartnerLinkModal(true)}
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-pink-50 dark:bg-pink-900/20 border border-pink-200 dark:border-pink-800 rounded-full text-xs font-bold text-pink-600 dark:text-pink-300 hover:bg-pink-100 transition-colors"
+            >
+              <Heart size={14} />
+              Link partner
+            </button>
+          )}
         </div>
 
         {/* Tabs */}
@@ -1177,10 +1308,31 @@ const CouplesView: React.FC<CouplesViewProps> = ({
               <h3 className="text-sm font-bold text-slate-700 dark:text-slate-200">Shared challenges</h3>
               <button
                 onClick={() => {
-                  // Add a demo challenge
+                  // Create a new habit for this challenge
+                  const habitId = Date.now().toString();
+                  const newHabit: Habit = {
+                    id: habitId,
+                    name: '30-day habit challenge',
+                    icon: '🎯',
+                    color: '#ec4899',
+                    description: 'Shared challenge with partner',
+                    frequencyType: 'daily',
+                    section: 'Others',
+                    startDate: new Date(),
+                    endDate: new Date(Date.now() + (30 - 1) * 24 * 60 * 60 * 1000),
+                    history: {},
+                    isArchived: false,
+                  };
+                  
+                  // Add habit to habits state
+                  if (onUpdateHabits) {
+                    onUpdateHabits([...habits, newHabit]);
+                  }
+                  
+                  // Create the corresponding challenge
                   const newChallenge: SharedHabitChallenge = {
-                    id: Date.now().toString(),
-                    habitId: '',
+                    id: `challenge_${habitId}`,
+                    habitId: habitId,
                     name: '30-day habit challenge',
                     icon: '🎯',
                     color: '#ec4899',
@@ -1218,6 +1370,13 @@ const CouplesView: React.FC<CouplesViewProps> = ({
       </div>
 
       {/* Modals */}
+      {showPartnerLinkModal && (
+        <PartnerLinkingModal
+          onLink={handleLinkPartner}
+          onClose={() => setShowPartnerLinkModal(false)}
+          isLoading={isLinkingPartner}
+        />
+      )}
       {showStatusPicker && (
         <StatusPicker
           current={myProfile.status}
@@ -1229,7 +1388,29 @@ const CouplesView: React.FC<CouplesViewProps> = ({
       {showMeetupEditor && (
         <MeetupEditor
           meetup={nextMeetup}
-          onSave={(meetup) => { update({ nextMeetup: meetup }); setShowMeetupEditor(false); }}
+          onSave={(meetup) => {
+            update({ nextMeetup: meetup });
+            
+            // Also create/update a calendar event task
+            if (onAddTask) {
+              const eventTask: Task = {
+                id: nextMeetup?.id || Date.now().toString(),
+                title: `🗓️ ${meetup.title}`,
+                description: `Meetup with ${partnerName}${meetup.location ? ` at ${meetup.location}` : ''}${meetup.notes ? `\n${meetup.notes}` : ''}`,
+                dueDate: new Date(meetup.date),
+                isEvent: true,
+                location: meetup.location || undefined,
+                createdDate: new Date(),
+                lists: [],
+                subtasks: [],
+                tags: ['couples', 'meetup'],
+                history: {},
+              };
+              onAddTask(eventTask);
+            }
+            
+            setShowMeetupEditor(false);
+          }}
           onClose={() => setShowMeetupEditor(false)}
         />
       )}

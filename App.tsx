@@ -283,11 +283,42 @@ const App: React.FC = () => {
       if (data.focusSessions) setFocusSessions(prev => mergeArrays(prev, data.focusSessions));
       
       if (data.couplesData) {
-        setCouplesData((prev: CouplesData) => ({
-          ...prev,
-          ...data.couplesData,
-          myProfile: prev.myProfile,
-        }));
+        setCouplesData((prev: CouplesData) => {
+          const updated = {
+            ...prev,
+            ...data.couplesData,
+            myProfile: prev.myProfile,
+          };
+          
+          // Sync shared challenges to habits
+          if (data.couplesData.sharedChallenges && Array.isArray(data.couplesData.sharedChallenges)) {
+            setHabits(prevHabits => {
+              const newHabits = [...prevHabits];
+              data.couplesData.sharedChallenges.forEach((challenge: any) => {
+                // Only create habit if challenge has a habitId and habit doesn't exist yet
+                if (challenge.habitId && !newHabits.find(h => h.id === challenge.habitId)) {
+                  const newHabit: any = {
+                    id: challenge.habitId,
+                    name: challenge.name,
+                    icon: challenge.icon,
+                    color: challenge.color,
+                    description: 'Shared challenge with partner',
+                    frequencyType: 'daily',
+                    section: 'Others',
+                    startDate: new Date(challenge.startDate),
+                    endDate: new Date(new Date(challenge.startDate).getTime() + (challenge.durationDays - 1) * 24 * 60 * 60 * 1000),
+                    history: {},
+                    isArchived: false,
+                  };
+                  newHabits.push(newHabit);
+                }
+              });
+              return newHabits;
+            });
+          }
+          
+          return updated;
+        });
       }
       
       if (data.settings) {
@@ -448,6 +479,31 @@ const App: React.FC = () => {
       }
       setSyncStatus('saved');
   };
+
+  const handleLinkPartner = useCallback(async (partnerUid: string) => {
+    if (!user || !partnerUid) return;
+    try {
+      // Fetch partner's data from Firestore
+      const partnerData = await loadUserDataFromFirestore(partnerUid);
+      if (partnerData && partnerData.user) {
+        const { displayName, photoURL } = partnerData.user;
+        setCouplesData(prev => ({
+          ...prev,
+          partnerProfile: {
+            uid: partnerUid,
+            displayName: displayName || 'Your Partner',
+            photoURL: photoURL || undefined,
+            status: 'online',
+            timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+          },
+          linkedAt: new Date(),
+        }));
+      }
+    } catch (error) {
+      console.error('Failed to link partner:', error);
+      throw error;
+    }
+  }, [user]);
 
   return (
     <div className="flex h-screen w-full bg-[#eef0f6] dark:bg-[#09090b] text-slate-900 dark:text-slate-100 transition-colors duration-300 p-0 md:p-3 gap-3 overflow-hidden">
@@ -622,6 +678,9 @@ const App: React.FC = () => {
                                 },
                             }}
                             onUpdateCouplesData={setCouplesData}
+                            onLinkPartner={handleLinkPartner}
+                            onUpdateHabits={setHabits}
+                            onAddTask={handleAddTask}
                             onMenuClick={() => setIsSidebarOpen(true)}
                             myUid={user?.uid || ''}
                             habits={habits}
