@@ -148,6 +148,36 @@ const SettingsView: React.FC<SettingsViewProps> = ({
 
                 <div className="h-px bg-slate-100 dark:bg-slate-800 mx-6 my-2" />
 
+                {/* Your UID - Share for Couples Linking */}
+                <div className="px-6 py-4">
+                  {user ? (
+                    <div className="bg-blue-50 dark:bg-blue-900/20 rounded-xl p-4 border border-blue-100 dark:border-blue-800">
+                      <div className="text-[10px] font-bold text-blue-600 dark:text-blue-400 uppercase tracking-widest mb-2">Your Unique ID</div>
+                      <p className="text-xs text-slate-600 dark:text-slate-300 mb-3">Share this code with your partner to link accounts in Couples Space.</p>
+                      <div className="flex gap-2">
+                        <div className="flex-1 bg-white dark:bg-slate-900 border border-blue-200 dark:border-blue-800 rounded-lg px-3 py-2.5 font-mono text-sm text-slate-700 dark:text-slate-300 break-all">
+                          {user.uid}
+                        </div>
+                        <button 
+                          onClick={() => {
+                            navigator.clipboard.writeText(user.uid);
+                            alert('UID copied to clipboard! Share with your partner.');
+                          }}
+                          className="px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors flex items-center gap-2 flex-shrink-0"
+                        >
+                          <Copy size={16} />
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="bg-slate-50 dark:bg-slate-800/50 rounded-xl p-4 border border-slate-100 dark:border-slate-800 text-center">
+                      <p className="text-sm text-slate-600 dark:text-slate-300">Sign in to see your unique ID for Couples linking</p>
+                    </div>
+                  )}
+                </div>
+
+                <div className="h-px bg-slate-100 dark:bg-slate-800 mx-6 my-2" />
+
                 {/* Couples Finance Section - NEW */}
                 <SectionHeader>Couples Finance</SectionHeader>
                 <div className="px-6 py-4">
