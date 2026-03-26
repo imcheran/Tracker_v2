@@ -808,7 +808,211 @@ const HabitsModule: React.FC<HabitsModuleProps> = ({
   );
 };
 
+// ═══════════════════════════════════════════════════════════════════════════
+// MAIN HABIT VIEW COMPONENT
+// ═══════════════════════════════════════════════════════════════════════════
+
+interface HabitViewComponentProps {
+  habits: Habit[];
+  onToggleHabit: (id: string, date: string) => void;
+  onUpdateHabit: (habit: Habit) => void;
+  onAddHabit: (habit: Habit) => void;
+  onDeleteHabit: (id: string) => void;
+  onMenuClick: () => void;
+  onOpenStats?: () => void;
+  onStartFocus?: (habitId: string) => void;
+  user?: any;
+}
+
+const HabitViewComponent: React.FC<HabitViewComponentProps> = ({
+  habits,
+  onToggleHabit,
+  onUpdateHabit,
+  onAddHabit,
+  onDeleteHabit,
+  onMenuClick,
+  onOpenStats,
+  onStartFocus,
+  user
+}) => {
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [editingHabit, setEditingHabit] = useState<Habit | undefined>();
+  const [loggingHabit, setLoggingHabit] = useState<Habit | undefined>();
+  const [filterSection, setFilterSection] = useState<HabitSection | null>(null);
+
+  const today = todayStr();
+  const activeHabits = habits.filter(h => !h.isArchived);
+  const groupedBySection = useMemo(() => {
+    const grouped: Record<HabitSection, Habit[]> = {
+      Morning: [],
+      Afternoon: [],
+      Night: [],
+      Others: []
+    };
+    activeHabits.forEach(h => {
+      const section = h.section || 'Others';
+      grouped[section].push(h);
+    });
+    return grouped;
+  }, [activeHabits]);
+
+  const handleLog = (habit: Habit, mood: string | undefined, note: string, skip: boolean, skipReason: string) => {
+    const newHistory = { ...habit.history };
+    if (skip) {
+      newHistory[today] = { completed: false, timestamp: Date.now(), reason: skipReason };
+    } else {
+      newHistory[today] = { completed: true, timestamp: Date.now(), mood, note };
+    }
+    onUpdateHabit({ ...habit, history: newHistory });
+  };
+
+  return (
+    <div className="flex-1 flex flex-col h-full overflow-hidden bg-slate-50 dark:bg-slate-900">
+      {/* Header */}
+      <div className="p-4 border-b border-slate-200 dark:border-white/5 flex items-center justify-between bg-white dark:bg-slate-900 shrink-0">
+        <div className="flex items-center gap-3">
+          <button onClick={onMenuClick} className="p-2 hover:bg-slate-100 dark:hover:bg-white/10 rounded-lg text-slate-600 dark:text-slate-400">
+            <Menu size={20} />
+          </button>
+          <h1 className="text-xl font-bold text-slate-800 dark:text-white">Habits</h1>
+        </div>
+        <div className="flex items-center gap2">
+          {onOpenStats && (
+            <button onClick={onOpenStats} className="p-2 hover:bg-slate-100 dark:hover:bg-white/10 rounded-lg text-slate-600 dark:text-slate-400">
+              <BarChart2 size={20} />
+            </button>
+          )}
+          <button onClick={() => setViewMode(viewMode === 'grid' ? 'list' : 'grid')} className="p-2 hover:bg-slate-100 dark:hover:bg-white/10 rounded-lg text-slate-600 dark:text-slate-400">
+            {viewMode === 'grid' ? <Layers size={20} /> : <Layers size={20} />}
+          </button>
+        </div>
+      </div>
+
+      {/* Content */}
+      <div className="flex-1 overflow-y-auto p-6 space-y-6">
+        {activeHabits.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-20 gap-3">
+            <div className="text-5xl">🌱</div>
+            <p className="text-slate-500 dark:text-slate-400 font-semibold">No habits found</p>
+            <button onClick={() => setShowAddModal(true)} className="mt-2 px-5 py-2.5 bg-indigo-500 text-white rounded-2xl text-sm font-semibold hover:bg-indigo-600">
+              + Add Habit
+            </button>
+          </div>
+        ) : (
+          Object.entries(groupedBySection).map(([section, sectionHabits]) => (
+            sectionHabits.length > 0 && (
+              <div key={section}>
+                <h2 className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-3 flex items-center gap-2">
+                  {SECTION_META[section as HabitSection].icon}
+                  {section}
+                </h2>
+                <div className={viewMode === 'grid' ? 'grid grid-cols-2 gap-3' : 'space-y-2'}>
+                  {sectionHabits.map(habit => (
+                    <HabitCard
+                      key={habit.id}
+                      habit={habit}
+                      viewMode={viewMode}
+                      onToggle={onToggleHabit}
+                      onEdit={setEditingHabit}
+                      onDelete={onDeleteHabit}
+                      onStartFocus={onStartFocus || (() => {})}
+                      onLog={setLoggingHabit}
+                    />
+                  ))}
+                </div>
+              </div>
+            )
+          ))
+        )}
+      </div>
+
+      {/* Add Button */}
+      <button
+        onClick={() => setShowAddModal(true)}
+        className="fixed bottom-8 right-8 w-14 h-14 rounded-full bg-indigo-500 text-white shadow-lg hover:bg-indigo-600 flex items-center justify-center z-40"
+      >
+        <Plus size={24} />
+      </button>
+
+      {/* Modals */}
+      {showAddModal && (
+        <HabitModal
+          onSave={(h) => { onAddHabit(h); setShowAddModal(false); }}
+          onClose={() => setShowAddModal(false)}
+        />
+      )}
+      {editingHabit && (
+        <HabitModal
+          habit={editingHabit}
+          onSave={onUpdateHabit}
+          onClose={() => setEditingHabit(undefined)}
+        />
+      )}
+      {loggingHabit && (
+        <LogModal
+          habit={loggingHabit}
+          date={today}
+          onLog={(mood, note, skip, skipReason) => handleLog(loggingHabit, mood, note, skip, skipReason)}
+          onClose={() => setLoggingHabit(undefined)}
+        />
+      )}
+    </div>
+  );
+};
+
+// ═══════════════════════════════════════════════════════════════════════════
+// HABIT STATS VIEW COMPONENT
+// ═══════════════════════════════════════════════════════════════════════════
+
+interface HabitStatsViewComponentProps {
+  habits: Habit[];
+  onClose?: () => void;
+}
+
+const HabitStatsViewComponent: React.FC<HabitStatsViewComponentProps> = ({ habits, onClose }) => {
+  const [activeTab, setActiveTab] = useState<'Week' | 'Month' | 'Year' | 'Record'>('Month');
+  const [currentDate, setCurrentDate] = useState(new Date());
+  const activeHabits = habits.filter(h => !h.isArchived);
+
+  return (
+    <div className="flex-1 h-full flex flex-col bg-slate-50 text-slate-900 overflow-hidden">
+      {/* Header */}
+      <div className="h-14 flex items-center justify-between px-4 shrink-0 bg-white border-b border-slate-200 shadow-sm">
+        {onClose && (
+          <button onClick={onClose} className="p-2 text-slate-500 hover:text-slate-800">
+            <X size={24} />
+          </button>
+        )}
+        <div className="flex gap-2">
+          {(['Week', 'Month', 'Year', 'Record'] as const).map(tab => (
+            <button
+              key={tab}
+              onClick={() => setActiveTab(tab)}
+              className={`px-4 py-1 text-xs font-bold rounded-md transition-colors ${activeTab === tab ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+            >
+              {tab}
+            </button>
+          ))}
+        </div>
+        <button className="p-2 text-slate-500 hover:text-slate-800">
+          <Share2 size={20} />
+        </button>
+      </div>
+
+      {/* Content */}
+      <div className="flex-1 overflow-y-auto p-6">
+        <div className="text-center py-10 text-slate-400">
+          <p>Stats view for {activeTab} - {activeHabits.length} habits tracked</p>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 export { 
+  HabitViewComponent,
+  HabitStatsViewComponent, 
   HabitFormSheet, 
   HabitReminderSheet, 
   HabitShareModal, 
@@ -821,4 +1025,4 @@ export {
   MiniDots
 };
 
-export default HabitCard;
+export default HabitViewComponent;
