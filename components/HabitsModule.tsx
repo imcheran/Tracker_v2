@@ -808,5 +808,17 @@ const HabitsModule: React.FC<HabitsModuleProps> = ({
   );
 };
 
-export default HabitsModule;
-export { HabitReminderSheet: HabitReminderSheetComponent };
+export { 
+  HabitFormSheet, 
+  HabitReminderSheet, 
+  HabitShareModal, 
+  HabitCard,
+  getStreak,
+  getCompletionRate,
+  getLongestStreak,
+  getLast7,
+  StatPill,
+  MiniDots
+};
+
+export default HabitCard;
