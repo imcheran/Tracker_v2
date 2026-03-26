@@ -94,25 +94,72 @@ interface CouplesViewProps {
 // ─── Partner Linking Modal ────────────────────────────────────────────
 
 const PartnerLinkingModal: React.FC<{
-  onLink: (partnerUid: string) => Promise<void>;
+  onLink: (inviteCode: string) => Promise<void>;
   onClose: () => void;
   isLoading?: boolean;
-}> = ({ onLink, onClose, isLoading }) => {
-  const [partnerUid, setPartnerUid] = useState('');
+  inviteCode?: string; // Optional: if provided, skip to code entry
+}> = ({ onLink, onClose, isLoading, inviteCode: initialCode }) => {
+  const [mode, setMode] = useState<'choose' | 'enter'>('choose');
+  const [inviteCode, setInviteCode] = useState('');
   const [error, setError] = useState('');
 
   const handleLink = async () => {
-    if (!partnerUid.trim()) {
-      setError('Please enter your partner\'s UID');
+    if (!inviteCode.trim()) {
+      setError('Please enter the invite code');
       return;
     }
     try {
-      await onLink(partnerUid.trim());
+      await onLink(inviteCode.trim().toUpperCase());
       onClose();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to link partner');
     }
   };
+
+  if (initialCode || mode === 'enter') {
+    return (
+      <div className="fixed inset-0 z-[200] bg-black/40 backdrop-blur-sm flex items-end justify-center">
+        <div className="w-full max-w-sm bg-white dark:bg-slate-900 rounded-t-3xl p-5 pb-10 animate-slide-up space-y-4">
+          <div className="flex items-center justify-between">
+            <h3 className="font-bold text-slate-900 dark:text-white flex items-center gap-2">
+              <Heart size={20} className="text-pink-500" /> Enter partner's code
+            </h3>
+            <button onClick={onClose} className="p-1.5 text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full">
+              <X size={20} />
+            </button>
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-xs font-bold text-slate-400 uppercase">Invite code from partner</label>
+            <div className="relative">
+              <input
+                value={inviteCode}
+                onChange={e => { setInviteCode(e.target.value.toUpperCase()); setError(''); }}
+                placeholder="E.g. ABC1D2E3F4G5"
+                maxLength={12}
+                className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-sm outline-none focus:border-pink-400 text-slate-800 dark:text-slate-100 font-mono tracking-widest"
+                disabled={isLoading}
+              />
+              {isLoading && <div className="absolute right-3 top-3 w-5 h-5 border-2 border-pink-400/20 border-t-pink-500 rounded-full animate-spin" />}
+            </div>
+            {error && <p className="text-xs text-red-500">{error}</p>}
+          </div>
+
+          <p className="text-xs text-slate-400 text-center">
+            Once linked, you'll see their status, share photos, and sync your schedules
+          </p>
+
+          <button
+            onClick={handleLink}
+            disabled={isLoading || !inviteCode.trim()}
+            className="w-full py-3 bg-gradient-to-r from-pink-500 to-rose-500 text-white rounded-xl font-bold hover:from-pink-600 hover:to-rose-600 disabled:opacity-40 transition-all"
+          >
+            {isLoading ? 'Linking...' : 'Link Partner'}
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="fixed inset-0 z-[200] bg-black/40 backdrop-blur-sm flex items-end justify-center">
@@ -126,32 +173,29 @@ const PartnerLinkingModal: React.FC<{
           </button>
         </div>
 
-        <div className="space-y-2">
-          <label className="text-xs font-bold text-slate-400 uppercase">Your partner's UID</label>
-          <div className="relative">
-            <input
-              value={partnerUid}
-              onChange={e => { setPartnerUid(e.target.value); setError(''); }}
-              placeholder="Ask them to share their UID from settings"
-              className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-sm outline-none focus:border-pink-400 text-slate-800 dark:text-slate-100"
-              disabled={isLoading}
-            />
-            {isLoading && <div className="absolute right-3 top-3 w-5 h-5 border-2 border-pink-400/20 border-t-pink-500 rounded-full animate-spin" />}
-          </div>
-          {error && <p className="text-xs text-red-500">{error}</p>}
-        </div>
-
         <p className="text-xs text-slate-400 text-center">
-          You'll see their status, share photos & moments, and sync your schedules
+          One user shares an invite code, the other enters it to link permanently
         </p>
 
-        <button
-          onClick={handleLink}
-          disabled={isLoading || !partnerUid.trim()}
-          className="w-full py-3 bg-gradient-to-r from-pink-500 to-rose-500 text-white rounded-xl font-bold hover:from-pink-600 hover:to-rose-600 disabled:opacity-40 transition-all"
-        >
-          {isLoading ? 'Linking...' : 'Link Partner'}
-        </button>
+        <div className="space-y-3">
+          <button
+            onClick={() => setMode('enter')}
+            className="w-full py-3 flex items-center justify-center gap-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 rounded-xl font-bold hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
+          >
+            <Lock size={16} />
+            I have a code
+          </button>
+          <button
+            onClick={() => {
+              setMode('enter');
+              alert('Go to Settings and generate an invite code to share with your partner');
+            }}
+            className="w-full py-3 flex items-center justify-center gap-2 bg-gradient-to-r from-pink-500 to-rose-500 text-white rounded-xl font-bold hover:from-pink-600 hover:to-rose-600 transition-all"
+          >
+            <Users size={16} />
+            Generate a code to share
+          </button>
+        </div>
       </div>
     </div>
   );
@@ -1106,21 +1150,19 @@ const CouplesView: React.FC<CouplesViewProps> = ({
   const update = (partial: Partial<CouplesData>) =>
     onUpdateCouplesData({ ...couplesData, ...partial });
 
-  const handleLinkPartner = async (partnerUid: string) => {
+  const handleLinkPartner = async (inviteCode: string) => {
     setIsLinkingPartner(true);
     try {
       if (!onLinkPartner) {
         throw new Error('Partner linking callback not provided');
       }
       
-      // Call the parent callback (App.tsx) which handles Firestore integration
-      await onLinkPartner(partnerUid);
-      
-      // Update local state to show partner immediately
-      const updatedData = { ...couplesData };
-      onUpdateCouplesData(updatedData);
+      // Call the parent callback (App.tsx) with the invite code
+      // This returns the coupleId if successful
+      await onLinkPartner(inviteCode);
       
       // Close the modal after successful linking
+      // Partner data will be fetched by App.tsx and passed back via props update
       setShowPartnerLinkModal(false);
     } catch (error) {
       alert(`Failed to link partner: ${error instanceof Error ? error.message : 'Unknown error'}`);

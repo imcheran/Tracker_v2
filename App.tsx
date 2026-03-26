@@ -18,7 +18,7 @@ const CouplesView = lazy(() => import('./components/CouplesView'));
 import { MobileNavigation } from './components/MobileNavigation';
 import { Task, ViewType, Habit, FocusCategory, List, AppSettings, FocusSession, Transaction, Debt, Debtor, SavingsGoal, Subscription, Investment, CouplesData, CoupleProfile } from './types';
 import { loadFromStorage, saveToStorage, STORAGE_KEYS } from './services/storageService';
-import { loginWithGoogle, logoutUser, subscribeToAuthChanges, saveUserDataToFirestore, subscribeToDataChanges, loadUserDataFromFirestore } from './services/firebaseService';
+import { loginWithGoogle, logoutUser, subscribeToAuthChanges, saveUserDataToFirestore, subscribeToDataChanges, loadUserDataFromFirestore, linkPartnerByCode, generateInviteCode, subscribeToCoupleData } from './services/firebaseService';
 import { fetchCalendarEvents, updateCalendarEvent, deleteCalendarEvent, createCalendarEvent } from './services/googleCalendarService';
 import { playAlarmSound } from './services/notificationService';
 import { Loader2 } from 'lucide-react';
@@ -367,13 +367,36 @@ const App: React.FC = () => {
             setSyncStatus('saved');
         }
 
-        // Realtime Listener
+        // Realtime Listener for user data
         const unsubData = subscribeToDataChanges(u.uid, (data) => {
             if (!isRemoteUpdate.current) {
                 isRemoteUpdate.current = true;
                 processIncomingData(data);
                 setLastSynced(new Date());
                 setTimeout(() => { isRemoteUpdate.current = false; }, 1000);
+            }
+            
+            // Set up or update couple data listener if user has a coupleId
+            if (data.isCoupled && data.coupleId) {
+              if (partnerSubscriptionRef.current) {
+                partnerSubscriptionRef.current();
+              }
+              partnerSubscriptionRef.current = subscribeToCoupleData(data.coupleId, (coupleData) => {
+                setCouplesData(prev => ({
+                  ...prev,
+                  ...coupleData,
+                  myProfile: {
+                    ...prev.myProfile,
+                    uid: u.uid,
+                    displayName: data.displayName || u.displayName || 'You',
+                    photoURL: data.photoURL || u.photoURL,
+                  },
+                }));
+              });
+            } else if (partnerSubscriptionRef.current) {
+              // User is no longer coupled, unsubscribe from couple data
+              partnerSubscriptionRef.current();
+              partnerSubscriptionRef.current = null;
             }
         });
         dataSubscriptionRef.current = unsubData;
@@ -382,6 +405,10 @@ const App: React.FC = () => {
         if (dataSubscriptionRef.current) {
             dataSubscriptionRef.current();
             dataSubscriptionRef.current = null;
+        }
+        if (partnerSubscriptionRef.current) {
+            partnerSubscriptionRef.current();
+            partnerSubscriptionRef.current = null;
         }
       }
       setIsAuthReady(true);
@@ -480,30 +507,38 @@ const App: React.FC = () => {
       setSyncStatus('saved');
   };
 
-  const handleLinkPartner = useCallback(async (partnerUid: string) => {
-    if (!user || !partnerUid) return;
+  const handleLinkPartner = useCallback(async (inviteCode: string) => {
+    if (!user?.uid) throw new Error('User not authenticated');
     try {
-      // Fetch partner's data from Firestore
-      const partnerData = await loadUserDataFromFirestore(partnerUid);
-      if (partnerData && partnerData.user) {
-        const { displayName, photoURL } = partnerData.user;
+      // Use atomic transaction to link partner
+      const coupleId = await linkPartnerByCode(user.uid, inviteCode);
+      
+      // Fetch updated user data to get partner info
+      const updatedUserData = await loadUserDataFromFirestore(user.uid);
+      
+      if (updatedUserData && updatedUserData.partnerUid) {
+        // Fetch partner profile
+        const partnerData = await loadUserDataFromFirestore(updatedUserData.partnerUid);
+        
+        // Update local state
         setCouplesData(prev => ({
           ...prev,
           partnerProfile: {
-            uid: partnerUid,
-            displayName: displayName || 'Your Partner',
-            photoURL: photoURL || undefined,
+            uid: updatedUserData.partnerUid,
+            displayName: partnerData?.displayName || 'Partner',
+            photoURL: partnerData?.photoURL,
             status: 'online',
             timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
           },
-          linkedAt: new Date(),
         }));
       }
-    } catch (error) {
+      
+      return coupleId;
+    } catch (error: any) {
       console.error('Failed to link partner:', error);
-      throw error;
+      throw new Error(error.message || 'Failed to link partner');
     }
-  }, [user]);
+  }, [user?.uid]);
 
   return (
     <div className="flex h-screen w-full bg-[#eef0f6] dark:bg-[#09090b] text-slate-900 dark:text-slate-100 transition-colors duration-300 p-0 md:p-3 gap-3 overflow-hidden">

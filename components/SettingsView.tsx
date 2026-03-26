@@ -3,9 +3,10 @@ import React, { useState } from 'react';
 import { 
   ArrowLeft, Moon, Sun, Monitor, Bell, Globe, 
   ChevronRight, Check, MoveDown, LayoutList, Share2, Sparkles, CheckCircle2,
-  Cloud, LogOut, LogIn, Calendar, Target, Clock, Notebook, Wallet, Heart, Copy
+  Cloud, LogOut, LogIn, Calendar, Target, Clock, Notebook, Wallet, Heart, Copy, Loader2
 } from 'lucide-react';
 import { AppSettings } from '../types';
+import { generateInviteCode } from '../services/firebaseService';
 
 interface SettingsViewProps {
   onClose: () => void;
@@ -23,7 +24,9 @@ const SettingsView: React.FC<SettingsViewProps> = ({
     onClose, settings, onUpdateSettings, theme, onThemeToggle, onOpenCompletedTasks, user, onLogin, onLogout
 }) => {
   const [partnerCode, setPartnerCode] = useState('');
+  const [myInviteCode, setMyInviteCode] = useState<string | null>(null);
   const [showInvite, setShowInvite] = useState(false);
+  const [isGeneratingCode, setIsGeneratingCode] = useState(false);
 
   // Fixed SectionHeader to correctly handle React children
   const SectionHeader: React.FC<{ children: React.ReactNode }> = ({ children }) => (
@@ -95,13 +98,25 @@ const SettingsView: React.FC<SettingsViewProps> = ({
       }
   };
 
-  const copyMyCode = () => {
-      if (user?.uid) {
-          navigator.clipboard.writeText(user.uid);
-          alert("Code copied! Share this with your partner.");
-      } else {
-          alert("Please sign in to generate a code.");
-      }
+  const handleGenerateInvite = async () => {
+    if (!user?.uid) {
+      alert("Please sign in first");
+      return;
+    }
+    setIsGeneratingCode(true);
+    try {
+      const code = await generateInviteCode(user.uid);
+      setMyInviteCode(code);
+    } catch (error: any) {
+      alert(`Failed to generate code: ${error.message}`);
+    } finally {
+      setIsGeneratingCode(false);
+    }
+  };
+
+  const copyCode = (code: string) => {
+    navigator.clipboard.writeText(code);
+    alert("✓ Code copied to clipboard!");
   };
 
   return (
@@ -153,27 +168,61 @@ const SettingsView: React.FC<SettingsViewProps> = ({
                 <div className="px-6 py-4">
                   {user ? (
                     <div className="space-y-4">
-                      {/* Your Unified Code - works for both Couples & Finance */}
-                      <div className="bg-gradient-to-br from-pink-50 to-rose-50 dark:from-pink-900/20 dark:to-rose-900/20 rounded-xl p-4 border border-pink-200 dark:border-pink-800">
-                        <div className="text-[10px] font-bold text-pink-600 dark:text-pink-400 uppercase tracking-widest mb-2">📲 Your Invite Code</div>
-                        <p className="text-xs text-slate-600 dark:text-slate-300 mb-3">Share this code with your partner for Couples Space & Joint Finances</p>
-                        <div className="flex gap-2">
-                          <input
-                            type="text"
-                            readOnly
-                            value={user.uid}
-                            className="flex-1 bg-white dark:bg-slate-900 border border-pink-300 dark:border-pink-700 rounded-lg px-3 py-2.5 font-mono text-sm text-slate-700 dark:text-slate-300"
-                          />
-                          <button 
-                            onClick={() => {
-                              navigator.clipboard.writeText(user.uid);
-                              alert('✓ Code copied!');
-                            }}
-                            className="px-3 py-2 bg-pink-600 hover:bg-pink-700 text-white rounded-lg transition-colors flex items-center gap-1.5 flex-shrink-0 text-xs font-bold"
+                      {/* Generate Invite Code - Step 1 of Linking */}
+                      <div className="bg-gradient-to-br from-pink-50 to-rose-50 dark:from-pink-900/20 dark:to-rose-900/20 rounded-xl p-5 border border-pink-200 dark:border-pink-800">
+                        <div className="text-[10px] font-bold text-pink-600 dark:text-pink-400 uppercase tracking-widest mb-2">📲 Generate Invite Code</div>
+                        <p className="text-xs text-slate-600 dark:text-slate-300 mb-4">
+                          {myInviteCode 
+                            ? "Share this code with your partner. They'll enter it in their app to link accounts."
+                            : "Generate a temporary invite code to share with your partner"
+                          }
+                        </p>
+                        
+                        {myInviteCode ? (
+                          // Show generated code
+                          <div className="space-y-3">
+                            <div className="flex gap-2">
+                              <input
+                                type="text"
+                                readOnly
+                                value={myInviteCode}
+                                className="flex-1 bg-white dark:bg-slate-900 border-2 border-pink-400 dark:border-pink-600 rounded-lg px-4 py-3 font-mono text-lg font-bold text-pink-700 dark:text-pink-300 text-center"
+                              />
+                              <button 
+                                onClick={() => copyCode(myInviteCode)}
+                                className="px-4 py-2 bg-pink-600 hover:bg-pink-700 text-white rounded-lg transition-colors flex items-center gap-2 flex-shrink-0 font-bold"
+                              >
+                                <Copy size={16} />
+                              </button>
+                            </div>
+                            <p className="text-[10px] text-pink-600 dark:text-pink-400 text-center">
+                              ⏱️ Code expires in 24 hours
+                            </p>
+                            <button 
+                              onClick={() => setMyInviteCode(null)}
+                              className="w-full py-2 text-xs text-pink-600 dark:text-pink-400 hover:bg-pink-100 dark:hover:bg-pink-800/30 rounded-lg transition-colors"
+                            >
+                              Generate New Code
+                            </button>
+                          </div>
+                        ) : (
+                          // Show generate button
+                          <button
+                            onClick={handleGenerateInvite}
+                            disabled={isGeneratingCode}
+                            className="w-full py-3 bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 disabled:opacity-50 text-white rounded-lg font-bold transition-all flex items-center justify-center gap-2"
                           >
-                            <Copy size={14} /> Copy
+                            {isGeneratingCode ? (
+                              <>
+                                <Loader2 size={16} className="animate-spin" /> Generating...
+                              </>
+                            ) : (
+                              <>
+                                <Sparkles size={16} /> Generate Invite Code
+                              </>
+                            )}
                           </button>
-                        </div>
+                        )}
                       </div>
 
                       {/* Partner Status */}

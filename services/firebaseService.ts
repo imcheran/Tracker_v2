@@ -236,3 +236,172 @@ export const subscribeToDataChanges = (uid: string, callback: (data: any) => voi
     }
   );
 };
+
+// --- Partner Linking Functions (Improved Model) ---
+
+import { runTransaction, serverTimestamp, arrayUnion } from "firebase/firestore";
+
+/**
+ * Generate a temporary invite code for partner linking
+ * Stores in partnerInvites/{code} collection
+ */
+export const generateInviteCode = async (senderUid: string): Promise<string> => {
+  if (!db) throw new Error("Firestore not initialized");
+  
+  const code = Math.random().toString(36).substring(2, 15).toUpperCase();
+  const inviteRef = doc(db, "partnerInvites", code);
+  
+  await setDoc(inviteRef, {
+    senderUid,
+    used: false,
+    createdAt: serverTimestamp(),
+    expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000), // 24 hours
+  });
+  
+  return code;
+};
+
+/**
+ * Link two partners using invite code with atomic transaction
+ * Creates couples/{coupleId} and updates both users atomically
+ */
+export const linkPartnerByCode = async (currentUid: string, inviteCode: string): Promise<string> => {
+  if (!db) throw new Error("Firestore not initialized");
+  
+  const inviteRef = doc(db, "partnerInvites", inviteCode);
+  
+  return runTransaction(db, async (transaction) => {
+    const inviteSnap = await transaction.get(inviteRef);
+    
+    if (!inviteSnap.exists()) {
+      throw new Error("Invalid invite code");
+    }
+    
+    const invite = inviteSnap.data();
+    
+    if (invite.used) {
+      throw new Error("Invite code already used");
+    }
+    
+    if (invite.senderUid === currentUid) {
+      throw new Error("You cannot link with yourself");
+    }
+    
+    const senderRef = doc(db, "users", invite.senderUid);
+    const currentRef = doc(db, "users", currentUid);
+    
+    const senderSnap = await transaction.get(senderRef);
+    const currentSnap = await transaction.get(currentRef);
+    
+    const sender = senderSnap.data();
+    const current = currentSnap.data();
+    
+    if (sender?.isCoupled || current?.isCoupled) {
+      throw new Error("One of the users is already linked");
+    }
+    
+    // Generate coupleId from sorted UIDs
+    const coupleId = [invite.senderUid, currentUid].sort().join("_");
+    const coupleRef = doc(db, "couples", coupleId);
+    
+    // Create couple document
+    transaction.set(coupleRef, {
+      user1: invite.senderUid,
+      user2: currentUid,
+      members: [invite.senderUid, currentUid],
+      createdAt: serverTimestamp(),
+      status: "active"
+    });
+    
+    // Update sender user doc
+    transaction.update(senderRef, {
+      partnerUid: currentUid,
+      coupleId,
+      isCoupled: true,
+      updatedAt: serverTimestamp(),
+    });
+    
+    // Update current user doc
+    transaction.update(currentRef, {
+      partnerUid: invite.senderUid,
+      coupleId,
+      isCoupled: true,
+      updatedAt: serverTimestamp(),
+    });
+    
+    // Mark invite as used
+    transaction.update(inviteRef, {
+      used: true,
+      usedBy: currentUid,
+      usedAt: serverTimestamp(),
+    });
+    
+    return coupleId;
+  });
+};
+
+/**
+ * Unlink a partner - removes couple relationship
+ */
+export const unlinkPartner = async (uid: string): Promise<void> => {
+  if (!db) throw new Error("Firestore not initialized");
+  
+  const userRef = doc(db, "users", uid);
+  const userSnap = await getDoc(userRef);
+  
+  if (!userSnap.exists()) {
+    throw new Error("User not found");
+  }
+  
+  const { partnerId, coupleId } = userSnap.data();
+  
+  if (!partnerId || !coupleId) {
+    throw new Error("User is not coupled");
+  }
+  
+  return runTransaction(db, async (transaction) => {
+    const partnerRef = doc(db, "users", partnerId);
+    const coupleRef = doc(db, "couples", coupleId);
+    
+    // Update current user
+    transaction.update(userRef, {
+      partnerUid: null,
+      coupleId: null,
+      isCoupled: false,
+      updatedAt: serverTimestamp(),
+    });
+    
+    // Update partner user
+    transaction.update(partnerRef, {
+      partnerUid: null,
+      coupleId: null,
+      isCoupled: false,
+      updatedAt: serverTimestamp(),
+    });
+    
+    // Mark couple as inactive (don't delete, keep for history)
+    transaction.update(coupleRef, {
+      status: "inactive",
+      inactivatedAt: serverTimestamp(),
+    });
+  });
+};
+
+/**
+ * Subscribe to couple data in real-time
+ */
+export const subscribeToCoupleData = (coupleId: string, callback: (data: any) => void) => {
+  if (!db) return () => {};
+  
+  return onSnapshot(
+    doc(db, "couples", coupleId),
+    (doc) => {
+      if (doc.exists()) {
+        callback(doc.data());
+      }
+    },
+    (error) => {
+      console.error("Couple data snapshot error:", error);
+    }
+  );
+};
