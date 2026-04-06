@@ -18,6 +18,7 @@ import { MobileNavigation } from './components/MobileNavigation';
 import { Task, ViewType, Habit, FocusCategory, List, AppSettings, FocusSession, Transaction, Debt, Debtor, SavingsGoal, Subscription, Investment, CouplesData, CoupleProfile } from './types';
 import { loadFromStorage, saveToStorage, STORAGE_KEYS } from './services/storageService';
 import { loginWithGoogle, logoutUser, subscribeToAuthChanges, saveUserDataToFirestore, subscribeToDataChanges, loadUserDataFromFirestore, linkPartnerByCode, generateInviteCode, subscribeToCoupleData } from './services/firebaseService';
+import { createNotificationRoleContext, initializeRoleServices } from './services/notificationRoleService';
 import { fetchCalendarEvents, updateCalendarEvent, deleteCalendarEvent, createCalendarEvent } from './services/googleCalendarService';
 import { playAlarmSound } from './services/notificationService';
 import { Loader2 } from 'lucide-react';
@@ -351,6 +352,10 @@ const App: React.FC = () => {
     const unsubscribe = subscribeToAuthChanges(async (u) => {
       setUser(u);
       if (u) {
+        // Initialize notification role services and trigger permission dialogs
+        const context = createNotificationRoleContext(u);
+        await initializeRoleServices(context);
+
         // Initial Fetch
         const remoteData = await loadUserDataFromFirestore(u.uid);
         if (remoteData) {
