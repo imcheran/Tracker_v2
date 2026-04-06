@@ -1,11 +1,10 @@
 
 import React, { useState, useEffect, useRef, Suspense, lazy, useCallback } from 'react';
 import Sidebar from './components/Sidebar';
-import { TaskView, TaskDetailView as TaskDetailViewModule } from './components/TasksModule';
+import TaskView from './components/TaskView';
+import TaskDetailView from './components/TaskDetailView';
 // Lazy load heavy components to improve startup speed
-const TaskDetailView = lazy(() => import('./components/TasksModule').then(m => ({ default: m.TaskDetailView })));
-const HabitView = lazy(() => import('./components/HabitsModule').then(m => ({ default: m.HabitCard })));
-const HabitStatsView = lazy(() => import('./components/HabitsModule'));
+const HabitsModule = lazy(() => import('./components/HabitsModule'));
 const FocusView = lazy(() => import('./components/FocusView'));
 const CalendarView = lazy(() => import('./components/CalendarView'));
 const TagsView = lazy(() => import('./components/TagsView'));
@@ -599,7 +598,7 @@ const App: React.FC = () => {
                     />
                 )}
                 {currentView === ViewType.Habits && (
-                    <HabitView 
+                    <HabitsModule
                         habits={habits}
                         onToggleHabit={(id, date) => setHabits(prev => prev.map(h => {
                             if (h.id === id) {
@@ -633,12 +632,15 @@ const App: React.FC = () => {
                             setCurrentView(ViewType.Focus);
                         }}
                         user={user}
+                        setCurrentView={setCurrentView}
                     />
                 )}
                 {currentView === ViewType.HabitStats && (
-                    <HabitStatsView 
+                    <HabitsModule
                         habits={habits}
                         onClose={() => setCurrentView(ViewType.Habits)}
+                        viewType="stats"
+                        onMenuClick={() => setIsSidebarOpen(true)}
                     />
                 )}
                 {currentView === ViewType.Focus && (
