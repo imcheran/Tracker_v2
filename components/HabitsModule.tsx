@@ -1070,6 +1070,3 @@ export {
 };
 
 export default HabitsModule;
-};
-
-export default HabitViewComponent;
