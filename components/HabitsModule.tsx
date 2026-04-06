@@ -13,7 +13,7 @@ import {
   TrendingUp, TrendingDown, Calendar, Filter,
   Search, Award, RefreshCw, Snowflake, Play,
   AlarmClock, BookOpen, SkipForward, Smile, Frown, Meh,
-  ChevronLeft, ChevronRight, Share2, User, ExternalLink, Zap as ZapIcon, Heart, Clock, CheckCircle2, Circle, Activity
+  ChevronLeft, ChevronRight, Share2, User, ExternalLink, Zap as ZapIcon, Heart, Clock, CheckCircle2, Circle, Activity, List, Grid3x3
 } from 'lucide-react';
 import { 
   format, subDays, isToday, parseISO, differenceInDays, startOfWeek, addDays,
@@ -30,6 +30,11 @@ interface HabitsModuleProps {
   onAddHabit: (habit: Habit) => void;
   onDeleteHabit: (id: string) => void;
   onMenuClick: () => void;
+  onOpenStats?: () => void;
+  onStartFocus?: (habitId: string) => void;
+  setCurrentView?: (view: string) => void;
+  onClose?: () => void;
+  viewType?: 'main' | 'stats';
   user?: any;
 }
 
@@ -586,7 +591,7 @@ const SummaryBanner: React.FC<{ habits: Habit[] }> = ({ habits }) => {
 
 const HabitsModule: React.FC<HabitsModuleProps> = ({
   habits, onToggleHabit, onUpdateHabit, onAddHabit, onDeleteHabit,
-  onMenuClick,
+  onMenuClick, onOpenStats, onStartFocus, setCurrentView, onClose, viewType = 'main', user
 }) => {
   const [showAddModal, setShowAddModal]   = useState(false);
   const [editingHabit, setEditingHabit]   = useState<Habit | undefined>();
@@ -597,6 +602,8 @@ const HabitsModule: React.FC<HabitsModuleProps> = ({
   const [searchQuery, setSearchQuery]     = useState('');
   const [collapsedSections, setCollapsed] = useState<Set<string>>(new Set());
   const [showArchivedHabits, setShowArchived] = useState(false);
+  const [activeStatsTab, setActiveStatsTab] = useState<'Week' | 'Month' | 'Year' | 'Record'>('Month');
+  const [currentStatsDate, setCurrentStatsDate] = useState(new Date());
 
   const today = todayStr();
   const active = habits.filter(h => !h.isArchived);
@@ -639,6 +646,45 @@ const HabitsModule: React.FC<HabitsModuleProps> = ({
     onUpdateHabit({ ...habit, history: newHistory, updatedAt: new Date() });
   };
 
+  // Show stats view if viewType is 'stats'
+  if (viewType === 'stats') {
+    const activeHabits = habits.filter(h => !h.isArchived);
+
+    return (
+      <div className="flex-1 h-full flex flex-col bg-slate-50 dark:bg-[#0f0f1a] overflow-hidden">
+        {/* Header */}
+        <div className="h-14 flex items-center justify-between px-4 shrink-0 bg-white dark:bg-slate-950 border-b border-slate-100 dark:border-white/5">
+          {onClose && (
+            <button onClick={onClose} className="p-2 text-slate-500 hover:text-slate-800 dark:hover:text-slate-200">
+              <X size={24} />
+            </button>
+          )}
+          <div className="flex gap-2">
+            {(['Week', 'Month', 'Year', 'Record'] as const).map(tab => (
+              <button
+                key={tab}
+                onClick={() => setActiveStatsTab(tab)}
+                className={`px-4 py-1 text-xs font-bold rounded-md transition-colors ${activeStatsTab === tab ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-sm' : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'}`}
+              >
+                {tab}
+              </button>
+            ))}
+          </div>
+          <button className="p-2 text-slate-500 hover:text-slate-800 dark:hover:text-slate-200">
+            <Share2 size={20} />
+          </button>
+        </div>
+
+        {/* Content */}
+        <div className="flex-1 overflow-y-auto p-6">
+          <div className="text-center py-10 text-slate-400">
+            <p>Stats view for {activeStatsTab} - {activeHabits.length} habits tracked</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="flex flex-col h-full bg-slate-50 dark:bg-[#0f0f1a] overflow-hidden">
       <div className="flex items-center gap-3 px-4 pt-12 pb-4 md:pt-6 bg-white dark:bg-slate-950 border-b border-slate-100 dark:border-white/5">
@@ -649,7 +695,10 @@ const HabitsModule: React.FC<HabitsModuleProps> = ({
           <h1 className="text-xl font-bold text-slate-800 dark:text-white leading-tight">Habits</h1>
           <p className="text-xs text-slate-400 mt-0.5">{format(new Date(), 'EEEE, MMM d')}</p>
         </div>
-        <button className="w-9 h-9 flex items-center justify-center rounded-xl text-slate-500 hover:bg-indigo-50 dark:hover:bg-indigo-500/10 hover:text-indigo-500 transition-colors" title="Stats">
+        <button 
+          onClick={onOpenStats}
+          className="w-9 h-9 flex items-center justify-center rounded-xl text-slate-500 hover:bg-indigo-50 dark:hover:bg-indigo-500/10 hover:text-indigo-500 transition-colors" 
+          title="Stats">
           <BarChart2 size={20} />
         </button>
         <button onClick={() => setViewMode(v => v === 'grid' ? 'list' : 'grid')}
@@ -884,7 +933,7 @@ const HabitViewComponent: React.FC<HabitViewComponentProps> = ({
             </button>
           )}
           <button onClick={() => setViewMode(viewMode === 'grid' ? 'list' : 'grid')} className="p-2 hover:bg-slate-100 dark:hover:bg-white/10 rounded-lg text-slate-600 dark:text-slate-400">
-            {viewMode === 'grid' ? <Layers size={20} /> : <Layers size={20} />}
+            {viewMode === 'grid' ? <List size={20} /> : <Grid3x3 size={20} />}
           </button>
         </div>
       </div>
@@ -1011,18 +1060,16 @@ const HabitStatsViewComponent: React.FC<HabitStatsViewComponentProps> = ({ habit
 };
 
 export { 
-  HabitViewComponent,
+  HabitsModule,
   HabitStatsViewComponent, 
-  HabitFormSheet, 
-  HabitReminderSheet, 
-  HabitShareModal, 
   HabitCard,
   getStreak,
   getCompletionRate,
   getLongestStreak,
-  getLast7,
-  StatPill,
-  MiniDots
+  getLast7
+};
+
+export default HabitsModule;
 };
 
 export default HabitViewComponent;
