@@ -1,9 +1,19 @@
-import React, { useState, useRef } from 'react';
-import { Task, List, Priority, ViewType } from '../types';
-import { startOfDay, startOfToday, isBefore, isSameDay, addDays, isBefore as dateIsBefore } from 'date-fns';
-import TaskItem from './TaskItem';
-import TaskDetailView from './TaskDetailView';
+import React, { useState, useRef, useEffect, useMemo } from 'react';
+import { Task, Priority, ViewType, List, AppSettings, Habit } from '../types';
+import { 
+  CheckCircle2, Plus, Inbox, Search, Layers, Archive, Sun, CalendarDays, Trash2, Menu,
+  MoreVertical, Check, X, Notebook, Pin, Image as ImageIcon, ChevronDown,
+  Palette, Clock, ListTodo, Hash, Lock, PenTool, Mic, Type, MousePointer2, Sparkles, Loader2, Users, LayoutGrid, List as ListIcon,
+  Calendar, FolderInput, ArrowRight, Eye, EyeOff, Circle, Grid, LayoutList, CheckSquare, Brush, Target, MapPin
+} from 'lucide-react';
+import { format, isSameDay, addDays, isBefore, isToday, isTomorrow, isAfter, startOfDay } from 'date-fns';
 import TaskInputSheet from './TaskInputSheet';
+import TaskDetailView from './TaskDetailView';
+import { NoteBackground } from './NoteBackgrounds';
+import SelectionToolbar from './SelectionToolbar';
+
+// Polyfill for isPast since it might be missing in newer date-fns versions
+const isPast = (date: Date) => isBefore(date, new Date());
 
 interface TaskViewProps {
   tasks: Task[];
@@ -17,13 +27,216 @@ interface TaskViewProps {
   onDeleteTask?: (taskId: string) => void;
   onMenuClick?: () => void;
   onChangeView?: (view: ViewType | string) => void;
-  settings?: any;
-  habits?: any[];
-  onUpdateHabit?: (habit: any) => void;
+  settings?: AppSettings;
+  habits?: Habit[];
+  onUpdateHabit?: (habit: Habit) => void;
   user?: any;
 }
 
-const isPast = (date: Date) => dateIsBefore(date, new Date());
+// --- Bento Task Card Component ---
+interface BentoTaskCardProps {
+    task: Task;
+    onToggle: () => void;
+    onSelect: () => void;
+    onDelete: () => void;
+    isSimplified?: boolean;
+}
+
+const BentoTaskCard: React.FC<BentoTaskCardProps> = ({ task, onToggle, onSelect, onDelete, isSimplified }) => {
+    const isOverdue = task.dueDate && isPast(new Date(task.dueDate)) && !isSameDay(new Date(task.dueDate), new Date()) && !task.isCompleted;
+    
+    // Distinct Styling for Calendar Events vs Tasks
+    if (task.isEvent) {
+        return (
+            <div 
+                onClick={onSelect}
+                className="group relative bg-gradient-to-br from-indigo-50 to-purple-50 dark:from-indigo-900/40 dark:to-purple-900/40 border border-indigo-100 dark:border-indigo-800/50 p-5 rounded-[24px] bento-card cursor-pointer overflow-hidden flex flex-col justify-between min-h-[140px] shadow-sm hover:shadow-indigo-500/10 transition-all duration-300"
+            >
+                <div className="absolute top-0 right-0 p-4 opacity-0 group-hover:opacity-100 transition-opacity z-10">
+                    <button onClick={(e) => { e.stopPropagation(); onDelete(); }} className="bg-white/80 dark:bg-black/40 backdrop-blur-sm p-2 rounded-full hover:bg-red-100 dark:hover:bg-red-900/50 hover:text-red-500 transition-colors shadow-sm">
+                        <Trash2 size={16} />
+                    </button>
+                </div>
+                
+                <div className="relative z-0">
+                    <div className="flex items-center gap-2 mb-3">
+                        <div className="bg-indigo-100 dark:bg-indigo-500/20 text-indigo-600 dark:text-indigo-300 p-1.5 rounded-lg">
+                            <Calendar size={16} />
+                        </div>
+                        <span className="text-[10px] font-bold uppercase tracking-wider text-indigo-400">Event</span>
+                    </div>
+                    <h3 className="text-lg font-bold text-slate-800 dark:text-white leading-tight line-clamp-2">{task.title}</h3>
+                </div>
+
+                <div className="mt-4 flex items-center gap-2 text-sm font-medium text-slate-600 dark:text-slate-300">
+                    {task.dueDate && (
+                        <div className="bg-white/60 dark:bg-white/10 px-3 py-1.5 rounded-full backdrop-blur-sm border border-indigo-100/50 dark:border-white/5">
+                            {isToday(new Date(task.dueDate)) ? 'Today' : format(new Date(task.dueDate), 'MMM d')}
+                            {!task.isAllDay && ` • ${format(new Date(task.dueDate), 'h:mm a')}`}
+                        </div>
+                    )}
+                </div>
+            </div>
+        );
+    }
+
+    // Standard Task Card with Premium Gradients
+    const priorityStyles = {
+        [Priority.High]: 'bg-gradient-to-br from-red-50 to-white dark:from-red-900/20 dark:to-slate-900 border-red-100 dark:border-red-900/30 shadow-red-500/5',
+        [Priority.Medium]: 'bg-gradient-to-br from-amber-50 to-white dark:from-amber-900/20 dark:to-slate-900 border-amber-100 dark:border-amber-900/30 shadow-amber-500/5',
+        [Priority.Low]: 'bg-gradient-to-br from-blue-50 to-white dark:from-blue-900/20 dark:to-slate-900 border-blue-100 dark:border-blue-900/30 shadow-blue-500/5',
+        [Priority.None]: 'bg-gradient-to-br from-white to-slate-50 dark:from-slate-800/50 dark:to-slate-900 border-slate-100 dark:border-slate-800'
+    };
+
+    return (
+        <div 
+            onClick={onSelect}
+            className={`group relative p-5 rounded-[24px] border transition-all duration-300 bento-card cursor-pointer flex flex-col justify-between min-h-[120px] shadow-sm hover:shadow-lg hover:-translate-y-1 ${priorityStyles[task.priority]} ${task.isCompleted ? 'opacity-60 grayscale' : ''}`}
+        >
+            <div className="flex items-start justify-between gap-3">
+                <h3 className={`text-base font-semibold leading-snug ${task.isCompleted ? 'line-through text-slate-400' : 'text-slate-800 dark:text-slate-100'}`}>
+                    {task.title}
+                </h3>
+                <button 
+                    onClick={(e) => { e.stopPropagation(); onToggle(); }}
+                    className={`shrink-0 w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all shadow-sm ${task.isCompleted ? 'bg-slate-400 border-slate-400 text-white' : 'border-slate-300 hover:border-indigo-500 bg-white dark:bg-transparent'}`}
+                >
+                    {task.isCompleted && <Check size={14} strokeWidth={3} />}
+                </button>
+            </div>
+
+            <div className="mt-4 flex flex-wrap items-center gap-2">
+                {task.dueDate && (
+                    <div className={`flex items-center gap-1 text-[10px] font-bold px-2.5 py-1.5 rounded-lg ${isOverdue ? 'bg-red-100 text-red-600 dark:bg-red-900/40 dark:text-red-300' : 'bg-white/80 dark:bg-white/10 text-slate-500 dark:text-slate-400'}`}>
+                        <Calendar size={12} />
+                        <span>{format(new Date(task.dueDate), 'MMM d')}</span>
+                    </div>
+                )}
+                
+                {task.tags.map(tag => (
+                    <span key={tag} className="text-[10px] font-bold bg-white/80 dark:bg-white/10 px-2.5 py-1.5 rounded-lg text-slate-500 dark:text-slate-400 border border-slate-100 dark:border-transparent">#{tag}</span>
+                ))}
+            </div>
+        </div>
+    );
+};
+
+// --- Note Item Component (Bento Style) ---
+interface NoteItemProps { 
+    note: Task; 
+    childTasks: Task[];
+    onClick: () => void; 
+    onLongPress: () => void;
+    isSelected: boolean;
+}
+
+const NoteItem: React.FC<NoteItemProps> = ({ note, childTasks, onClick, onLongPress, isSelected }) => {
+    const imageAttachment = note.attachments?.find(a => a.type === 'image' || a.type === 'drawing');
+    const isDark = document.documentElement.classList.contains('dark');
+    const timerRef = useRef<any>(null);
+
+    // Only render background if a color or theme is set
+    const hasCustomBg = (note.color && note.color !== '#ffffff' && note.color !== '#0f172a') || (note.backgroundImage && note.backgroundImage !== 'none');
+
+    const handleTouchStart = () => {
+        timerRef.current = setTimeout(onLongPress, 500); // 500ms for long press
+    };
+
+    const handleTouchEnd = () => {
+        if (timerRef.current) {
+            clearTimeout(timerRef.current);
+            timerRef.current = null;
+        }
+    };
+
+    // Subtask Logic
+    const incompleteSubtasks = childTasks.filter(t => !t.isCompleted);
+    const completedSubtasks = childTasks.filter(t => t.isCompleted);
+    const displaySubtasks = childTasks.slice(0, 4);
+    const remainingCount = Math.max(0, childTasks.length - 4);
+
+    return (
+        <div 
+            onClick={onClick}
+            onTouchStart={handleTouchStart}
+            onTouchEnd={handleTouchEnd}
+            onMouseDown={handleTouchStart}
+            onMouseUp={handleTouchEnd}
+            className={`
+                break-inside-avoid mb-3 rounded-[24px] overflow-hidden cursor-pointer flex flex-col group relative transition-all duration-300
+                ${isSelected ? 'ring-4 ring-indigo-500 shadow-xl scale-95 z-10' : 'hover:-translate-y-1 hover:shadow-lg'}
+                ${!hasCustomBg ? 'bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800' : 'border border-black/5'}
+            `}
+            style={{ 
+                backgroundColor: note.color !== '#ffffff' ? note.color : undefined 
+            }}
+        >
+            {isSelected && (
+                <div className="absolute top-3 right-3 z-30 bg-orange-500 text-white rounded-full p-1 shadow-md animate-scale-in">
+                    <Check size={14} strokeWidth={3} />
+                </div>
+            )}
+
+            {note.backgroundImage && note.backgroundImage !== 'none' && (
+                <NoteBackground themeId={note.backgroundImage} isDark={isDark} className="opacity-50" />
+            )}
+
+            {imageAttachment && (
+                <div className="w-full relative z-10 h-32 overflow-hidden">
+                    <img src={imageAttachment.url} alt="attachment" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
+                </div>
+            )}
+            
+            <div className={`p-5 flex flex-col gap-2 relative z-10 ${imageAttachment ? 'pt-3' : ''}`}>
+                {note.title && (
+                    <h3 className={`font-bold text-lg leading-snug ${note.isCompleted ? 'line-through text-slate-500' : 'text-slate-900 dark:text-slate-100'} ${!hasCustomBg ? 'dark:text-white' : ''}`}>
+                        {note.title}
+                    </h3>
+                )}
+                
+                {note.description && (
+                    <div 
+                        className={`text-sm line-clamp-6 whitespace-pre-wrap ${hasCustomBg ? 'text-slate-800/80 dark:text-slate-900/80' : 'text-slate-600 dark:text-slate-400'}`}
+                        dangerouslySetInnerHTML={{ __html: note.description }}
+                    />
+                )}
+
+                {displaySubtasks.length > 0 && (
+                    <div className={`mt-2 space-y-1 ${note.description ? 'pt-2 border-t border-black/5 dark:border-white/5' : ''}`}>
+                        {displaySubtasks.map(sub => (
+                            <div key={sub.id} className="flex items-center gap-2">
+                                {sub.isCompleted ? (
+                                    <CheckCircle2 size={14} className={`${hasCustomBg ? 'text-slate-600' : 'text-slate-400'}`} />
+                                ) : (
+                                    <Circle size={14} className={`${hasCustomBg ? 'text-slate-600' : 'text-slate-400'}`} />
+                                )}
+                                <span className={`text-xs truncate ${sub.isCompleted ? 'line-through opacity-60' : ''} ${hasCustomBg ? 'text-slate-800' : 'text-slate-600 dark:text-slate-300'}`}>
+                                    {sub.title}
+                                </span>
+                            </div>
+                        ))}
+                        {remainingCount > 0 && (
+                            <div className={`text-[10px] font-medium pl-6 ${hasCustomBg ? 'text-slate-600' : 'text-slate-400'}`}>
+                                + {remainingCount} more items
+                            </div>
+                        )}
+                    </div>
+                )}
+
+                {(note.tags.length > 0 || note.isPinned) && (
+                    <div className="flex flex-wrap gap-1.5 mt-2">
+                        {note.tags.map(tag => (
+                            <span key={tag} className="px-2 py-1 bg-black/5 dark:bg-white/10 rounded-lg text-[10px] font-bold text-slate-600 dark:text-slate-300">
+                                #{tag}
+                            </span>
+                        ))}
+                    </div>
+                )}
+            </div>
+        </div>
+    );
+};
 
 const TaskView: React.FC<TaskViewProps> = ({ 
     tasks, lists, viewType, searchQuery, onToggleTask, onAddTask, onUpdateTask, onSelectTask, onDeleteTask, onMenuClick, habits, onUpdateHabit, user
@@ -31,9 +244,8 @@ const TaskView: React.FC<TaskViewProps> = ({
   const [showInputSheet, setShowInputSheet] = useState(false);
   const [inputInitialMode, setInputInitialMode] = useState<'text' | 'list' | 'voice' | 'image' | 'drawing'>('text');
   const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
-  const [isGridView, setIsGridView] = useState(false);
+  const [isGridView, setIsGridView] = useState(true);
   const [selectedNoteIds, setSelectedNoteIds] = useState<Set<string>>(new Set());
-  const [taskToEditDate, setTaskToEditDate] = useState<Task | undefined>(undefined);
 
   const isNotesView = viewType === ViewType.Notes;
   const isSelectionMode = selectedNoteIds.size > 0;
@@ -51,28 +263,6 @@ const TaskView: React.FC<TaskViewProps> = ({
       } else {
           setSelectedTaskId(id);
       }
-  };
-
-  const createBlankNote = (mode: 'text' | 'list' | 'voice' | 'image' | 'drawing' = 'text') => {
-      const newId = Date.now().toString();
-      const newTask: Task = {
-          id: newId,
-          title: '',
-          description: '',
-          isCompleted: false,
-          priority: Priority.None,
-          listId: 'notes', 
-          tags: [],
-          subtasks: [],
-          attachments: [],
-          isNote: true,
-          color: '#ffffff',
-          createdAt: new Date(),
-          updatedAt: new Date()
-      };
-      
-      onAddTask(newTask);
-      onSelectTask(newId);
   };
 
   const handleBulkUpdate = (updates: Partial<Task>) => {
@@ -103,7 +293,9 @@ const TaskView: React.FC<TaskViewProps> = ({
       
       const today = startOfDay(new Date());
       
-      if (isNotesView) return task.isNote;
+      if (isNotesView) {
+          return task.isNote === true && !task.parentId;
+      }
 
       if (task.isNote && viewType !== ViewType.All && viewType !== ViewType.Trash && viewType !== ViewType.Search && viewType !== ViewType.Tags) {
           return false;
@@ -112,32 +304,38 @@ const TaskView: React.FC<TaskViewProps> = ({
       if (task.parentId) return false;
 
       switch (viewType) {
-          case ViewType.Inbox:
-              return task.listId === 'inbox' && !task.isCompleted;
-          case ViewType.Today:
-              return task.dueDate && isSameDay(new Date(task.dueDate), today) && !task.isCompleted;
-          case ViewType.Next7Days:
-              return task.dueDate && task.dueDate >= today && task.dueDate <= addDays(today, 7) && !task.isCompleted;
-          case ViewType.Completed:
-              return task.isCompleted;
-          case ViewType.Trash:
-              return task.isDeleted;
-          case ViewType.All:
-              return !task.isCompleted;
-          case ViewType.Search:
-              return !task.isCompleted;
-          default:
-              return task.listId === viewType && !task.isCompleted;
+          case ViewType.Inbox: return task.listId === 'inbox' && !task.isCompleted && !task.isEvent;
+          case ViewType.Today: 
+            return task.dueDate && isSameDay(new Date(task.dueDate), today) && !task.isCompleted;
+          case ViewType.Next7Days: {
+              return task.dueDate && 
+                     isBefore(new Date(task.dueDate), addDays(today, 7)) && 
+                     !isBefore(new Date(task.dueDate), today) && 
+                     !task.isCompleted;
+          }
+          case ViewType.Completed: return task.isCompleted;
+          case ViewType.All: {
+             if (task.isEvent && task.dueDate && isBefore(new Date(task.dueDate), startOfDay(new Date()))) {
+                 return false;
+             }
+             return !task.isCompleted;
+          }
+          case ViewType.Trash: return false; 
+          case ViewType.Tags: return true; 
+          case ViewType.Search: return true;
+          default: return task.listId === viewType && !task.isCompleted;
       }
   }).sort((a, b) => {
       if (viewType === ViewType.Completed) {
-          return new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime();
+          return (new Date(b.updatedAt || 0).getTime()) - (new Date(a.updatedAt || 0).getTime());
       }
       if (isNotesView) {
-          return new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime();
+          if (a.isPinned && !b.isPinned) return -1;
+          if (!a.isPinned && b.isPinned) return 1;
+          return (new Date(b.updatedAt || b.createdAt || 0).getTime()) - (new Date(a.updatedAt || a.createdAt || 0).getTime());
       }
       if ((viewType === ViewType.Today || viewType === ViewType.Next7Days || viewType === ViewType.All) && a.dueDate && b.dueDate) {
-          return new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime();
+         return new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime();
       }
       if (a.priority !== b.priority) return b.priority - a.priority;
       if (a.dueDate && b.dueDate) return new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime();
@@ -145,84 +343,132 @@ const TaskView: React.FC<TaskViewProps> = ({
   });
 
   const getHeaderTitle = () => {
-      if (searchQuery) return `Search: ${searchQuery}`;
+      if (searchQuery) return 'Search Results';
       switch (viewType) {
-          case ViewType.Inbox: return 'Inbox';
-          case ViewType.Today: return 'Today';
-          case ViewType.Next7Days: return 'Next 7 Days';
-          case ViewType.Completed: return 'Completed';
-          case ViewType.Notes: return 'Notes';
-          case ViewType.Trash: return 'Trash';
-          default: return 'All Tasks';
+          case ViewType.Inbox: return 'My Inbox';
+          case ViewType.Today: return 'Today\'s Plan';
+          case ViewType.Next7Days: return 'Upcoming Week';
+          case ViewType.All: return 'All Tasks'; 
+          case ViewType.Completed: return 'Archive';
+          case ViewType.Notes: return 'My Notes';
+          default: return lists.find(l => l.id === viewType)?.name || 'Tasks';
       }
   };
 
   return (
     <div className="h-full flex flex-col relative overflow-hidden bg-slate-50 dark:bg-slate-950 transition-colors">
         {/* Header */}
-        <div className="border-b border-slate-200 dark:border-slate-800 px-6 py-4 flex items-center justify-between shrink-0">
-            <h1 className="text-2xl font-bold text-slate-900 dark:text-white">{getHeaderTitle()}</h1>
-            <div className="flex gap-2">
-                {onMenuClick && (
-                    <button onClick={onMenuClick} className="p-2 hover:bg-slate-200 dark:hover:bg-slate-800 rounded-lg transition-colors">
-                        ☰
+        <div className="pt-[calc(env(safe-area-inset-top)+1rem)] shrink-0 sticky top-0 z-20 pointer-events-none px-4 md:px-6">
+            <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border border-white/40 dark:border-white/10 shadow-sm rounded-[24px] flex items-center justify-between p-4 pointer-events-auto">
+                <div className="flex items-center gap-4">
+                    <button onClick={onMenuClick} className="p-2 -ml-2 text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors md:hidden">
+                        <Menu size={20} />
                     </button>
-                )}
+                    <div>
+                        <h1 className="text-xl font-black text-slate-800 dark:text-white leading-none tracking-tight">
+                            {getHeaderTitle()}
+                        </h1>
+                        <p className="text-xs font-bold text-slate-400 mt-1 uppercase tracking-wide">
+                            {filteredTasks.length} {filteredTasks.length === 1 ? 'Item' : 'Items'}
+                        </p>
+                    </div>
+                </div>
+                
+                <div className="flex items-center gap-2">
+                    {isNotesView ? (
+                        <button 
+                            onClick={() => setIsGridView(!isGridView)}
+                            className="p-3 bg-slate-100 dark:bg-slate-800 rounded-xl text-slate-500 hover:text-slate-900 dark:hover:text-white transition-colors"
+                        >
+                            {isGridView ? <LayoutList size={20} /> : <Grid size={20} />}
+                        </button>
+                    ) : null}
+                </div>
             </div>
         </div>
 
-        {/* Task List */}
-        <div className="flex-1 overflow-y-auto custom-scrollbar">
+        {/* Selection Toolbar */}
+        {isSelectionMode && (
+            <SelectionToolbar 
+                count={selectedNoteIds.size}
+                onClear={() => setSelectedNoteIds(new Set())}
+                onArchive={() => handleBulkUpdate({ isArchived: true })}
+                onDelete={() => {
+                    selectedNoteIds.forEach(id => onDeleteTask?.(id));
+                    setSelectedNoteIds(new Set());
+                }}
+                onPin={() => handleBulkUpdate({ isPinned: true })}
+                onColor={() => {}}
+                onLabel={() => {}}
+            />
+        )}
+
+        {/* List / Grid Area */}
+        <div className={`flex-1 overflow-y-auto custom-scrollbar pb-32 px-4 md:px-6 pt-4`}>
             {filteredTasks.length === 0 ? (
-                <div className="flex flex-col items-center justify-center h-full space-y-4 text-slate-400">
-                    <div className="text-5xl">📭</div>
-                    <p className="text-center">No tasks yet. Create one to get started!</p>
+                <div className="flex flex-col items-center justify-center h-[60vh] text-center">
+                    <div className="w-40 h-40 mb-6 bg-white dark:bg-slate-900 rounded-full flex items-center justify-center animate-pulse shadow-sm">
+                        {isNotesView ? <Notebook size={64} className="text-slate-300 dark:text-slate-600"/> : <Inbox size={64} className="text-slate-300 dark:text-slate-600"/>}
+                    </div>
+                    <h3 className="text-xl font-bold text-slate-700 dark:text-slate-200">All caught up!</h3>
+                    <p className="text-slate-500 font-medium mt-2">Time to relax or start something new.</p>
                 </div>
             ) : (
-                <div className="divide-y divide-slate-100 dark:divide-slate-800">
-                    {filteredTasks.map(task => (
-                        <TaskItem
-                            key={task.id}
-                            task={task}
-                            onToggle={onToggleTask}
-                            onSelect={() => setSelectedTaskId(task.id)}
-                            selected={selectedTaskId === task.id}
-                        />
-                    ))}
-                </div>
+                isNotesView ? (
+                    <div className={`${isGridView ? 'columns-2 md:columns-3 lg:columns-4 gap-4 space-y-4' : 'flex flex-col space-y-4'} pb-10`}>
+                        {filteredTasks.map(note => (
+                            <NoteItem 
+                                key={note.id} 
+                                note={note} 
+                                childTasks={tasks.filter(t => t.parentId === note.id && !t.isDeleted)}
+                                onClick={() => handleNoteClick(note.id)} 
+                                onLongPress={() => handleLongPressNote(note.id)}
+                                isSelected={selectedNoteIds.has(note.id)}
+                            />
+                        ))}
+                    </div>
+                ) : (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 pb-10">
+                        {filteredTasks.map(task => (
+                            <BentoTaskCard 
+                                key={task.id}
+                                task={task}
+                                onToggle={() => onToggleTask(task.id)}
+                                onSelect={() => setSelectedTaskId(task.id)}
+                                onDelete={() => onDeleteTask?.(task.id)}
+                            />
+                        ))}
+                    </div>
+                )
             )}
         </div>
 
         {/* Floating Action Button */}
-        <button
-            onClick={() => {
-                setInputInitialMode('text');
-                setShowInputSheet(true);
-            }}
-            className="fixed bottom-8 right-8 z-40 w-14 h-14 rounded-full bg-blue-500 text-white shadow-lg hover:bg-blue-600 flex items-center justify-center text-2xl transition-all hover:scale-110 active:scale-95"
-        >
-            +
-        </button>
-
-        {/* Task Detail View */}
-        {selectedTaskId && (
-            <TaskDetailView
-                task={tasks.find(t => t.id === selectedTaskId)!}
-                lists={lists}
-                tasks={tasks}
-                onClose={() => setSelectedTaskId(null)}
-                onUpdateTask={onUpdateTask}
-                onAddTask={onAddTask}
-                onDeleteTask={() => {
-                    if (onDeleteTask) onDeleteTask(selectedTaskId);
-                    setSelectedTaskId(null);
-                }}
-                onSelectTask={setSelectedTaskId}
-                onStartFocus={() => {}}
-            />
+        {isNotesView ? (
+            <div className={`fixed bottom-[calc(3.5rem+env(safe-area-inset-bottom)+1rem)] md:bottom-8 right-6 z-30 transition-transform duration-300 ${isSelectionMode ? 'translate-y-[200%]' : 'translate-y-0'}`}>
+                <div className="bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl border border-white/20 p-2 rounded-[24px] shadow-2xl flex items-center gap-1 pointer-events-auto">
+                    <button className="p-3 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl text-slate-600 dark:text-slate-400 transition-colors"><CheckSquare size={20} /></button>
+                    <button className="p-3 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl text-slate-600 dark:text-slate-400 transition-colors"><ImageIcon size={20} /></button>
+                    <button 
+                        onClick={() => { setInputInitialMode('text'); setShowInputSheet(true); }}
+                        className="w-12 h-12 bg-gradient-to-br from-amber-500 to-orange-600 text-white rounded-xl flex items-center justify-center shadow-lg hover:scale-105 active:scale-95 transition-transform"
+                    >
+                         <Plus size={24} strokeWidth={3} />
+                    </button>
+                </div>
+            </div>
+        ) : (
+            <div className="fixed bottom-[calc(3.5rem+env(safe-area-inset-bottom)+1.5rem)] right-6 md:bottom-8 md:right-8 z-50">
+                <button 
+                    onClick={() => { setInputInitialMode('text'); setShowInputSheet(true); }}
+                    className="w-16 h-16 bg-gradient-to-br from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white rounded-[24px] shadow-2xl shadow-blue-600/40 flex items-center justify-center hover:scale-105 active:scale-95 transition-all group"
+                >
+                    <Plus size={32} strokeWidth={3} className="group-hover:rotate-90 transition-transform duration-300" />
+                </button>
+            </div>
         )}
 
-        {/* Task Input Sheet */}
+        {/* Input Sheets */}
         <TaskInputSheet 
             isOpen={showInputSheet}
             onClose={() => setShowInputSheet(false)}
@@ -235,17 +481,22 @@ const TaskView: React.FC<TaskViewProps> = ({
             }}
         />
 
-        {/* Date Edit Sheet */}
-        <TaskInputSheet 
-            isOpen={!!taskToEditDate}
-            onClose={() => setTaskToEditDate(undefined)}
-            onAddTask={(updatedTask) => {
-                onUpdateTask(updatedTask);
-            }} 
-            lists={lists}
-            existingTask={taskToEditDate}
-            activePicker='date'
-        />
+        {/* Task Detail View */}
+        {selectedTaskId && (
+            <TaskDetailView
+                task={tasks.find(t => t.id === selectedTaskId)!}
+                lists={lists}
+                tasks={tasks}
+                onClose={() => setSelectedTaskId(null)}
+                onUpdateTask={onUpdateTask}
+                onAddTask={onAddTask}
+                onDeleteTask={(id) => {
+                    onDeleteTask?.(id);
+                    setSelectedTaskId(null);
+                }}
+                onSelectTask={setSelectedTaskId}
+            />
+        )}
     </div>
   );
 };
