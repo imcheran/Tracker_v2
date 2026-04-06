@@ -63,10 +63,6 @@ const TaskInputSheet: React.FC<TaskInputSheetProps> = ({ isOpen, onClose, onAddT
 
   const hours = Array.from({ length: 24 }, (_, i) => i.toString().padStart(2, '0'));
   const minutes = Array.from({ length: 12 }, (_, i) => (i * 5).toString().padStart(2, '0'));
-    } catch (error) {
-      console.error('Failed to start recording:', error);
-    }
-  };
 
   const stopVoiceRecording = () => {
     if (mediaRecorderRef.current && isVoiceRecording) {
