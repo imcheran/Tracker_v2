@@ -1,0 +1,212 @@
+<!-- =====================================================================
+     ANDROID MANIFEST ADDITIONS FOR NOTIFICATION COMMAND CENTER
+     
+     These additions enable:
+     - NotificationListenerService to intercept notifications
+     - Battery optimization bypass (keep service running in Doze)
+     - Network access for Firebase communication
+     
+     File Path: android/app/src/main/AndroidManifest.xml
+     ===================================================================== -->
+
+<!-- ═════════════════════════════════════════════════════════════════════
+     SECTION 1: PERMISSIONS (Add before <application> tag)
+     ═════════════════════════════════════════════════════════════════════ -->
+
+<!-- Standard permissions for network and battery -->
+<uses-permission android:name="android.permission.INTERNET" />
+<uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+
+<!-- ★ DEEP SYSTEM PERMISSION #1: Bind to Notification Listener Service
+     This is the KEY permission that allows the app to act as a 
+     NotificationListenerService and intercept notifications.
+     
+     User must manually grant in: Settings > Accessibility > Services
+     
+     ⚠️ CRITICAL: Without this, notification interception won't work!
+-->
+<uses-permission android:name="android.permission.BIND_NOTIFICATION_LISTENER_SERVICE" />
+
+<!-- ★ DEEP SYSTEM PERMISSION #2: Request Battery Optimization Bypass
+     Allows the app to ask user to disable battery optimization
+     so the notification service stays alive in Doze mode.
+     
+     Without this, the service may get killed when device sleeps.
+-->
+<uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
+
+<!-- Optional: Query certain apps (Android 11+)
+     Allows the app to query installed packages for filtering notifications.
+     Remove if not needed.
+-->
+<uses-permission android:name="android.permission.QUERY_ALL_PACKAGES"
+    tools:ignore="QueryAllPackagesPermission" />
+
+
+<!-- ═════════════════════════════════════════════════════════════════════
+     SECTION 2: SERVICE DECLARATIONS (Add inside <application> tag)
+     ═════════════════════════════════════════════════════════════════════ -->
+
+<!-- ★ NotificationInterceptorService: Main background service
+     This service runs continuously and intercepts all notifications.
+     
+     - android:name: Points to the Kotlin service class
+     - android:permission: Requires BIND_NOTIFICATION_LISTENER_SERVICE
+     - android:exported: Must be true (system needs to bind to it)
+     
+     The system will automatically start this service once user enables it
+     in Accessibility Settings.
+-->
+<service
+    android:name=".services.NotificationInterceptorService"
+    android:permission="android.permission.BIND_NOTIFICATION_LISTENER_SERVICE"
+    android:exported="true"
+    android:label="@string/app_name">
+    <!-- This intent filter tells Android this is a NotificationListenerService -->
+    <intent-filter>
+        <action android:name="android.service.notification.NotificationListenerService" />
+    </intent-filter>
+</service>
+
+<!-- Optional: Battery optimization receiver
+     Listens for battery state changes (for your reference).
+     You can remove this if not needed.
+-->
+<receiver
+    android:name=".receivers.BatteryOptimizationReceiver"
+    android:exported="false"
+    android:enabled="false">
+    <intent-filter>
+        <action android:name="android.os.BatteryManager.ACTION_CHARGING" />
+        <action android:name="android.os.BatteryManager.ACTION_DISCHARGING" />
+    </intent-filter>
+</receiver>
+
+
+<!-- ═════════════════════════════════════════════════════════════════════
+     SECTION 3: COMPLETE EXAMPLE AndroidManifest.xml
+     ═════════════════════════════════════════════════════════════════════ -->
+
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    package="com.cheran.tracker">
+
+    <!-- ===== PERMISSIONS (START) ===== -->
+    
+    <!-- Internet & Network -->
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+
+    <!-- Notification Interception (CRITICAL) -->
+    <uses-permission android:name="android.permission.BIND_NOTIFICATION_LISTENER_SERVICE" />
+
+    <!-- Battery Optimization Bypass -->
+    <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
+
+    <!-- Query Packages (Android 11+) -->
+    <uses-permission android:name="android.permission.QUERY_ALL_PACKAGES"
+        tools:ignore="QueryAllPackagesPermission" />
+
+    <!-- ===== PERMISSIONS (END) ===== -->
+
+    <application
+        android:allowBackup="true"
+        android:dataExtractionRules="@xml/data_extraction_rules"
+        android:debuggable="false"
+        android:hardwareAccelerated="true"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:supportsRtl="true"
+        android:theme="@style/AppTheme"
+        android:usesCleartextTraffic="false">
+
+        <!-- ===== SERVICES (START) ===== -->
+
+        <!-- Notification Interceptor Service -->
+        <service
+            android:name=".services.NotificationInterceptorService"
+            android:permission="android.permission.BIND_NOTIFICATION_LISTENER_SERVICE"
+            android:exported="true"
+            android:label="@string/app_name">
+            <intent-filter>
+                <action android:name="android.service.notification.NotificationListenerService" />
+            </intent-filter>
+        </service>
+
+        <!-- Battery Optimization Receiver (Optional) -->
+        <receiver
+            android:name=".receivers.BatteryOptimizationReceiver"
+            android:exported="false"
+            android:enabled="false">
+            <intent-filter>
+                <action android:name="android.os.BatteryManager.ACTION_CHARGING" />
+                <action android:name="android.os.BatteryManager.ACTION_DISCHARGING" />
+            </intent-filter>
+        </receiver>
+
+        <!-- ===== SERVICES (END) ===== -->
+
+        <!-- Your existing activities, providers, etc. below this -->
+
+        <activity
+            android:name=".MainActivity"
+            android:exported="true"
+            android:label="@string/app_name"
+            android:launchMode="singleTask"
+            android:theme="@style/AppTheme">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <!-- ... rest of your configuration ... -->
+
+    </application>
+
+</manifest>
+
+
+<!-- ═════════════════════════════════════════════════════════════════════
+     SETUP CHECKLIST
+     ═════════════════════════════════════════════════════════════════════ -->
+
+<!-- 
+✅ VERIFICATION STEPS:
+
+1. ADD PERMISSIONS:
+   - [ ] <uses-permission android:name="android.permission.INTERNET" />
+   - [ ] <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+   - [ ] <uses-permission android:name="android.permission.BIND_NOTIFICATION_LISTENER_SERVICE" />
+   - [ ] <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
+
+2. ADD SERVICE:
+   - [ ] <service android:name=".services.NotificationInterceptorService"...>
+   - [ ] Verify android:permission="android.permission.BIND_NOTIFICATION_LISTENER_SERVICE"
+   - [ ] Verify android:exported="true"
+   - [ ] Verify intent-filter has action for NotificationListenerService
+
+3. VERIFY FILE STRUCTURE:
+   - [ ] Service class at: android/app/src/main/java/com/cheran/tracker/services/NotificationInterceptorService.kt
+   - [ ] Plugin class at: android/app/src/main/java/com/cheran/tracker/plugins/NotificationListenerPlugin.kt
+   - [ ] Both files have correct package name: com.cheran.tracker
+
+4. BUILD & TEST:
+   - [ ] Run: ./gradlew build (from android folder)
+   - [ ] Check for no compilation errors
+   - [ ] Install app on test device
+   - [ ] Go to Settings > Accessibility > Services
+   - [ ] Enable the app in the list
+   - [ ] Grant Battery Optimization permissions
+   - [ ] Send a test notification
+   - [ ] Verify in Firebase that notification was written
+
+5. TROUBLESHOOTING:
+   If service isn't starting:
+   - [ ] Verify package name matches in all Kotlin files
+   - [ ] Check app is registered in MainActivity.kt: registerPlugin(NotificationListenerPlugin::class)
+   - [ ] Check Accessibility Settings - app must be explicitly enabled by user
+   - [ ] Check logcat: adb logcat | grep "NotificationInterceptor"
+
+═════════════════════════════════════════════════════════════════════ -->

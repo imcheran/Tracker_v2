@@ -329,3 +329,45 @@ export interface CouplesData {
   nextMeetup?: CouplesMeetup;
   sharedChallenges: SharedHabitChallenge[];
 }
+
+// ===== Notification Command Center Types =====
+
+export interface InterceptedNotification {
+  id: string;                          // Unique ID (timestamp + random)
+  title: string;                       // Notification title
+  appName: string;                     // Package name or app name
+  message: string;                     // Notification message body
+  bigText?: string;                    // Long-form text if available
+  subText?: string;                    // Additional subtitle from notification
+  timestamp: number;                   // When intercepted (milliseconds)
+  senderUid: string;                   // Firebase UID of sending device
+  senderEmail: string;                 // Email of sender for identification
+  deviceId: string;                    // Unique device identifier
+  dismissed: boolean;                  // Whether user dismissed it
+  category?: string;                   // Optional category (sms|chat|reminder|etc)
+  actions?: NotificationAction[];      // Possible actions user can take
+}
+
+export interface NotificationAction {
+  id: string;
+  title: string;
+  semanticAction?: string;             // "reply", "mark_as_read", etc
+}
+
+export interface NotificationSenderMetadata {
+  senderUid: string;
+  email: string;
+  displayName: string;
+  deviceId: string;
+  lastNotificationTime?: number;      // Last notification received
+  isActive: boolean;                   // Has sent notifications recently
+  notificationCount: number;           // Lifetime notification count
+}
+
+export interface NotificationViewerState {
+  viewerEmail: string;                 // Always 'kuttiavt@gmail.com'
+  allSenders: NotificationSenderMetadata[];     // List of all sending devices
+  notificationsByTime: InterceptedNotification[];  // All notifs, sorted by time (newest first)
+  filterBySender?: string;             // Current filter UID
+  unreadCount: number;                 // Total unread notifications
+}
