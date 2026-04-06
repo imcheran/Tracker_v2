@@ -12,86 +12,57 @@ interface TaskInputSheetProps {
   onClose: () => void;
   onAddTask: (task: Task) => void;
   lists: List[];
-  initialMode?: 'text' | 'list' | 'voice' | 'image' | 'drawing';
-  initialConfig?: { listId?: string; isNote?: boolean };
+  initialConfig?: Partial<Task>;
+  activePicker?: 'none' | 'date' | 'priority' | 'list' | 'color';
   existingTask?: Task;
-  activePicker?: 'date' | 'time' | 'priority';
+  initialMode?: 'text' | 'list' | 'voice' | 'image' | 'drawing';
 }
 
-const TaskInputSheet: React.FC<TaskInputSheetProps> = ({ 
-  isOpen, onClose, onAddTask, lists, initialMode = 'text', initialConfig = {}, existingTask
-}) => {
+type PickerView = 'none' | 'date' | 'priority' | 'list' | 'color'; 
+
+const NOTE_COLORS = ['#ffffff', '#f28b82', '#fbbc04', '#fff475', '#ccff90', '#a7ffeb', '#cbf0f8', '#aecbfa', '#d7aefb', '#fdcfe8', '#e6c9a8', '#e8eaed'];
+
+const TaskInputSheet: React.FC<TaskInputSheetProps> = ({ isOpen, onClose, onAddTask, lists, initialConfig, activePicker: initialPicker = 'none', existingTask, initialMode = 'text' }) => {
+  // --- State ---
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
-  const [mode, setMode] = useState<'text' | 'list' | 'voice' | 'image' | 'drawing'>(initialMode);
+  const [activePicker, setActivePicker] = useState<PickerView>(initialPicker);
+  
   const [priority, setPriority] = useState<Priority>(Priority.None);
-  const [listId, setListId] = useState(initialConfig.listId || 'inbox');
-  const [tags, setTags] = useState<string[]>([]);
-  const [tagInput, setTagInput] = useState('');
-  const [dueDate, setDueDate] = useState<Date | null>(null);
-  const [dueTime, setDueTime] = useState<string>('09:00');
-  const [isNote, setIsNote] = useState(initialConfig.isNote || false);
-  const [isVoiceRecording, setIsVoiceRecording] = useState(false);
-  const [isTranscribing, setIsTranscribing] = useState(false);
-  const [recordingTime, setRecordingTime] = useState(0);
+  const [listId, setListId] = useState<string>('inbox');
+  const [dueDate, setDueDate] = useState<Date | undefined>(undefined);
+  const [isNote, setIsNote] = useState(false);
+  const [noteColor, setNoteColor] = useState('#ffffff');
+  const [parentId, setParentId] = useState<string | undefined>(undefined);
+  
+  const [attachments, setAttachments] = useState<Task['attachments']>([]);
+  const [showDrawing, setShowDrawing] = useState(false);
+  
+  const [isRecording, setIsRecording] = useState(false);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
-  const audioChunksRef = useRef<Blob[]>([]);
-  const recordingTimerRef = useRef<any>(null);
+  const chunksRef = useRef<Blob[]>([]);
+  const [isProcessingVoice, setIsProcessingVoice] = useState(false);
+  
+  const [startHour, setStartHour] = useState('09');
+  const [startMinute, setStartMinute] = useState('00');
+  const [endHour, setEndHour] = useState('10');
+  const [endMinute, setEndMinute] = useState('00');
+  
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
+  
+  const [reminder, setReminder] = useState<string>('None'); 
+  const [repeat, setRepeat] = useState<string>('None');
+  const [isAllDay, setIsAllDay] = useState(false);
 
-  const inputModes = [
-    { id: 'text', label: 'Text', icon: '✍️' },
-    { id: 'list', label: 'List', icon: '📋' },
-    { id: 'voice', label: 'Voice', icon: '🎤' },
-    { id: 'image', label: 'Image', icon: '📸' },
-    { id: 'drawing', label: 'Draw', icon: '🎨' }
-  ];
+  const [dateTab, setDateTab] = useState<'date' | 'time'>('date');
+  const [calendarMonth, setCalendarMonth] = useState(new Date());
 
-  useEffect(() => {
-    if (existingTask) {
-      setTitle(existingTask.title);
-      setDescription(existingTask.description || '');
-      setPriority(existingTask.priority);
-      setListId(existingTask.listId);
-      setTags(existingTask.tags);
-      if (existingTask.dueDate) {
-        setDueDate(new Date(existingTask.dueDate));
-        const time = format(new Date(existingTask.dueDate), 'HH:mm');
-        setDueTime(time);
-      }
-      setIsNote(existingTask.isNote || false);
-    }
-  }, [existingTask]);
+  const titleInputRef = useRef<HTMLInputElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-  useEffect(() => {
-    if (isOpen && initialMode === 'voice' && !isVoiceRecording) {
-      startVoiceRecording();
-    }
-  }, [isOpen, initialMode]);
-
-  // --- Voice Recording ---
-  const startVoiceRecording = async () => {
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      const mediaRecorder = new MediaRecorder(stream);
-      
-      audioChunksRef.current = [];
-      mediaRecorder.ondataavailable = (e) => {
-        audioChunksRef.current.push(e.data);
-      };
-
-      mediaRecorder.onstop = async () => {
-        const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/wav' });
-        await transcribeAudio(audioBlob);
-        stream.getTracks().forEach(track => track.stop());
-      };
-
-      mediaRecorder.start();
-      mediaRecorderRef.current = mediaRecorder;
-      setIsVoiceRecording(true);
-      setRecordingTime(0);
-      recordingTimerRef.current = setInterval(() => {
-        setRecordingTime(t => t + 1);
-      }, 1000);
+  const hours = Array.from({ length: 24 }, (_, i) => i.toString().padStart(2, '0'));
+  const minutes = Array.from({ length: 12 }, (_, i) => (i * 5).toString().padStart(2, '0'));
     } catch (error) {
       console.error('Failed to start recording:', error);
     }
@@ -416,25 +387,6 @@ const TaskInputSheet: React.FC<TaskInputSheetProps> = ({
           </button>
         </div>
       </div>
-    </div>
-  );
-};
-
-export default TaskInputSheet;
-
-interface TaskInputSheetProps {
-  isOpen: boolean;
-  onClose: () => void;
-  onAddTask: (task: Task) => void;
-  lists: List[];
-  initialConfig?: Partial<Task>;
-  activePicker?: 'none' | 'date' | 'priority' | 'list' | 'color';
-  existingTask?: Task;
-  initialMode?: 'text' | 'list' | 'voice' | 'image' | 'drawing';
-}
-
-type PickerView = 'none' | 'date' | 'priority' | 'list' | 'color'; 
-
 const NOTE_COLORS = ['#ffffff', '#f28b82', '#fbbc04', '#fff475', '#ccff90', '#a7ffeb', '#cbf0f8', '#aecbfa', '#d7aefb', '#fdcfe8', '#e6c9a8', '#e8eaed'];
 
 const TaskInputSheet: React.FC<TaskInputSheetProps> = ({ isOpen, onClose, onAddTask, lists, initialConfig, activePicker: initialPicker = 'none', existingTask, initialMode = 'text' }) => {
