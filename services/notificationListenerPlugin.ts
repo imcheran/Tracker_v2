@@ -125,7 +125,7 @@ export const NotificationListenerPlugin = registerPlugin<NotificationListenerPlu
   "NotificationListenerPlugin",
   {
     // Web implementation (no-op for web platform)
-    web: () => import("./web").then(m => new m.NotificationListenerPluginWeb()),
+    web: () => import("./notificationListenerPluginWeb").then(m => new m.NotificationListenerPluginWeb()),
   }
 );
 
