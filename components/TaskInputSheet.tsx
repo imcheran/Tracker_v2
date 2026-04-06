@@ -1,32 +1,426 @@
-import React, { useState, useRef, useMemo, useEffect } from 'react';
-import { Task, List, Priority } from '../types';
-import { eachDayOfInterval, startOfWeek, endOfWeek, startOfMonth, endOfMonth, startOfToday, format, addDays, addMonths, addMinutes, differenceInMinutes, getDay } from 'date-fns';
+import React, { useState, useRef, useEffect } from 'react';
+import { Task, Priority, List } from '../types';
+import { Plus, Mic, ImagePlus, Pen, X, Send, Loader2, Calendar, Clock, Flag, CheckCircle2, Hash } from 'lucide-react';
+import { format, addDays, addHours } from 'date-fns';
+import nlpService from '../services/nlpService';
+import aiService from '../services/aiService';
+import DrawingCanvas from './DrawingCanvas';
+import WheelPicker from './WheelPicker';
 
-// --- Local Date Helpers ---
-const startOfMonth = (date: Date) => new Date(date.getFullYear(), date.getMonth(), 1);
-const endOfMonth = (date: Date) => new Date(date.getFullYear(), date.getMonth() + 1, 0);
-const subMonths = (date: Date, n: number) => addMonths(date, -n);
-const nextMonday = (date: Date) => addDays(date, (8 - getDay(date)) % 7 || 7);
-const startOfWeek = (date: Date, options?: { weekStartsOn?: number }) => {
-    const day = getDay(date);
-    const startDay = options?.weekStartsOn || 0;
-    const diff = (day < startDay ? 7 : 0) + day - startDay;
-    return addDays(date, -diff);
+interface TaskInputSheetProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onAddTask: (task: Task) => void;
+  lists: List[];
+  initialMode?: 'text' | 'list' | 'voice' | 'image' | 'drawing';
+  initialConfig?: { listId?: string; isNote?: boolean };
+  existingTask?: Task;
+  activePicker?: 'date' | 'time' | 'priority';
+}
+
+const TaskInputSheet: React.FC<TaskInputSheetProps> = ({ 
+  isOpen, onClose, onAddTask, lists, initialMode = 'text', initialConfig = {}, existingTask
+}) => {
+  const [title, setTitle] = useState('');
+  const [description, setDescription] = useState('');
+  const [mode, setMode] = useState<'text' | 'list' | 'voice' | 'image' | 'drawing'>(initialMode);
+  const [priority, setPriority] = useState<Priority>(Priority.None);
+  const [listId, setListId] = useState(initialConfig.listId || 'inbox');
+  const [tags, setTags] = useState<string[]>([]);
+  const [tagInput, setTagInput] = useState('');
+  const [dueDate, setDueDate] = useState<Date | null>(null);
+  const [dueTime, setDueTime] = useState<string>('09:00');
+  const [isNote, setIsNote] = useState(initialConfig.isNote || false);
+  const [isVoiceRecording, setIsVoiceRecording] = useState(false);
+  const [isTranscribing, setIsTranscribing] = useState(false);
+  const [recordingTime, setRecordingTime] = useState(0);
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const audioChunksRef = useRef<Blob[]>([]);
+  const recordingTimerRef = useRef<any>(null);
+
+  const inputModes = [
+    { id: 'text', label: 'Text', icon: '✍️' },
+    { id: 'list', label: 'List', icon: '📋' },
+    { id: 'voice', label: 'Voice', icon: '🎤' },
+    { id: 'image', label: 'Image', icon: '📸' },
+    { id: 'drawing', label: 'Draw', icon: '🎨' }
+  ];
+
+  useEffect(() => {
+    if (existingTask) {
+      setTitle(existingTask.title);
+      setDescription(existingTask.description || '');
+      setPriority(existingTask.priority);
+      setListId(existingTask.listId);
+      setTags(existingTask.tags);
+      if (existingTask.dueDate) {
+        setDueDate(new Date(existingTask.dueDate));
+        const time = format(new Date(existingTask.dueDate), 'HH:mm');
+        setDueTime(time);
+      }
+      setIsNote(existingTask.isNote || false);
+    }
+  }, [existingTask]);
+
+  useEffect(() => {
+    if (isOpen && initialMode === 'voice' && !isVoiceRecording) {
+      startVoiceRecording();
+    }
+  }, [isOpen, initialMode]);
+
+  // --- Voice Recording ---
+  const startVoiceRecording = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const mediaRecorder = new MediaRecorder(stream);
+      
+      audioChunksRef.current = [];
+      mediaRecorder.ondataavailable = (e) => {
+        audioChunksRef.current.push(e.data);
+      };
+
+      mediaRecorder.onstop = async () => {
+        const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/wav' });
+        await transcribeAudio(audioBlob);
+        stream.getTracks().forEach(track => track.stop());
+      };
+
+      mediaRecorder.start();
+      mediaRecorderRef.current = mediaRecorder;
+      setIsVoiceRecording(true);
+      setRecordingTime(0);
+      recordingTimerRef.current = setInterval(() => {
+        setRecordingTime(t => t + 1);
+      }, 1000);
+    } catch (error) {
+      console.error('Failed to start recording:', error);
+    }
+  };
+
+  const stopVoiceRecording = () => {
+    if (mediaRecorderRef.current && isVoiceRecording) {
+      mediaRecorderRef.current.stop();
+      setIsVoiceRecording(false);
+      if (recordingTimerRef.current) clearInterval(recordingTimerRef.current);
+      setRecordingTime(0);
+    }
+  };
+
+  const transcribeAudio = async (audioBlob: Blob) => {
+    setIsTranscribing(true);
+    try {
+      const transcribedText = await aiService.transcribeAudio(audioBlob);
+      setTitle(prev => prev + ' ' + transcribedText);
+      
+      // Try to parse smart input for date/priority
+      const parsed = await nlpService.parseSmartInput(transcribedText);
+      if (parsed.dueDate) setDueDate(parsed.dueDate);
+      if (parsed.priority !== Priority.None) setPriority(parsed.priority);
+      if (parsed.tags.length > 0) setTags(prev => [...prev, ...parsed.tags]);
+    } catch (error) {
+      console.error('Transcription failed:', error);
+    } finally {
+      setIsTranscribing(false);
+    }
+  };
+
+  // --- Image Upload & OCR ---
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      try {
+        const text = await aiService.extractImageText(file);
+        setDescription(prev => prev + '\n' + text);
+      } catch (error) {
+        console.error('OCR failed:', error);
+      }
+    }
+  };
+
+  // --- Handle Tag Input ---
+  const handleTagAdd = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter' || e.key === ',') {
+      e.preventDefault();
+      const newTag = tagInput.trim();
+      if (newTag && !tags.includes(newTag)) {
+        setTags([...tags, newTag]);
+        setTagInput('');
+      }
+    }
+  };
+
+  const removeTag = (tag: string) => {
+    setTags(tags.filter(t => t !== tag));
+  };
+
+  // --- Submit ---
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!title.trim()) {
+      alert('Please enter a task title');
+      return;
+    }
+
+    // Combine due date and time
+    let finalDueDate: Date | undefined;
+    if (dueDate) {
+      const [hours, minutes] = dueTime.split(':').map(Number);
+      finalDueDate = new Date(dueDate);
+      finalDueDate.setHours(hours, minutes, 0, 0);
+    }
+
+    const newTask: Task = {
+      id: existingTask?.id || Date.now().toString(),
+      title: title.trim(),
+      description,
+      isCompleted: existingTask?.isCompleted || false,
+      priority,
+      listId,
+      tags,
+      subtasks: [],
+      attachments: [],
+      isNote,
+      color: isNote ? '#ffffff' : undefined,
+      createdAt: existingTask?.createdAt || new Date(),
+      updatedAt: new Date(),
+      dueDate: finalDueDate
+    };
+
+    onAddTask(newTask);
+    resetForm();
+    onClose();
+  };
+
+  const resetForm = () => {
+    setTitle('');
+    setDescription('');
+    setPriority(Priority.None);
+    setListId(initialConfig.listId || 'inbox');
+    setTags([]);
+    setTagInput('');
+    setDueDate(null);
+    setDueTime('09:00');
+    setMode('text');
+  };
+
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-end md:items-center justify-center bg-black/40 backdrop-blur-sm">
+      <div className="w-full md:w-[600px] bg-white dark:bg-slate-900 rounded-t-[32px] md:rounded-[32px] shadow-2xl max-h-[90vh] overflow-y-auto flex flex-col">
+        {/* Header */}
+        <div className="shrink-0 flex items-center justify-between p-6 border-b border-slate-100 dark:border-slate-800 sticky top-0 bg-white dark:bg-slate-900">
+          <h2 className="text-2xl font-bold text-slate-900 dark:text-white">
+            {existingTask ? 'Edit Task' : isNote ? 'New Note' : 'New Task'}
+          </h2>
+          <button 
+            onClick={onClose}
+            className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors"
+          >
+            <X size={24} className="text-slate-500" />
+          </button>
+        </div>
+
+        {/* Input Modes */}
+        {!existingTask && (
+          <div className="shrink-0 flex gap-2 p-4 overflow-x-auto border-b border-slate-100 dark:border-slate-800">
+            {inputModes.map(m => (
+              <button
+                key={m.id}
+                onClick={() => {
+                  if (m.id === 'voice') startVoiceRecording();
+                  setMode(m.id as any);
+                }}
+                className={`px-4 py-2 rounded-xl font-medium whitespace-nowrap transition-all ${
+                  mode === m.id
+                    ? 'bg-blue-500 text-white shadow-lg' 
+                    : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
+                }`}
+              >
+                {m.icon} {m.label}
+              </button>
+            ))}
+          </div>
+        )}
+
+        {/* Form Content */}
+        <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-6 space-y-6">
+          
+          {/* Title Input */}
+          <div>
+            <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">
+              {isNote ? 'Note Title' : 'Task Title'} { isVoiceRecording && <Loader2 className="inline animate-spin ml-2" size={16} />}
+            </label>
+            <input
+              type="text"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              placeholder={mode === 'voice' ? 'Listening...' : 'What needs to be done?'}
+              disabled={isVoiceRecording}
+              className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all disabled:opacity-50"
+            />
+          </div>
+
+          {/* Description */}
+          {!isNote && (
+            <div>
+              <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">Description (Optional)</label>
+              <textarea
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                placeholder="Add details..."
+                rows={3}
+                className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all resize-none"
+              />
+            </div>
+          )}
+
+          {/* Image Input */}
+          {mode === 'image' && (
+            <div>
+              <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">Upload Image</label>
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handleImageUpload}
+                className="w-full px-4 py-3 rounded-xl border-2 border-dashed border-slate-300 dark:border-slate-600 cursor-pointer hover:border-blue-500 transition-colors"
+              />
+            </div>
+          )}
+
+          {mode === 'drawing' && <DrawingCanvas />}
+
+          {/* Tags */}
+          <div>
+            <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">Tags</label>
+            <div className="flex gap-2 flex-wrap mb-3">
+              {tags.map(tag => (
+                <span key={tag} className="px-3 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded-lg text-sm font-medium flex items-center gap-2">
+                  #{tag}
+                  <button type="button" onClick={() => removeTag(tag)} className="hover:text-blue-900 dark:hover:text-blue-100">
+                    <X size={14} />
+                  </button>
+                </span>
+              ))}
+            </div>
+            <input
+              type="text"
+              value={tagInput}
+              onChange={(e) => setTagInput(e.target.value)}
+              onKeyDown={handleTagAdd}
+              placeholder="Type tag + Enter..."
+              className="w-full px-4 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
+            />
+          </div>
+
+          {/* Due Date */}
+          <div>
+            <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">Due Date</label>
+            {dueDate && (
+              <div className="flex gap-3 items-end mb-3">
+                <WheelPicker 
+                  value={dueDate}
+                  onChange={setDueDate}
+                  type="date"
+                />
+                <input
+                  type="time"
+                  value={dueTime}
+                  onChange={(e) => setDueTime(e.target.value)}
+                  className="px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white"
+                />
+              </div>
+            )}
+            <div className="flex gap-2 flex-wrap">
+              {[
+                { label: 'Today', days: 0 },
+                { label: 'Tomorrow', days: 1 },
+                { label: 'Next Week', days: 7 }
+              ].map(btn => (
+                <button
+                  key={btn.label}
+                  type="button"
+                  onClick={() => setDueDate(addDays(new Date(), btn.days))}
+                  className="px-3 py-1 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 rounded-lg text-sm font-medium hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
+                >
+                  {btn.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Priority & List */}
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">Priority</label>
+              <select
+                value={priority}
+                onChange={(e) => setPriority(Number(e.target.value) as Priority)}
+                className="w-full px-4 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <option value={Priority.None}>None</option>
+                <option value={Priority.Low}>Low</option>
+                <option value={Priority.Medium}>Medium</option>
+                <option value={Priority.High}>High</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">List</label>
+              <select
+                value={listId}
+                onChange={(e) => setListId(e.target.value)}
+                className="w-full px-4 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="inbox">Inbox</option>
+                {lists.map(list => (
+                  <option key={list.id} value={list.id}>{list.name}</option>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          {/* Voice Recording Status */}
+          {isVoiceRecording && (
+            <div className="bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-xl p-4 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-3 h-3 bg-red-500 rounded-full animate-pulse" />
+                <span className="text-red-700 dark:text-red-300 font-medium">Recording... {recordingTime}s</span>
+              </div>
+              <button
+                type="button"
+                onClick={stopVoiceRecording}
+                className="px-3 py-1 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
+              >
+                Stop
+              </button>
+            </div>
+          )}
+        </form>
+
+        {/* Footer */}
+        <div className="shrink-0 flex gap-3 p-6 border-t border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50">
+          <button
+            type="button"
+            onClick={onClose}
+            className="flex-1 px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 font-bold hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+          >
+            Cancel
+          </button>
+          <button
+            type="submit"
+            onClick={handleSubmit}
+            className="flex-1 px-4 py-3 rounded-xl bg-gradient-to-r from-blue-500 to-indigo-600 text-white font-bold hover:from-blue-600 hover:to-indigo-700 transition-all shadow-lg flex items-center justify-center gap-2"
+          >
+            <Send size={18} />
+            {existingTask ? 'Update' : 'Create'}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
 };
-const endOfWeek = (date: Date, options?: { weekStartsOn?: number }) => {
-    const start = startOfWeek(date, options);
-    return addDays(start, 6);
-};
-const setHours = (date: Date, hours: number) => {
-    const d = new Date(date);
-    d.setHours(hours);
-    return d;
-};
-const setMinutes = (date: Date, minutes: number) => {
-    const d = new Date(date);
-    d.setMinutes(minutes);
-    return d;
-};
+
+export default TaskInputSheet;
 
 interface TaskInputSheetProps {
   isOpen: boolean;
