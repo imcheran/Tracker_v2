@@ -489,8 +489,12 @@ const App: React.FC = () => {
       setAccessToken(accessToken);
       if (accessToken) { localStorage.setItem('google_access_token', accessToken); syncWithGoogleCalendar(accessToken); }
     } catch (error: any) { 
-      console.error("Login failed", error); 
-      alert(`Login failed: ${error.message || "Please try again."}`); 
+      console.error("Login failed:", error); 
+      const errorMsg = error.message || "Please try again.";
+      const displayMsg = errorMsg.includes('\n') 
+        ? errorMsg 
+        : `Login failed: ${errorMsg}`;
+      alert(displayMsg); 
     }
   };
   const handleLogout = async () => { await logoutUser(); setUser(null); setAccessToken(null); };

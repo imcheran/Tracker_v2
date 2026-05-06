@@ -53,11 +53,13 @@ const initializeFirebase = () => {
   try {
     // 1. Initialize App (Modular & Idempotent)
     app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
+    console.log("✓ Firebase App initialized with project:", firebaseConfig.projectId);
 
     // 2. Initialize Auth
     try {
         // Pass app instance explicitly to getAuth to avoid "default app not found" or registration issues
         auth = getAuth(app);
+        console.log("✓ Firebase Auth initialized");
         
         // Set persistence only if we have a valid auth instance
         if (auth) {
@@ -67,6 +69,7 @@ const initializeFirebase = () => {
         }
     } catch (authError) {
         console.error("Critical Auth Initialization Error:", authError);
+        console.error("This may indicate Firebase is not properly configured");
         // We don't throw here to allow the app to function in offline/no-auth mode if needed
     }
 
@@ -75,15 +78,18 @@ const initializeFirebase = () => {
       db = initializeFirestore(app, {
         localCache: persistentLocalCache({ tabManager: persistentMultipleTabManager() })
       });
+      console.log("✓ Firestore initialized with persistent cache");
     } catch (e) {
       console.warn("Firestore advanced persistence failed, falling back to default:", e);
       db = getFirestore(app);
+      console.log("✓ Firestore initialized (fallback mode)");
     }
 
     // 4. Initialize Analytics (Client-side only)
     if (typeof window !== 'undefined') {
       try {
         analytics = getAnalytics(app);
+        console.log("✓ Analytics initialized");
       } catch (e) {
         console.warn("Analytics failed to initialize", e);
       }
@@ -91,13 +97,16 @@ const initializeFirebase = () => {
 
     // 5. Initialize Capacitor Google Auth (Native Only)
     if (Capacitor.isNativePlatform()) {
+      console.log("Native platform detected, initializing Capacitor Google Auth...");
       GoogleAuth.initialize({
         clientId: '965709257556-i7958klip6ut3mb5fgaffh2p55q3attn.apps.googleusercontent.com',
         scopes: ['profile', 'email', 'https://www.googleapis.com/auth/calendar.events'],
         grantOfflineAccess: false,
       });
+      console.log("✓ Capacitor Google Auth initialized");
     }
 
+    console.log("✅ Firebase initialization completed successfully");
     return true;
   } catch (error) {
     console.error("CRITICAL: Firebase Initialization Error", error);
@@ -110,14 +119,20 @@ initializeFirebase();
 
 // --- Public API ---
 export const loginWithGoogle = async (): Promise<{ user: any; accessToken: string }> => {
-  if (!auth) throw new Error("Authentication service not available");
+  if (!auth) {
+    console.error("Firebase Auth not available - initialization may have failed");
+    console.error("Check browser console for Firebase initialization errors");
+    throw new Error("Authentication service not available. Firebase may not be properly configured.");
+  }
 
   try {
     if (Capacitor.isNativePlatform()) {
       try {
+        console.log("Attempting native Google Sign-In...");
         const googleUser = await GoogleAuth.signIn();
         const credential = GoogleAuthProvider.credential(googleUser.authentication.idToken);
         const result = await signInWithCredential(auth, credential);
+        console.log("✓ Native sign-in successful:", result.user.email);
         return {
           user: {
             uid: result.user.uid,
@@ -132,11 +147,18 @@ export const loginWithGoogle = async (): Promise<{ user: any; accessToken: strin
         throw new Error(`Native Sign-In Failed: ${nativeError.message || JSON.stringify(nativeError)}. \n\nPOSSIBLE FIX: Ensure your app's SHA-1 fingerprint is added to Firebase Console > Project Settings > Your Android App.`);
       }
     } else {
+      console.log("Attempting web Google Sign-In popup...");
+      console.log("Current origin:", window.location.origin);
+      console.log("Current hostname:", window.location.hostname);
+      
       const provider = new GoogleAuthProvider();
       provider.addScope('https://www.googleapis.com/auth/calendar.events');
       provider.setCustomParameters({ prompt: 'select_account' });
+      
       const result = await signInWithPopup(auth, provider);
       const credential = GoogleAuthProvider.credentialFromResult(result);
+      
+      console.log("✓ Web sign-in successful:", result.user.email);
       
       if (credential?.accessToken) {
         localStorage.setItem('google_access_token', credential.accessToken);
@@ -153,17 +175,45 @@ export const loginWithGoogle = async (): Promise<{ user: any; accessToken: strin
       };
     }
   } catch (error: any) {
-    console.error("Google login error", error);
+    console.error("Google login error:", error);
+    console.error("Error code:", error.code);
+    console.error("Error message:", error.message);
+    
+    // Provide specific, actionable error messages
     if (error.code === 'auth/popup-closed-by-user') {
-      throw new Error("Login cancelled by user.");
+      throw new Error("Login cancelled by user. Please try again.");
     }
     if (error.code === 'auth/unauthorized-domain') {
-      throw new Error(`Domain not authorized. Please add '${window.location.hostname}' to Firebase Console > Authentication > Settings > Authorized Domains.`);
+      const hostname = window.location.hostname;
+      throw new Error(
+        `❌ Domain not authorized: "${hostname}"\n\n` +
+        `🔧 FIX: Add this domain to Firebase:\n` +
+        `1. Go to Firebase Console → tracker-8fefe project\n` +
+        `2. Click Authentication → Settings → Authorized Domains\n` +
+        `3. Add: ${hostname}\n` +
+        `4. Refresh this page and try again`
+      );
     }
     if (error.code === 'auth/popup-blocked') {
-      throw new Error("Popup blocked. Please allow popups for this site.");
+      throw new Error("Popup blocked by your browser. Please allow popups for this site and try again.");
     }
-    throw new Error(error.message || "An unknown error occurred during login.");
+    if (error.code === 'auth/operation-not-supported-in-this-environment') {
+      throw new Error("Sign-in not supported in this environment. Please check your Firebase configuration and API key restrictions.");
+    }
+    if (error.code === 'auth/invalid-api-key') {
+      throw new Error("Invalid Firebase API key. Check Firebase project configuration in firebaseService.ts");
+    }
+    if (error.code === 'auth/network-request-failed') {
+      throw new Error("Network error. Please check your internet connection and try again. Also verify that Google APIs are accessible from your network.");
+    }
+    
+    // Generic error with original message
+    throw new Error(
+      `Login failed: ${error.message || "Unknown error"}\n\n` +
+      `Error code: ${error.code || 'UNKNOWN'}\n\n` +
+      `Check the browser console (F12) for more details. ` +
+      `See FIREBASE_LOGIN_TROUBLESHOOTING.md for help.`
+    );
   }
 };
 
