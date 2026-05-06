@@ -28,10 +28,6 @@ import type { Firestore } from "firebase/firestore";
 import { GoogleAuth } from '@codetrix-studio/capacitor-google-auth';
 import { Capacitor } from '@capacitor/core';
 
-// CRITICAL: Side-effect imports to register 'auth' and 'firestore' components with the Firebase App
-import "firebase/auth";
-import "firebase/firestore";
-
 const firebaseConfig = {
   apiKey: "AIzaSyBliJyouiIZ0opeozDFvjUkcFBzVruOBzI",
   authDomain: "tracker-8fefe.firebaseapp.com",
@@ -105,11 +101,14 @@ const initializeFirebase = () => {
     if (Capacitor.isNativePlatform()) {
       console.log("Native platform detected, initializing Capacitor Google Auth...");
       GoogleAuth.initialize({
-        clientId: '965709257556-mrjfaagv12o82bf5hmekc5h5t62r1ma8.apps.googleusercontent.com',
+        // IMPORTANT: Use the Web Client ID (client_type 3), NOT the Android Client ID
+        // Web Client ID: 965709257556-9mjjqb4rjp6uc60j66cct9d692t7jl5q.apps.googleusercontent.com
+        // Android Client ID: 965709257556-mrjfaagv12o82bf5hmekc5h5t62r1ma8.apps.googleusercontent.com
+        clientId: '965709257556-9mjjqb4rjp6uc60j66cct9d692t7jl5q.apps.googleusercontent.com',
         scopes: ['profile', 'email', 'https://www.googleapis.com/auth/calendar.events'],
         grantOfflineAccess: false,
       });
-      console.log("✓ Capacitor Google Auth initialized");
+      console.log("✓ Capacitor Google Auth initialized with Web Client ID");
     }
 
     console.log("✅ Firebase initialization completed successfully");
