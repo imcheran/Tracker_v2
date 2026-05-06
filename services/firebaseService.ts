@@ -209,3 +209,20 @@ export const subscribeToDataChanges = (uid: string, callback: (data: any) => voi
     }
   );
 };
+
+export const generateInviteCode = async (uid: string): Promise<string> => {
+  if (!db) throw new Error("Database service not available");
+  
+  const code = Math.random().toString(36).substring(2, 8).toUpperCase();
+  
+  try {
+    await setDoc(doc(db, "invites", code), {
+      uid,
+      createdAt: new Date()
+    });
+    return code;
+  } catch (error) {
+    console.error("Error generating invite code", error);
+    throw error;
+  }
+};
