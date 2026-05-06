@@ -29,7 +29,7 @@ import { GoogleAuth } from '@codetrix-studio/capacitor-google-auth';
 import { Capacitor } from '@capacitor/core';
 
 const firebaseConfig = {
-  apiKey: "AIzaSyBliJyouiIZ0opeozDFvjUkcFBzVruOBzI",
+  apiKey: "AIzaSyB2Y7lRwWryfNB89FYQOTzWyfjJsXb1fvY",
   authDomain: "tracker-8fefe.firebaseapp.com",
   projectId: "tracker-8fefe",
   storageBucket: "tracker-8fefe.firebasestorage.app",
