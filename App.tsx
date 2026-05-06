@@ -17,7 +17,7 @@ const CouplesView = lazy(() => import('./components/CouplesView'));
 import { MobileNavigation } from './components/MobileNavigation';
 import { Task, ViewType, Habit, FocusCategory, List, AppSettings, FocusSession, Transaction, Debt, Debtor, SavingsGoal, Subscription, Investment, CouplesData, CoupleProfile } from './types';
 import { loadFromStorage, saveToStorage, STORAGE_KEYS } from './services/storageService';
-import { loginWithGoogle, logoutUser, subscribeToAuthChanges, saveUserDataToFirestore, subscribeToDataChanges, loadUserDataFromFirestore, linkPartnerByCode, generateInviteCode, subscribeToCoupleData } from './services/firebaseService';
+import { loginWithGoogle, logoutUser, subscribeToAuthChanges, saveUserDataToFirestore, subscribeToDataChanges, loadUserDataFromFirestore, linkPartnerByCode, generateInviteCode, subscribeToCoupleData, checkFirebaseStatus } from './services/firebaseService';
 import { createNotificationRoleContext, initializeRoleServices } from './services/notificationRoleService';
 import { fetchCalendarEvents, updateCalendarEvent, deleteCalendarEvent, createCalendarEvent } from './services/googleCalendarService';
 import { playAlarmSound } from './services/notificationService';
@@ -79,6 +79,18 @@ const App: React.FC = () => {
     else document.documentElement.classList.remove('dark');
     saveToStorage('ticktick_clone_theme', theme);
   }, [theme]);
+
+  // --- Firebase Status Check ---
+  useEffect(() => {
+    const status = checkFirebaseStatus();
+    if (!status.isReady) {
+      console.warn("⚠️  Firebase not fully initialized on app startup");
+      console.warn("This may cause login to fail");
+      console.warn("Details:", status.details);
+    } else {
+      console.log("✅ Firebase ready");
+    }
+  }, []);
   
   // --- Loading State ---
   const [isSyncingCalendar, setIsSyncingCalendar] = useState(false);

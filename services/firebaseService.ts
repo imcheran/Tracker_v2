@@ -59,18 +59,24 @@ const initializeFirebase = () => {
     try {
         // Pass app instance explicitly to getAuth to avoid "default app not found" or registration issues
         auth = getAuth(app);
+        if (!auth) {
+            throw new Error("getAuth returned undefined - Firebase App may not be initialized");
+        }
         console.log("✓ Firebase Auth initialized");
         
         // Set persistence only if we have a valid auth instance
-        if (auth) {
-            setPersistence(auth, browserLocalPersistence).catch(e =>
-              console.warn("Auth Persistence Warning:", e)
-            );
-        }
+        setPersistence(auth, browserLocalPersistence).catch(e =>
+          console.warn("Auth Persistence Warning:", e)
+        );
     } catch (authError) {
-        console.error("Critical Auth Initialization Error:", authError);
-        console.error("This may indicate Firebase is not properly configured");
-        // We don't throw here to allow the app to function in offline/no-auth mode if needed
+        console.error("CRITICAL: Auth Initialization Error:", authError);
+        console.error("Details:", {
+            errorMessage: (authError as Error).message,
+            firebaseConfigValid: !!firebaseConfig.apiKey && !!firebaseConfig.projectId,
+            appInitialized: !!app
+        });
+        // Re-throw to be caught by outer try-catch and properly logged
+        throw authError;
     }
 
     // 3. Initialize Firestore
@@ -109,7 +115,19 @@ const initializeFirebase = () => {
     console.log("✅ Firebase initialization completed successfully");
     return true;
   } catch (error) {
-    console.error("CRITICAL: Firebase Initialization Error", error);
+    console.error("❌ CRITICAL: Firebase Initialization Failed");
+    console.error("Error:", error instanceof Error ? error.message : String(error));
+    console.error("Stack:", error instanceof Error ? error.stack : "N/A");
+    console.error("\nDiagnostics:");
+    console.error("  - Firebase Config API Key:", firebaseConfig.apiKey ? "✓ Present" : "✗ Missing");
+    console.error("  - Firebase Config Project ID:", firebaseConfig.projectId ? "✓ Present" : "✗ Missing");
+    console.error("  - App initialized:", app ? "✓ Yes" : "✗ No");
+    console.error("  - Auth initialized:", auth ? "✓ Yes" : "✗ No");
+    console.error("\nFIX: Check browser console above for detailed error. Common fixes:");
+    console.error("  1. Verify Firebase SDK imports are correct");
+    console.error("  2. Check that firebase config is valid");
+    console.error("  3. Ensure network can reach Firebase servers");
+    console.error("  4. Try clearing browser cache and refreshing");
     return false;
   }
 };
@@ -117,12 +135,43 @@ const initializeFirebase = () => {
 // Run initialization immediately on module load
 initializeFirebase();
 
+// --- Diagnostic Function ---
+export const checkFirebaseStatus = (): { isReady: boolean; details: Record<string, any> } => {
+  const status = {
+    isReady: !!(auth && app && db),
+    details: {
+      appInitialized: !!app,
+      authInitialized: !!auth,
+      firestoreInitialized: !!db,
+      analyticsInitialized: !!analytics,
+      firebaseConfigValid: {
+        apiKey: !!firebaseConfig.apiKey,
+        projectId: !!firebaseConfig.projectId,
+        authDomain: !!firebaseConfig.authDomain,
+        appId: !!firebaseConfig.appId,
+      },
+      timestamp: new Date().toISOString(),
+    }
+  };
+  
+  console.log("Firebase Status Check:", status);
+  return status;
+};
+
 // --- Public API ---
 export const loginWithGoogle = async (): Promise<{ user: any; accessToken: string }> => {
   if (!auth) {
-    console.error("Firebase Auth not available - initialization may have failed");
-    console.error("Check browser console for Firebase initialization errors");
-    throw new Error("Authentication service not available. Firebase may not be properly configured.");
+    const status = checkFirebaseStatus();
+    console.error("❌ Firebase Auth not available");
+    console.error("Firebase Status:", status);
+    console.error("\n🔍 Troubleshooting Steps:");
+    console.error("1. Check the Firebase Status above - if all are false, Firebase failed to initialize");
+    console.error("2. Open browser DevTools → Console (F12) and look for red error messages during page load");
+    console.error("3. Common issues:");
+    console.error("   - Firebase SDK imports missing");
+    console.error("   - Network unable to reach firebase.googleapis.com");
+    console.error("   - Stale cache - try Ctrl+Shift+Delete and hard refresh (Ctrl+F5)");
+    throw new Error("Authentication service not available. Firebase may not be properly configured.\n\nOpen browser console (F12) to see detailed error. Check FIREBASE_LOGIN_TROUBLESHOOTING.md for help.");
   }
 
   try {
