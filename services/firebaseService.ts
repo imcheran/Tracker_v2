@@ -353,14 +353,14 @@ export const unlinkPartner = async (uid: string): Promise<void> => {
     throw new Error("User not found");
   }
   
-  const { partnerId, coupleId } = userSnap.data();
+  const { partnerUid, coupleId } = userSnap.data();
   
-  if (!partnerId || !coupleId) {
+  if (!partnerUid || !coupleId) {
     throw new Error("User is not coupled");
   }
   
   return runTransaction(db, async (transaction) => {
-    const partnerRef = doc(db, "users", partnerId);
+    const partnerRef = doc(db, "users", partnerUid);
     const coupleRef = doc(db, "couples", coupleId);
     
     // Update current user
