@@ -3,8 +3,8 @@ import Sidebar from './components/Sidebar';
 import TaskView from './components/TaskView';
 // Lazy load heavy components to improve startup speed
 const TaskDetailView = lazy(() => import('./components/TaskDetailView'));
-const HabitView = lazy(() => import('./components/HabitView'));
-const HabitStatsView = lazy(() => import('./components/HabitStatsView'));
+const HabitView = lazy(() => import('./components/HabitsModule'));
+const HabitStatsView = lazy(() => import('./components/HabitsModule').then(m => ({ default: m.HabitStatsViewComponent })));
 const FocusView = lazy(() => import('./components/FocusView'));
 const CalendarView = lazy(() => import('./components/CalendarView'));
 const TagsView = lazy(() => import('./components/TagsView'));

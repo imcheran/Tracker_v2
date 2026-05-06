@@ -1,10 +1,9 @@
 import { GoogleGenAI, Type } from "@google/genai";
 import { Priority, Transaction } from "../types";
 
-// Fix: obtain API key exclusively from process.env.API_KEY and use named parameter
-// Use a fresh instance for each request to ensure the most up-to-date configuration
+// Vite exposes env vars prefixed with VITE_ via import.meta.env
 const getAiClient = () => {
-  return new GoogleGenAI({ apiKey: process.env.API_KEY });
+  return new GoogleGenAI({ apiKey: import.meta.env.VITE_API_KEY as string });
 };
 
 export const parseSmartTask = async (input: string): Promise<{

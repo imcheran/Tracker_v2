@@ -21,6 +21,7 @@ export enum ViewType {
   All = 'all',
   Archive = 'archive',
   Finance = 'finance',
+  Matrix = 'matrix',
   Kanban = 'kanban',
   Together = 'together'
 }
@@ -91,7 +92,7 @@ export interface Habit {
   description?: string;
   quote?: string;
   goal?: number;
-  frequencyType?: 'daily' | 'weekly' | 'interval';
+  frequencyType?: 'daily' | 'weekly' | 'interval' | 'specific_days';
   frequencyDays?: number[]; // 0-6
   frequencyCount?: number;
   section?: 'Morning' | 'Afternoon' | 'Night' | 'Others';
@@ -102,10 +103,12 @@ export interface Habit {
   unit?: string;
   isArchived?: boolean;
   isAutoLog?: boolean;
-  showWidget?: boolean; // New: Show as widget in Today view
+  isNegative?: boolean;
+  showWidget?: boolean;
+  routine?: string;
   createdDate?: Date;
   updatedAt?: Date;
-  history: Record<string, { completed: boolean; timestamp: number; mood?: string; note?: string }>;
+  history: Record<string, { completed: boolean; timestamp: number; mood?: string; note?: string; skipReason?: string }>;
 }
 
 export type HabitLog = Habit['history'][string];
