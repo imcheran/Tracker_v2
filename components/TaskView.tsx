@@ -82,16 +82,16 @@ const BentoTaskCard: React.FC<BentoTaskCardProps> = ({ task, onToggle, onSelect,
 
     // Standard Task Card with Premium Gradients
     const priorityStyles = {
-        [Priority.High]: 'bg-gradient-to-br from-red-50 to-white dark:from-red-900/20 dark:to-slate-900 border-red-100 dark:border-red-900/30 shadow-red-500/5',
-        [Priority.Medium]: 'bg-gradient-to-br from-amber-50 to-white dark:from-amber-900/20 dark:to-slate-900 border-amber-100 dark:border-amber-900/30 shadow-amber-500/5',
-        [Priority.Low]: 'bg-gradient-to-br from-blue-50 to-white dark:from-blue-900/20 dark:to-slate-900 border-blue-100 dark:border-blue-900/30 shadow-blue-500/5',
-        [Priority.None]: 'bg-gradient-to-br from-white to-slate-50 dark:from-slate-800/50 dark:to-slate-900 border-slate-100 dark:border-slate-800'
+        [Priority.High]: 'bg-gradient-to-br from-red-50 to-white dark:from-red-950/40 dark:to-slate-950 border-red-100 dark:border-red-900/30 shadow-red-500/10 hover:border-red-300 dark:hover:border-red-500/50 hover:shadow-red-500/20',
+        [Priority.Medium]: 'bg-gradient-to-br from-amber-50 to-white dark:from-amber-950/40 dark:to-slate-950 border-amber-100 dark:border-amber-900/30 shadow-amber-500/10 hover:border-amber-300 dark:hover:border-amber-500/50 hover:shadow-amber-500/20',
+        [Priority.Low]: 'bg-gradient-to-br from-blue-50 to-white dark:from-blue-950/40 dark:to-slate-950 border-blue-100 dark:border-blue-900/30 shadow-blue-500/10 hover:border-blue-300 dark:hover:border-blue-500/50 hover:shadow-blue-500/20',
+        [Priority.None]: 'bg-gradient-to-br from-white to-slate-50 dark:from-[#09090b] dark:to-[#0f0f13] border-slate-100 dark:border-white/10 hover:border-slate-300 dark:hover:border-white/20 hover:shadow-slate-500/10'
     };
 
     return (
         <div 
             onClick={onSelect}
-            className={`group relative p-5 rounded-[24px] border transition-all duration-300 bento-card cursor-pointer flex flex-col justify-between min-h-[120px] shadow-sm hover:shadow-lg hover:-translate-y-1 ${priorityStyles[task.priority]} ${task.isCompleted ? 'opacity-60 grayscale' : ''}`}
+            className={`group relative p-5 rounded-[24px] border transition-all duration-500 bento-card cursor-pointer flex flex-col justify-between min-h-[120px] shadow-sm hover:shadow-xl hover:-translate-y-1.5 ${priorityStyles[task.priority]} ${task.isCompleted ? 'opacity-60 grayscale' : 'animate-fade-in'}`}
         >
             <div className="flex items-start justify-between gap-3">
                 <h3 className={`text-base font-semibold leading-snug ${task.isCompleted ? 'line-through text-slate-400' : 'text-slate-800 dark:text-slate-100'}`}>
@@ -461,9 +461,11 @@ const TaskView: React.FC<TaskViewProps> = ({
             <div className="fixed bottom-[calc(3.5rem+env(safe-area-inset-bottom)+1.5rem)] right-6 md:bottom-8 md:right-8 z-50">
                 <button 
                     onClick={() => { setInputInitialMode('text'); setShowInputSheet(true); }}
-                    className="w-16 h-16 bg-gradient-to-br from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white rounded-[24px] shadow-2xl shadow-blue-600/40 flex items-center justify-center hover:scale-105 active:scale-95 transition-all group"
+                    className="relative w-16 h-16 bg-gradient-to-br from-blue-500 via-indigo-600 to-purple-600 hover:from-blue-600 hover:via-indigo-700 hover:to-purple-700 text-white rounded-[24px] shadow-2xl shadow-indigo-600/50 flex items-center justify-center hover:scale-110 active:scale-95 transition-all duration-300 group overflow-hidden"
                 >
-                    <Plus size={32} strokeWidth={3} className="group-hover:rotate-90 transition-transform duration-300" />
+                    <div className="absolute inset-0 bg-white/20 rounded-[24px] opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                    <div className="absolute inset-0 bg-indigo-500 rounded-[24px] animate-pulse-slow -z-10 blur-xl opacity-60"></div>
+                    <Plus size={32} strokeWidth={3} className="group-hover:rotate-180 transition-transform duration-500 relative z-10" />
                 </button>
             </div>
         )}

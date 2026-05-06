@@ -1,4 +1,3 @@
-
 export enum Priority {
   None = 0,
   Low = 1,
@@ -93,14 +92,10 @@ export interface Habit {
   description?: string;
   quote?: string;
   goal?: number;
-  frequencyType?: 'daily' | 'weekly' | 'monthly' | 'interval' | 'specific_days';
+  frequencyType?: 'daily' | 'weekly' | 'interval' | 'specific_days';
   frequencyDays?: number[]; // 0-6
   frequencyCount?: number;
   section?: 'Morning' | 'Afternoon' | 'Night' | 'Others';
-  routine?: string; // New: Smart Routine Grouping
-  isNegative?: boolean; // New: Tracking habits to break
-  streakFreezes?: number; // New: Available streak freezes
-  freezeDates?: string[]; // New: Dates where freeze was used
   startDate?: Date;
   endDate?: Date;
   reminders?: string[];
@@ -108,9 +103,12 @@ export interface Habit {
   unit?: string;
   isArchived?: boolean;
   isAutoLog?: boolean;
+  isNegative?: boolean;
+  showWidget?: boolean;
+  routine?: string;
   createdDate?: Date;
   updatedAt?: Date;
-  history: Record<string, { completed: boolean; timestamp: number; mood?: string; note?: string; skipReason?: string; duration?: number }>;
+  history: Record<string, { completed: boolean; timestamp: number; mood?: string; note?: string; skipReason?: string }>;
 }
 
 export type HabitLog = Habit['history'][string];
@@ -166,9 +164,6 @@ export interface Transaction {
   // Couples Finance Features
   isShared?: boolean; 
   paidBy?: string; // UID of the user who paid
-
-  // Split Expense Feature
-  personalShare?: number; // The amount that actually counts as expense, if different from total amount
 }
 
 export interface Debtor {
@@ -259,115 +254,4 @@ export interface AppSettings {
       partnerName?: string;
       householdId?: string;
   }
-}
-
-export interface CoupleProfile {
-  uid: string;
-  displayName: string;
-  photoURL?: string;
-  timezone: string;
-  status: 'free' | 'busy' | 'sleeping' | 'studying' | 'working' | 'do_not_disturb';
-  statusUntil?: string;
-  statusMessage?: string;
-  lastSeen?: string;
-}
-
-export interface PhotoMoment {
-  id: string;
-  uid: string;
-  imageUrl: string;
-  caption?: string;
-  timestamp: string;
-  reactions?: { uid: string; emoji: string }[];
-}
-
-export interface JournalEntry {
-  id: string;
-  uid: string;
-  content: string;
-  mood?: 'love' | 'happy' | 'miss' | 'sad' | 'excited';
-  timestamp: string;
-  isRead?: boolean;
-}
-
-export interface CheckIn {
-  id: string;
-  uid: string;
-  type: 'morning' | 'night';
-  message: string;
-  mood?: string;
-  timestamp: string;
-}
-
-export interface CouplesMeetup {
-  id: string;
-  title: string;
-  date: string;
-  location?: string;
-  notes?: string;
-}
-
-export interface SharedHabitChallenge {
-  id: string;
-  habitId: string;
-  partnerHabitId?: string;
-  name: string;
-  icon: string;
-  color: string;
-  durationDays: number;
-  startDate: string;
-  myProgress: Record<string, boolean>;
-  partnerProgress: Record<string, boolean>;
-}
-
-export interface CouplesData {
-  myProfile: CoupleProfile;
-  partnerProfile?: CoupleProfile;
-  photoWall: PhotoMoment[];
-  journal: JournalEntry[];
-  checkIns: CheckIn[];
-  nextMeetup?: CouplesMeetup;
-  sharedChallenges: SharedHabitChallenge[];
-}
-
-// ===== Notification Command Center Types =====
-
-export interface InterceptedNotification {
-  id: string;                          // Unique ID (timestamp + random)
-  title: string;                       // Notification title
-  appName: string;                     // Package name or app name
-  message: string;                     // Notification message body
-  bigText?: string;                    // Long-form text if available
-  subText?: string;                    // Additional subtitle from notification
-  timestamp: number;                   // When intercepted (milliseconds)
-  senderUid: string;                   // Firebase UID of sending device
-  senderEmail: string;                 // Email of sender for identification
-  deviceId: string;                    // Unique device identifier
-  dismissed: boolean;                  // Whether user dismissed it
-  category?: string;                   // Optional category (sms|chat|reminder|etc)
-  actions?: NotificationAction[];      // Possible actions user can take
-}
-
-export interface NotificationAction {
-  id: string;
-  title: string;
-  semanticAction?: string;             // "reply", "mark_as_read", etc
-}
-
-export interface NotificationSenderMetadata {
-  senderUid: string;
-  email: string;
-  displayName: string;
-  deviceId: string;
-  lastNotificationTime?: number;      // Last notification received
-  isActive: boolean;                   // Has sent notifications recently
-  notificationCount: number;           // Lifetime notification count
-}
-
-export interface NotificationViewerState {
-  viewerEmail: string;                 // Always 'kuttiavt@gmail.com'
-  allSenders: NotificationSenderMetadata[];     // List of all sending devices
-  notificationsByTime: InterceptedNotification[];  // All notifs, sorted by time (newest first)
-  filterBySender?: string;             // Current filter UID
-  unreadCount: number;                 // Total unread notifications
 }

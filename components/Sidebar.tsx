@@ -24,16 +24,16 @@ interface SidebarProps {
 }
 
 const VIEW_COLORS: Record<string, string> = {
-    [ViewType.Inbox]: 'bg-blue-500',
-    [ViewType.Today]: 'bg-orange-500',
-    [ViewType.Next7Days]: 'bg-violet-500',
-    [ViewType.All]: 'bg-slate-500',
-    [ViewType.Calendar]: 'bg-rose-500',
-    [ViewType.Habits]: 'bg-emerald-500',
-    [ViewType.Focus]: 'bg-indigo-500',
-    [ViewType.Notes]: 'bg-amber-500',
-    [ViewType.Finance]: 'bg-cyan-600',
-    [ViewType.Together]: 'bg-rose-500',
+    [ViewType.Inbox]: 'bg-gradient-to-r from-blue-500 to-indigo-500 shadow-blue-500/30',
+    [ViewType.Today]: 'bg-gradient-to-r from-orange-500 to-amber-500 shadow-orange-500/30',
+    [ViewType.Next7Days]: 'bg-gradient-to-r from-violet-500 to-purple-500 shadow-violet-500/30',
+    [ViewType.All]: 'bg-gradient-to-r from-slate-600 to-slate-800 dark:from-slate-500 dark:to-slate-700 shadow-slate-500/30',
+    [ViewType.Calendar]: 'bg-gradient-to-r from-rose-500 to-pink-500 shadow-rose-500/30',
+    [ViewType.Habits]: 'bg-gradient-to-r from-emerald-500 to-teal-500 shadow-emerald-500/30',
+    [ViewType.Focus]: 'bg-gradient-to-r from-indigo-500 to-cyan-500 shadow-indigo-500/30',
+    [ViewType.Notes]: 'bg-gradient-to-r from-amber-500 to-orange-500 shadow-amber-500/30',
+    [ViewType.Finance]: 'bg-gradient-to-r from-cyan-600 to-blue-600 shadow-cyan-500/30',
+    [ViewType.Together]: 'bg-gradient-to-r from-rose-500 to-pink-600 shadow-pink-500/30',
 };
 
 const TEXT_COLORS: Record<string, string> = {
@@ -62,10 +62,10 @@ const Sidebar: React.FC<SidebarProps> = React.memo(({
       const isActive = currentView === view;
       
       return `
-        relative flex items-center gap-3 px-4 py-3 rounded-2xl cursor-pointer transition-all duration-300 select-none group
+        relative flex items-center gap-3 px-4 py-3 rounded-2xl cursor-pointer transition-all duration-300 select-none group active:scale-95
         ${isActive 
-            ? `${activeColor} text-white shadow-lg shadow-black/5 translate-x-1` 
-            : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/50 hover:text-slate-900 dark:hover:text-slate-200'
+            ? `${activeColor} text-white shadow-lg translate-x-1` 
+            : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100/50 dark:hover:bg-slate-800/30 hover:text-slate-900 dark:hover:text-slate-200'
         }
       `;
   };
@@ -101,19 +101,19 @@ const Sidebar: React.FC<SidebarProps> = React.memo(({
 
         <div className={`
             fixed md:static inset-y-0 left-0 z-50
-            h-full md:h-auto md:rounded-[32px]
-            bg-white dark:bg-slate-950 flex flex-col 
+            h-full md:h-[calc(100vh-24px)] md:my-3 md:ml-3 md:rounded-[32px]
+            bg-white/80 dark:bg-[#020202]/60 backdrop-blur-3xl border-r md:border border-white/20 dark:border-white/5 flex flex-col 
             transition-transform duration-300 ease-[cubic-bezier(0.2,0.8,0.2,1)]
             w-[85vw] max-w-[280px]
             ${isOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0 md:ml-0'}
-            shadow-2xl md:shadow-none md:border-0
+            shadow-2xl md:shadow-none
         `}>
         
         <div className="flex flex-col h-full px-4 pt-safe">
             {/* Header / Branding */}
             <div className="py-6 flex items-center justify-between px-2">
                 <div className="flex items-center gap-4">
-                    <div className="w-11 h-11 bg-blue-600 rounded-2xl flex items-center justify-center text-white shadow-xl shadow-blue-600/20">
+                    <div className="w-11 h-11 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl flex items-center justify-center text-white shadow-lg shadow-blue-500/30">
                         <CheckSquare size={24} strokeWidth={2.5} />
                     </div>
                     <span className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">Tracker</span>

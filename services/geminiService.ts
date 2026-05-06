@@ -1,4 +1,3 @@
-
 import { GoogleGenAI } from "@google/genai";
 
 /**
@@ -8,10 +7,9 @@ import { GoogleGenAI } from "@google/genai";
  * @returns A motivating string tip.
  */
 export const getProductivityTips = async (workDuration: number, breakDuration: number): Promise<string> => {
-  // Fix: The API key must be obtained exclusively from process.env.API_KEY as per guidelines.
-  // Initialization must use a named parameter: { apiKey: process.env.API_KEY }.
+  // Vite exposes env vars via import.meta.env (must be prefixed with VITE_)
   try {
-    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+    const ai = new GoogleGenAI({ apiKey: import.meta.env.VITE_API_KEY as string });
     const response = await ai.models.generateContent({
       model: 'gemini-3-flash-preview',
       contents: `Generate a short (under 15 words) and highly motivating productivity tip or quote for a user who is starting a ${workDuration}-minute focus session.`,

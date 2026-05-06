@@ -1,4 +1,3 @@
-
 export const STORAGE_KEYS = {
   TASKS: 'ticktick_clone_tasks',
   LISTS: 'ticktick_clone_lists',
@@ -13,8 +12,7 @@ export const STORAGE_KEYS = {
   INVESTMENTS: 'ticktick_clone_investments',
   SETTINGS: 'ticktick_clone_settings',
   TOKEN: 'ticktick_clone_token',
-  USER: 'ticktick_clone_user',
-  COUPLES_DATA: 'tracker_couples_data'
+  USER: 'ticktick_clone_user'
 };
 
 export const loadFromStorage = <T,>(key: string, defaultValue: T): T => {

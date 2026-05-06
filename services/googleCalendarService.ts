@@ -1,4 +1,3 @@
-
 import { Task, Priority } from '../types';
 import { addMinutes, format, addDays, isSameDay, isBefore, isValid } from 'date-fns';
 
@@ -97,7 +96,7 @@ const googleEventToTask = (event: any): Task => {
     description: event.description,
     isCompleted: false,
     priority: priority,
-    listId: 'calendar', // Use specific list or inbox, handled by view logic
+    listId: 'inbox', // Default to inbox
     tags: [],
     dueDate: startDate,
     endDate: endDate,

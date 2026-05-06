@@ -83,7 +83,7 @@ export interface CouplesData {
 interface CouplesViewProps {
   couplesData: CouplesData;
   onUpdateCouplesData: (data: CouplesData) => void;
-  onLinkPartner?: (partnerUid: string) => Promise<void>;
+  onLinkPartner?: (inviteCode: string) => Promise<void>;
   onUpdateHabits?: (habits: Habit[]) => void;
   onAddTask?: (task: Task) => void;
   onMenuClick?: () => void;
