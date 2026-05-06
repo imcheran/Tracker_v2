@@ -1,4 +1,3 @@
-
 import React, { useMemo, useState } from 'react';
 import { X, Share2, ChevronLeft, ChevronRight, TrendingUp, Zap } from 'lucide-react';
 import { FocusSession } from '../types';
@@ -22,24 +21,23 @@ const FocusStatsView: React.FC<FocusStatsViewProps> = ({ sessions, onClose }) =>
 
   // --- Data Calculations ---
 
-  // NOTE: We now include 'failed' sessions in stats because users want partial focus time reflected.
-  const relevantSessions = useMemo(() => 
-    sessions.filter(s => s.status === 'completed' || s.status === 'failed'), 
+  const completedSessions = useMemo(() => 
+    sessions.filter(s => s.status === 'completed'), 
   [sessions]);
 
   // 1. Overview Cards
   const stats = useMemo(() => {
     const today = new Date();
-    const todaySessions = relevantSessions.filter(s => isToday(new Date(s.timestamp)));
+    const todaySessions = completedSessions.filter(s => isToday(new Date(s.timestamp)));
     
     const todayCount = todaySessions.length;
     const todayDuration = todaySessions.reduce((acc, s) => acc + s.duration, 0);
     
-    const totalCount = relevantSessions.length;
-    const totalDuration = relevantSessions.reduce((acc, s) => acc + s.duration, 0);
+    const totalCount = completedSessions.length;
+    const totalDuration = completedSessions.reduce((acc, s) => acc + s.duration, 0);
 
     return { todayCount, todayDuration, totalCount, totalDuration };
-  }, [relevantSessions]);
+  }, [completedSessions]);
 
   // 2. Trends Data
   const trendsData = useMemo(() => {
@@ -51,7 +49,7 @@ const FocusStatsView: React.FC<FocusStatsViewProps> = ({ sessions, onClose }) =>
       const days = eachDayOfInterval({ start, end });
       
       data = days.map(day => {
-        const dayTotal = relevantSessions
+        const dayTotal = completedSessions
           .filter(s => isSameDay(new Date(s.timestamp), day))
           .reduce((acc, s) => acc + s.duration, 0);
         return { 
@@ -66,7 +64,7 @@ const FocusStatsView: React.FC<FocusStatsViewProps> = ({ sessions, onClose }) =>
       const days = eachDayOfInterval({ start, end });
       
       data = days.filter((_, i) => i % 3 === 0 || i === days.length - 1).map(day => {
-         const dayTotal = relevantSessions
+         const dayTotal = completedSessions
           .filter(s => isSameDay(new Date(s.timestamp), day))
           .reduce((acc, s) => acc + s.duration, 0);
          return {
@@ -81,7 +79,7 @@ const FocusStatsView: React.FC<FocusStatsViewProps> = ({ sessions, onClose }) =>
         const months = eachMonthOfInterval({ start, end });
         
         data = months.map(month => {
-            const monthTotal = relevantSessions
+            const monthTotal = completedSessions
                 .filter(s => new Date(s.timestamp).getMonth() === month.getMonth() && new Date(s.timestamp).getFullYear() === month.getFullYear())
                 .reduce((acc, s) => acc + s.duration, 0);
             return {
@@ -93,12 +91,12 @@ const FocusStatsView: React.FC<FocusStatsViewProps> = ({ sessions, onClose }) =>
     }
     
     return data;
-  }, [relevantSessions, range, currentDate]);
+  }, [completedSessions, range, currentDate]);
 
   // 3. Power Hour (Hourly Distribution)
   const hourlyData = useMemo(() => {
       const hours = Array(24).fill(0);
-      relevantSessions.forEach(s => {
+      completedSessions.forEach(s => {
           const hour = new Date(s.timestamp).getHours();
           hours[hour] += s.duration;
       });
@@ -108,7 +106,7 @@ const FocusStatsView: React.FC<FocusStatsViewProps> = ({ sessions, onClose }) =>
           label: h % 4 === 0 ? `${h}:00` : '',
           value: mins
       }));
-  }, [relevantSessions]);
+  }, [completedSessions]);
 
   const bestHour = useMemo(() => {
       const max = Math.max(...hourlyData.map(d => d.value));
@@ -124,7 +122,7 @@ const FocusStatsView: React.FC<FocusStatsViewProps> = ({ sessions, onClose }) =>
       const days = eachDayOfInterval({ start, end: today });
       
       return days.map(day => {
-          const minutes = relevantSessions
+          const minutes = completedSessions
             .filter(s => isSameDay(new Date(s.timestamp), day))
             .reduce((acc, s) => acc + s.duration, 0);
           
@@ -136,7 +134,7 @@ const FocusStatsView: React.FC<FocusStatsViewProps> = ({ sessions, onClose }) =>
 
           return { date: day, level, minutes };
       });
-  }, [relevantSessions]);
+  }, [completedSessions]);
 
   // Helpers
   const formatDuration = (mins: number) => {

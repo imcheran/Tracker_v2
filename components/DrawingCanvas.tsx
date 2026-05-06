@@ -1,4 +1,3 @@
-
 import React, { useRef, useState, useEffect } from 'react';
 import { X, Check, Eraser, Pen, Palette, Minus, Plus } from 'lucide-react';
 

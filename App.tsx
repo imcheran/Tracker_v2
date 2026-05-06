@@ -1,28 +1,28 @@
-
 import React, { useState, useEffect, useRef, Suspense, lazy, useCallback } from 'react';
 import Sidebar from './components/Sidebar';
 import TaskView from './components/TaskView';
-import TaskDetailView from './components/TaskDetailView';
 // Lazy load heavy components to improve startup speed
-const HabitsModule = lazy(() => import('./components/HabitsModule'));
+const TaskDetailView = lazy(() => import('./components/TaskDetailView'));
+const HabitView = lazy(() => import('./components/HabitView'));
+const HabitStatsView = lazy(() => import('./components/HabitStatsView'));
 const FocusView = lazy(() => import('./components/FocusView'));
 const CalendarView = lazy(() => import('./components/CalendarView'));
 const TagsView = lazy(() => import('./components/TagsView'));
 const FinanceView = lazy(() => import('./components/FinanceView'));
-const NotesView = lazy(() => import('./components/NotesView'));
 const SettingsView = lazy(() => import('./components/SettingsView'));
 const ProfileMenu = lazy(() => import('./components/ProfileMenu'));
-const CouplesView = lazy(() => import('./components/CouplesView'));
+const TogetherView = lazy(() => import('./components/TogetherView'));
 
 import { MobileNavigation } from './components/MobileNavigation';
-import { Task, ViewType, Habit, FocusCategory, List, AppSettings, FocusSession, Transaction, Debt, Debtor, SavingsGoal, Subscription, Investment, CouplesData, CoupleProfile } from './types';
+import { Task, ViewType, Habit, FocusCategory, List, AppSettings, FocusSession, Transaction, Debt, Debtor, SavingsGoal, Subscription, Investment } from './types';
 import { loadFromStorage, saveToStorage, STORAGE_KEYS } from './services/storageService';
-import { loginWithGoogle, logoutUser, subscribeToAuthChanges, saveUserDataToFirestore, subscribeToDataChanges, loadUserDataFromFirestore, linkPartnerByCode, generateInviteCode, subscribeToCoupleData } from './services/firebaseService';
-import { createNotificationRoleContext, initializeRoleServices } from './services/notificationRoleService';
-import { fetchCalendarEvents, updateCalendarEvent, deleteCalendarEvent, createCalendarEvent } from './services/googleCalendarService';
+import { loginWithGoogle, logoutUser, subscribeToAuthChanges, saveUserDataToFirestore, subscribeToDataChanges, loadUserDataFromFirestore } from './services/firebaseService';
+import { fetchCalendarEvents } from './services/googleCalendarService';
 import { playAlarmSound } from './services/notificationService';
+import { updateWidgetData } from './services/widgetService';
 import { Loader2 } from 'lucide-react';
 import { addMonths } from 'date-fns';
+import { LiveUpdate } from '@capawesome/capacitor-live-update';
 import { Capacitor } from '@capacitor/core';
 import { App as CapacitorApp } from '@capacitor/app';
 
@@ -50,19 +50,15 @@ const mergeArrays = <T extends { id: string; updatedAt?: Date | string }>(local:
 };
 
 const LoadingFallback: React.FC = () => (
-  <div className="flex-1 flex flex-col items-center justify-center h-full gap-3
-    bg-white dark:bg-[#0f0f1a] rounded-[28px]">
-    <div className="w-10 h-10 rounded-full border-2 border-indigo-500/20 border-t-indigo-500
-      animate-spin" />
-    <p className="text-sm text-slate-400 dark:text-slate-500 font-medium animate-pulse">
-      Loading…
-    </p>
-  </div>
+    <div className="flex-1 flex items-center justify-center bg-slate-50 dark:bg-slate-950 h-full">
+        <Loader2 size={32} className="animate-spin text-blue-500" />
+    </div>
 );
 
 const App: React.FC = () => {
   // --- Main App State ---
   const [currentView, setCurrentView] = useState<ViewType | string>(ViewType.Inbox);
+  const [viewHistory, setViewHistory] = useState<string[]>([]); // Navigation History Stack
   const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
   const [focusTaskId, setFocusTaskId] = useState<string | undefined>(undefined);
   const [searchQuery, setSearchQuery] = useState('');
@@ -129,51 +125,34 @@ const App: React.FC = () => {
   const [habits, setHabits] = useState<Habit[]>(() => loadFromStorage(STORAGE_KEYS.HABITS, []));
   const [focusCategories, setFocusCategories] = useState<FocusCategory[]>(() => loadFromStorage(STORAGE_KEYS.FOCUS, []));
   const [focusSessions, setFocusSessions] = useState<FocusSession[]>(() => loadFromStorage(STORAGE_KEYS.FOCUS_SESSIONS, []));
+  
+  // Finance State
   const [transactions, setTransactions] = useState<Transaction[]>(() => loadFromStorage(STORAGE_KEYS.TRANSACTIONS, []));
   const [debtors, setDebtors] = useState<Debtor[]>(() => loadFromStorage(STORAGE_KEYS.DEBTORS, []));
   const [debts, setDebts] = useState<Debt[]>(() => loadFromStorage(STORAGE_KEYS.DEBTS, []));
   const [goals, setGoals] = useState<SavingsGoal[]>(() => loadFromStorage(STORAGE_KEYS.GOALS, []));
-  const [subscriptions, setSubscriptions] = useState<Subscription[]>(() => loadFromStorage(STORAGE_KEYS.SUBSCRIPTIONS, []));
-  const [investments, setInvestments] = useState<Investment[]>(() => loadFromStorage(STORAGE_KEYS.INVESTMENTS, []));
-
-  // ── Couples Space ───────────────────────────────────────────────────────
-  const [couplesData, setCouplesData] = useState<CouplesData>(() => {
-    const saved = loadFromStorage<CouplesData | null>(STORAGE_KEYS.COUPLES_DATA, null);
-    if (saved) return saved;
-    return {
-      myProfile: {
-        uid: '',
-        displayName: 'You',
-        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-        status: 'free',
-      },
-      photoWall: [],
-      journal: [],
-      checkIns: [],
-      sharedChallenges: [],
-    };
-  });
-
-  // --- Partner Data State ---
+  
+  // New Finance Features
   const [partnerTransactions, setPartnerTransactions] = useState<Transaction[]>([]);
   const [partnerGoals, setPartnerGoals] = useState<SavingsGoal[]>([]);
+  const [subscriptions, setSubscriptions] = useState<Subscription[]>(() => loadFromStorage(STORAGE_KEYS.SUBSCRIPTIONS, []));
+  const [investments, setInvestments] = useState<Investment[]>(() => loadFromStorage(STORAGE_KEYS.INVESTMENTS, []));
 
   const [isOnline, setIsOnline] = useState(navigator.onLine);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   const saveTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const dataSubscriptionRef = useRef<(() => void) | null>(null);
-  const partnerSubscriptionRef = useRef<(() => void) | null>(null);
   const isRemoteUpdate = useRef(false);
   const latestDataRef = useRef<any>(null);
   
   const stateRef = useRef({ 
-      selectedTaskId, showSettings, showProfileMenu, isSidebarOpen, currentView 
+      selectedTaskId, showSettings, showProfileMenu, isSidebarOpen, currentView, viewHistory 
   });
 
   useEffect(() => {
-      stateRef.current = { selectedTaskId, showSettings, showProfileMenu, isSidebarOpen, currentView };
-  }, [selectedTaskId, showSettings, showProfileMenu, isSidebarOpen, currentView]);
+      stateRef.current = { selectedTaskId, showSettings, showProfileMenu, isSidebarOpen, currentView, viewHistory };
+  }, [selectedTaskId, showSettings, showProfileMenu, isSidebarOpen, currentView, viewHistory]);
 
   useEffect(() => {
       if (Capacitor.isNativePlatform()) {
@@ -189,6 +168,12 @@ const App: React.FC = () => {
                   setShowProfileMenu(false);
               } else if (state.isSidebarOpen) {
                   setIsSidebarOpen(false);
+              } else if (state.viewHistory.length > 0) {
+                  // Pop from history
+                  const newHistory = [...state.viewHistory];
+                  const prevView = newHistory.pop();
+                  setViewHistory(newHistory);
+                  if (prevView) setCurrentView(prevView);
               } else if (state.currentView !== ViewType.Inbox) {
                   setCurrentView(ViewType.Inbox);
               } else {
@@ -206,6 +191,12 @@ const App: React.FC = () => {
   }, []);
 
   useEffect(() => {
+      if (Capacitor.isNativePlatform()) {
+          LiveUpdate.sync({ channel: 'production' }).catch(console.warn);
+      }
+  }, []);
+
+  useEffect(() => {
       const handleOnline = () => { setIsOnline(true); setSyncStatus('saved'); };
       const handleOffline = () => { setIsOnline(false); setSyncStatus('offline'); };
       window.addEventListener('online', handleOnline);
@@ -217,6 +208,13 @@ const App: React.FC = () => {
   }, []);
 
   // --- Helpers ---
+  const handleViewChange = useCallback((newView: ViewType | string) => {
+      if (newView === currentView) return;
+      setViewHistory(prev => [...prev, currentView as string]);
+      setCurrentView(newView);
+      setIsSidebarOpen(false);
+  }, [currentView]);
+
   const onTokenExpired = useCallback(() => {
       setAccessToken(null);
       localStorage.removeItem('google_access_token');
@@ -232,27 +230,8 @@ const App: React.FC = () => {
           const events = await fetchCalendarEvents(token, start, end);
           
           setTasks(prev => {
-              const existingEventsMap = new Map<string, Task>();
-              prev.forEach(t => {
-                  if (t.isEvent && t.externalId) {
-                      existingEventsMap.set(t.externalId, t);
-                  }
-              });
-
               const localTasks = prev.filter(t => !t.isEvent);
-              const mergedEvents = events.map(evt => {
-                  const existing = evt.externalId ? existingEventsMap.get(evt.externalId) : null;
-                  if (existing) {
-                      return { 
-                          ...evt, 
-                          isCompleted: existing.isCompleted, 
-                          listId: existing.listId,
-                          id: existing.id
-                      };
-                  }
-                  return evt;
-              });
-              return [...localTasks, ...mergedEvents];
+              return [...localTasks, ...events];
           });
           setLastSynced(new Date());
       } catch (error) {
@@ -266,141 +245,60 @@ const App: React.FC = () => {
   }, [onTokenExpired]);
 
   // --- Process Incoming Cloud Data with Smart Merge ---
-  const processIncomingData = useCallback((data: any) => {
+  const processIncomingData = (data: any) => {
       if (!data) return;
-      console.log("Processing incoming data...");
       
-      if (data.tasks && Array.isArray(data.tasks)) setTasks(prev => mergeArrays(prev, data.tasks.map((t: any) => ({ ...t, dueDate: t.dueDate ? new Date(t.dueDate) : undefined }))));
-      if (data.habits && Array.isArray(data.habits)) setHabits(prev => mergeArrays(prev, data.habits));
+      if (data.tasks && Array.isArray(data.tasks)) {
+          setTasks(prev => mergeArrays(prev, data.tasks.map((t: any) => ({ ...t, dueDate: t.dueDate ? new Date(t.dueDate) : undefined }))));
+      }
+      
+      if (data.habits && Array.isArray(data.habits)) {
+          setHabits(prev => mergeArrays(prev, data.habits));
+      }
+
       if (data.transactions) setTransactions(prev => mergeArrays(prev, data.transactions));
       if (data.goals) setGoals(prev => mergeArrays(prev, data.goals));
       if (data.debtors) setDebtors(prev => mergeArrays(prev, data.debtors));
       if (data.debts) setDebts(prev => mergeArrays(prev, data.debts));
       if (data.subscriptions) setSubscriptions(prev => mergeArrays(prev, data.subscriptions));
       if (data.investments) setInvestments(prev => mergeArrays(prev, data.investments));
+
       if (data.lists) setLists(prev => mergeArrays(prev, data.lists));
       if (data.focusCategories) setFocusCategories(prev => mergeArrays(prev, data.focusCategories));
       if (data.focusSessions) setFocusSessions(prev => mergeArrays(prev, data.focusSessions));
       
-      if (data.couplesData) {
-        setCouplesData((prev: CouplesData) => {
-          const updated = {
-            ...prev,
-            ...data.couplesData,
-            myProfile: prev.myProfile,
-          };
-          
-          // Sync shared challenges to habits
-          if (data.couplesData.sharedChallenges && Array.isArray(data.couplesData.sharedChallenges)) {
-            setHabits(prevHabits => {
-              const newHabits = [...prevHabits];
-              data.couplesData.sharedChallenges.forEach((challenge: any) => {
-                // Only create habit if challenge has a habitId and habit doesn't exist yet
-                if (challenge.habitId && !newHabits.find(h => h.id === challenge.habitId)) {
-                  const newHabit: any = {
-                    id: challenge.habitId,
-                    name: challenge.name,
-                    icon: challenge.icon,
-                    color: challenge.color,
-                    description: 'Shared challenge with partner',
-                    frequencyType: 'daily',
-                    section: 'Others',
-                    startDate: new Date(challenge.startDate),
-                    endDate: new Date(new Date(challenge.startDate).getTime() + (challenge.durationDays - 1) * 24 * 60 * 60 * 1000),
-                    history: {},
-                    isArchived: false,
-                  };
-                  newHabits.push(newHabit);
-                }
-              });
-              return newHabits;
-            });
-          }
-          
-          return updated;
-        });
-      }
-      
       if (data.settings) {
-          const defaultFeatures = { tasks: true, calendar: true, habits: true, focus: true, notes: true, finance: true };
+          const defaultFeatures = { 
+              tasks: true,
+              calendar: true, 
+              habits: true, 
+              focus: true, 
+              notes: true, 
+              finance: true 
+          };
           const mergedFeatures = { ...defaultFeatures, ...(data.settings.features || {}) };
           setSettings({ ...data.settings, features: mergedFeatures });
       }
-  }, []);
-
-  useEffect(() => {
-      const partnerId = settings.couples?.partnerId;
-      if (partnerId) {
-          const unsub = subscribeToDataChanges(partnerId, (data) => {
-              if (data) {
-                  if (data.transactions && Array.isArray(data.transactions)) {
-                      const pTransactions = data.transactions.map((t: any) => ({ ...t, paidBy: t.paidBy || partnerId }));
-                      setPartnerTransactions(pTransactions);
-                  }
-                  if (data.goals && Array.isArray(data.goals)) setPartnerGoals(data.goals);
-              }
-          });
-          partnerSubscriptionRef.current = unsub;
-      } else {
-          setPartnerTransactions([]);
-          setPartnerGoals([]);
-      }
-      return () => { if (partnerSubscriptionRef.current) partnerSubscriptionRef.current(); };
-  }, [settings.couples?.partnerId]);
+  };
 
   useEffect(() => {
     const unsubscribe = subscribeToAuthChanges(async (u) => {
       setUser(u);
       if (u) {
-        // Initialize notification role services and trigger permission dialogs
-        const context = createNotificationRoleContext(u);
-        await initializeRoleServices(context);
-
-        // Initial Fetch
         const remoteData = await loadUserDataFromFirestore(u.uid);
         if (remoteData) {
           isRemoteUpdate.current = true;
           processIncomingData(remoteData);
           setLastSynced(new Date());
-          // Wait a bit before allowing local updates to sync back to avoid race
-          setTimeout(() => { isRemoteUpdate.current = false; }, 2000);
-        } else {
-            // New user or no data on cloud, force immediate save of local data to cloud
-            setSyncStatus('saving');
-            await saveUserDataToFirestore(u.uid, { tasks, lists, habits, focusCategories, focusSessions, transactions, debtors, debts, goals, subscriptions, investments, settings });
-            setSyncStatus('saved');
+          setTimeout(() => { isRemoteUpdate.current = false; }, 1000);
         }
-
-        // Realtime Listener for user data
+        
         const unsubData = subscribeToDataChanges(u.uid, (data) => {
             if (!isRemoteUpdate.current) {
                 isRemoteUpdate.current = true;
                 processIncomingData(data);
                 setLastSynced(new Date());
                 setTimeout(() => { isRemoteUpdate.current = false; }, 1000);
-            }
-            
-            // Set up or update couple data listener if user has a coupleId
-            if (data.isCoupled && data.coupleId) {
-              if (partnerSubscriptionRef.current) {
-                partnerSubscriptionRef.current();
-              }
-              partnerSubscriptionRef.current = subscribeToCoupleData(data.coupleId, (coupleData) => {
-                setCouplesData(prev => ({
-                  ...prev,
-                  ...coupleData,
-                  myProfile: {
-                    ...prev.myProfile,
-                    uid: u.uid,
-                    displayName: data.displayName || u.displayName || 'You',
-                    photoURL: data.photoURL || u.photoURL,
-                  },
-                }));
-              });
-            } else if (partnerSubscriptionRef.current) {
-              // User is no longer coupled, unsubscribe from couple data
-              partnerSubscriptionRef.current();
-              partnerSubscriptionRef.current = null;
             }
         });
         dataSubscriptionRef.current = unsubData;
@@ -410,23 +308,25 @@ const App: React.FC = () => {
             dataSubscriptionRef.current();
             dataSubscriptionRef.current = null;
         }
-        if (partnerSubscriptionRef.current) {
-            partnerSubscriptionRef.current();
-            partnerSubscriptionRef.current = null;
-        }
       }
       setIsAuthReady(true);
     });
     return () => unsubscribe();
-  }, [accessToken, syncWithGoogleCalendar, processIncomingData]);
+  }, [accessToken, syncWithGoogleCalendar]);
 
-  // --- Auto-Save Logic ---
+  // --- Auto-Save Logic with Safety Net ---
   useEffect(() => {
       if (!isAuthReady) return; 
-      const currentData = { tasks, lists, habits, focusCategories, focusSessions, transactions, debtors, debts, goals, subscriptions, investments, settings, couplesData };
+
+      const currentData = {
+          tasks, lists, habits, focusCategories, focusSessions, 
+          transactions, debtors, debts, goals, settings,
+          subscriptions, investments
+      };
+
       latestDataRef.current = currentData;
-      
-      // Save to Local Storage immediately
+
+      // Optimistic Update: Save to LocalStorage in the next tick to avoid blocking UI
       setTimeout(() => {
           saveToStorage(STORAGE_KEYS.TASKS, tasks);
           saveToStorage(STORAGE_KEYS.LISTS, lists);
@@ -437,119 +337,72 @@ const App: React.FC = () => {
           saveToStorage(STORAGE_KEYS.DEBTORS, debtors);
           saveToStorage(STORAGE_KEYS.DEBTS, debts);
           saveToStorage(STORAGE_KEYS.GOALS, goals);
+          saveToStorage(STORAGE_KEYS.SETTINGS, settings);
           saveToStorage(STORAGE_KEYS.SUBSCRIPTIONS, subscriptions);
           saveToStorage(STORAGE_KEYS.INVESTMENTS, investments);
-          saveToStorage(STORAGE_KEYS.SETTINGS, settings);
-          saveToStorage(STORAGE_KEYS.COUPLES_DATA, couplesData);
+          updateWidgetData(habits);
       }, 0);
 
-      // Debounce Save to Firestore
       if (user && !isRemoteUpdate.current) {
           if (saveTimeoutRef.current) clearTimeout(saveTimeoutRef.current);
           setSyncStatus('saving');
           saveTimeoutRef.current = setTimeout(() => {
               saveUserDataToFirestore(user.uid, currentData);
               setSyncStatus('saved');
-          }, 2000);
+          }, 2000); // Debounce saves
       }
-  }, [tasks, lists, habits, focusCategories, focusSessions, transactions, debtors, debts, goals, subscriptions, investments, settings, couplesData, user, isAuthReady]);
+  }, [tasks, lists, habits, focusCategories, focusSessions, transactions, debtors, debts, goals, settings, user, isAuthReady, subscriptions, investments]);
 
   // --- Handlers ---
-  const handleAddTask = useCallback((task: Task) => setTasks(prev => [...prev, task]), []);
-  
+
+  const handleAddTask = useCallback((task: Task) => {
+    setTasks(prev => [...prev, task]);
+  }, []);
+
   const handleUpdateTask = useCallback((task: Task) => {
     setTasks(prev => prev.map(t => t.id === task.id ? task : t));
-    
-    // Cross-sync: Update Google Calendar if linked
-    if (accessToken && task.externalId) {
-        updateCalendarEvent(accessToken, task).catch(err => console.error("Failed to update GCal event", err));
-    }
-  }, [accessToken]);
+  }, []);
 
   const handleToggleTask = useCallback((taskId: string) => {
-    setTasks(prev => prev.map(t => t.id === taskId ? { ...t, isCompleted: !t.isCompleted, updatedAt: new Date() } : t));
+    setTasks(prev => prev.map(t => {
+      if (t.id === taskId) {
+        return { ...t, isCompleted: !t.isCompleted, updatedAt: new Date() };
+      }
+      return t;
+    }));
     playAlarmSound();
   }, []);
 
   const handleDeleteTask = useCallback((taskId: string) => {
-     // Find the task before removing/marking deleted to check if it's an external event
-     const taskToDelete = tasks.find(t => t.id === taskId);
      setTasks(prev => prev.map(t => t.id === taskId ? { ...t, isDeleted: true, updatedAt: new Date() } : t));
-     
-     // Cross-sync: Delete from Google Calendar if linked
-     if (taskToDelete?.externalId && accessToken) {
-         deleteCalendarEvent(accessToken, taskToDelete.externalId).catch(err => console.error("Failed to delete GCal event", err));
-     }
-  }, [tasks, accessToken]);
-  
+  }, []);
+
   const handleLogin = async () => {
     try {
       const { user, accessToken } = await loginWithGoogle();
       setUser(user);
       setAccessToken(accessToken);
-      if (accessToken) { localStorage.setItem('google_access_token', accessToken); syncWithGoogleCalendar(accessToken); }
-    } catch (error: any) { 
-      console.error("Login failed", error); 
-      alert(`Login failed: ${error.message || "Please try again."}`); 
+      if (accessToken) {
+          localStorage.setItem('google_access_token', accessToken);
+          syncWithGoogleCalendar(accessToken);
+      }
+    } catch (error) {
+      console.error("Login failed", error);
+      alert("Login failed. Please try again.");
     }
   };
-  const handleLogout = async () => { await logoutUser(); setUser(null); setAccessToken(null); };
 
-  const handleManualSync = async () => {
-      if(!user) return;
-      setSyncStatus('saving');
-      const currentData = { tasks, lists, habits, focusCategories, focusSessions, transactions, debtors, debts, goals, subscriptions, investments, settings, couplesData };
-      await saveUserDataToFirestore(user.uid, currentData);
-      
-      const remoteData = await loadUserDataFromFirestore(user.uid);
-      if(remoteData) {
-          processIncomingData(remoteData);
-          alert("Sync complete. Data merged from cloud.");
-      } else {
-          alert("Sync complete. Local data uploaded.");
-      }
-      setSyncStatus('saved');
+  const handleLogout = async () => {
+    await logoutUser();
+    setUser(null);
+    setAccessToken(null);
   };
-
-  const handleLinkPartner = useCallback(async (inviteCode: string) => {
-    if (!user?.uid) throw new Error('User not authenticated');
-    try {
-      // Use atomic transaction to link partner
-      const coupleId = await linkPartnerByCode(user.uid, inviteCode);
-      
-      // Fetch updated user data to get partner info
-      const updatedUserData = await loadUserDataFromFirestore(user.uid);
-      
-      if (updatedUserData && updatedUserData.partnerUid) {
-        // Fetch partner profile
-        const partnerData = await loadUserDataFromFirestore(updatedUserData.partnerUid);
-        
-        // Update local state
-        setCouplesData(prev => ({
-          ...prev,
-          partnerProfile: {
-            uid: updatedUserData.partnerUid,
-            displayName: partnerData?.displayName || 'Partner',
-            photoURL: partnerData?.photoURL,
-            status: 'online',
-            timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-          },
-        }));
-      }
-      
-      return coupleId;
-    } catch (error: any) {
-      console.error('Failed to link partner:', error);
-      throw new Error(error.message || 'Failed to link partner');
-    }
-  }, [user?.uid]);
 
   return (
-    <div className="flex h-screen w-full bg-[#eef0f6] dark:bg-[#09090b] text-slate-900 dark:text-slate-100 transition-colors duration-300 p-0 md:p-3 gap-3 overflow-hidden">
-        {/* Sidebar as a Floating Card on Desktop */}
+    <div className="flex h-screen w-full bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 transition-colors">
         <Sidebar 
             currentView={currentView}
-            onChangeView={(view) => { setCurrentView(view); setIsSidebarOpen(false); }}
+            onChangeView={handleViewChange}
             lists={lists}
             enabledFeatures={Object.keys(settings.features || {}).filter(k => settings.features![k as keyof typeof settings.features])}
             onOpenSettings={() => setShowSettings(true)}
@@ -563,8 +416,7 @@ const App: React.FC = () => {
             syncStatus={syncStatus}
         />
         
-        {/* Main Content Area - Bento Card Style */}
-        <main className="flex-1 flex flex-col h-full relative overflow-hidden bg-white dark:bg-[#0f0f1a] md:rounded-[28px] shadow-none md:shadow-2xl ring-0 md:ring-1 ring-black/5 dark:ring-white/5 transition-all duration-300">
+        <main className="flex-1 flex flex-col h-full relative overflow-hidden">
             <Suspense fallback={<LoadingFallback />}>
                 {(currentView === ViewType.Inbox || currentView === ViewType.Today || currentView === ViewType.Next7Days || currentView === ViewType.Completed || currentView === ViewType.Trash || currentView === ViewType.All || currentView === ViewType.Search || currentView === ViewType.Archive || currentView === ViewType.Notes || lists.find(l => l.id === currentView)) && (
                     <TaskView 
@@ -578,11 +430,10 @@ const App: React.FC = () => {
                         onSelectTask={(id) => setSelectedTaskId(id)}
                         onDeleteTask={handleDeleteTask}
                         onMenuClick={() => setIsSidebarOpen(true)}
-                        onChangeView={setCurrentView}
+                        onChangeView={handleViewChange}
                         settings={settings}
                         habits={habits}
                         onUpdateHabit={(h) => setHabits(prev => prev.map(old => old.id === h.id ? h : old))}
-                        user={user}
                     />
                 )}
                 {currentView === ViewType.Calendar && (
@@ -603,7 +454,7 @@ const App: React.FC = () => {
                     />
                 )}
                 {currentView === ViewType.Habits && (
-                    <HabitsModule
+                    <HabitView 
                         habits={habits}
                         onToggleHabit={(id, date) => setHabits(prev => prev.map(h => {
                             if (h.id === id) {
@@ -618,34 +469,13 @@ const App: React.FC = () => {
                         onAddHabit={(h) => setHabits([...habits, h])}
                         onDeleteHabit={(id) => setHabits(prev => prev.map(h => h.id === id ? { ...h, isArchived: true } : h))}
                         onMenuClick={() => setIsSidebarOpen(true)}
-                        onOpenStats={() => setCurrentView(ViewType.HabitStats)}
-                        onStartFocus={(habitId) => {
-                            const habit = habits.find(h => h.id === habitId);
-                            const tempTask: Task = {
-                                id: `habit-${habitId}`,
-                                title: habit?.name || "Habit Focus",
-                                isCompleted: false,
-                                priority: 0,
-                                listId: 'focus',
-                                tags: ['Habit'],
-                                subtasks: [],
-                                attachments: [],
-                                createdAt: new Date()
-                            };
-                            if (!tasks.find(t => t.id === tempTask.id)) setTasks(prev => [...prev, tempTask]);
-                            setFocusTaskId(tempTask.id);
-                            setCurrentView(ViewType.Focus);
-                        }}
-                        user={user}
-                        setCurrentView={setCurrentView}
+                        onOpenStats={() => handleViewChange(ViewType.HabitStats)}
                     />
                 )}
                 {currentView === ViewType.HabitStats && (
-                    <HabitsModule
+                    <HabitStatsView 
                         habits={habits}
-                        onClose={() => setCurrentView(ViewType.Habits)}
-                        viewType="stats"
-                        onMenuClick={() => setIsSidebarOpen(true)}
+                        onClose={() => handleViewChange(ViewType.Habits)}
                     />
                 )}
                 {currentView === ViewType.Focus && (
@@ -653,7 +483,7 @@ const App: React.FC = () => {
                         categories={focusCategories}
                         onAddCategory={(c) => setFocusCategories([...focusCategories, c])}
                         activeTask={tasks.find(t => t.id === focusTaskId)}
-                        onFocusComplete={(s) => setFocusSessions(prev => [...prev, s])}
+                        onFocusComplete={(s) => setFocusSessions([...focusSessions, s])}
                         onMenuClick={() => setIsSidebarOpen(true)}
                         focusSessions={focusSessions}
                         unlockedTrees={settings.focus?.unlockedTrees}
@@ -687,7 +517,8 @@ const App: React.FC = () => {
                         onAddDebt={(d) => setDebts([...debts, d])}
                         onUpdateDebt={(d) => setDebts(prev => prev.map(old => old.id === d.id ? d : old))}
                         onDeleteDebt={(id) => setDebts(prev => prev.filter(d => d.id !== id))}
-                        goals={settings.couples?.partnerId && partnerGoals.length > 0 ? [...goals, ...partnerGoals] : goals}
+                        goals={goals}
+                        partnerGoals={partnerGoals}
                         onAddGoal={(g) => setGoals([...goals, g])}
                         onUpdateGoal={(g) => setGoals(prev => prev.map(old => old.id === g.id ? g : old))}
                         onDeleteGoal={(id) => setGoals(prev => prev.filter(g => g.id !== id))}
@@ -702,38 +533,17 @@ const App: React.FC = () => {
                         user={user}
                     />
                 )}
-                {currentView === ViewType.Notes && (
-                    <NotesView 
+                {currentView === ViewType.Together && (
+                    <TogetherView 
+                        user={user}
                         onMenuClick={() => setIsSidebarOpen(true)}
                     />
-                )}
-                {currentView === ViewType.Together && (
-                    <Suspense fallback={<LoadingFallback />}>
-                        <CouplesView
-                            couplesData={{
-                                ...couplesData,
-                                myProfile: {
-                                    ...couplesData.myProfile,
-                                    uid: user?.uid || '',
-                                    displayName: user?.displayName || 'You',
-                                    photoURL: user?.photoURL || undefined,
-                                },
-                            }}
-                            onUpdateCouplesData={setCouplesData}
-                            onLinkPartner={handleLinkPartner}
-                            onUpdateHabits={setHabits}
-                            onAddTask={handleAddTask}
-                            onMenuClick={() => setIsSidebarOpen(true)}
-                            myUid={user?.uid || ''}
-                            habits={habits}
-                        />
-                    </Suspense>
                 )}
             </Suspense>
             
             <MobileNavigation 
                 currentView={currentView} 
-                onChangeView={setCurrentView} 
+                onChangeView={handleViewChange} 
                 onMenuClick={() => setIsSidebarOpen(true)} 
             />
         </main>
@@ -747,7 +557,7 @@ const App: React.FC = () => {
                     onUpdateSettings={setSettings}
                     theme={theme}
                     onThemeToggle={() => setTheme(prev => prev === 'light' ? 'dark' : 'light')}
-                    onOpenCompletedTasks={() => { setShowSettings(false); setCurrentView(ViewType.Completed); }}
+                    onOpenCompletedTasks={() => { setShowSettings(false); handleViewChange(ViewType.Completed); }}
                     user={user}
                     onLogin={handleLogin}
                     onLogout={handleLogout}
@@ -763,7 +573,6 @@ const App: React.FC = () => {
                     onLogout={handleLogout}
                     onLogin={handleLogin}
                     onSettings={() => { setShowProfileMenu(false); setShowSettings(true); }}
-                    onSync={handleManualSync}
                 />
             </Suspense>
         )}
@@ -778,7 +587,7 @@ const App: React.FC = () => {
                     onUpdateTask={handleUpdateTask}
                     onAddTask={handleAddTask}
                     onDeleteTask={handleDeleteTask}
-                    onStartFocus={(id) => { setSelectedTaskId(null); setFocusTaskId(id); setCurrentView(ViewType.Focus); }}
+                    onStartFocus={(id) => { setSelectedTaskId(null); setFocusTaskId(id); handleViewChange(ViewType.Focus); }}
                     onSelectTask={(id) => setSelectedTaskId(id)}
                     settings={settings}
                 />

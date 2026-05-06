@@ -1,4 +1,3 @@
-
 export const CURRENCIES = [
   {"code": "USD", "name": "US Dollar", "symbol": "$"},
   {"code": "AUD", "name": "Australian Dollar", "symbol": "AU$"},
