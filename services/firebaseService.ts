@@ -105,7 +105,7 @@ const initializeFirebase = () => {
     if (Capacitor.isNativePlatform()) {
       console.log("Native platform detected, initializing Capacitor Google Auth...");
       GoogleAuth.initialize({
-        clientId: '965709257556-i7958klip6ut3mb5fgaffh2p55q3attn.apps.googleusercontent.com',
+        clientId: '965709257556-mrjfaagv12o82bf5hmekc5h5t62r1ma8.apps.googleusercontent.com',
         scopes: ['profile', 'email', 'https://www.googleapis.com/auth/calendar.events'],
         grantOfflineAccess: false,
       });
